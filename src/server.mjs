@@ -7,7 +7,7 @@ import { DEFAULT_MODEL, extractFacts } from './nebius.mjs';
 const root = fileURLToPath(new URL('../web/', import.meta.url));
 const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 4318);
-const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.json':'application/json', '.svg':'image/svg+xml', '.txt':'text/plain; charset=utf-8', '.png':'image/png' };
+const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.json':'application/json', '.svg':'image/svg+xml', '.txt':'text/plain; charset=utf-8', '.png':'image/png', '.pdf':'application/pdf' };
 let activeExtraction = false;
 const json = (res, status, value) => { res.writeHead(status, { 'Content-Type':'application/json', 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff' }); res.end(JSON.stringify(value)); };
 

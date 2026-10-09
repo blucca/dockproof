@@ -1,8 +1,13 @@
 /**
  * DockProof's deterministic, document-linked audit.
  * Inputs and currency are explicit: pounds, integer USD cents, discount basis points.
- * The bundled fixture supplies curated facts; this module performs arithmetic and review gates.
+ * The bundled fixture and source-selected document cases share arithmetic and review gates.
  */
+import {
+  FIELD_DEFINITIONS, DOCUMENT_ROLES, documentRoles, evidenceFingerprint,
+  fieldValue, fieldSelectionStatus, requiresSelectedSources,
+} from './fact-review.mjs';
+
 export const POLICY_VERSION = 'xpo-cnwy-199-ak3-20260817/v1';
 export const SUPPORTED_CLASSES = Object.freeze([
   '50', '55', '60', '65', '70', '77.5', '85', '92.5', '100',
@@ -133,7 +138,8 @@ function rateCentsFor(service, freightClass) {
 }
 
 function sourceRefs(state, fields) {
-  return fields.map(field => state.facts?.provenance?.[field]).filter(Boolean).map(ref => clone(ref));
+  return fields.map(field => state.facts?.provenance?.[field]
+    ? { field, ...clone(state.facts.provenance[field]) } : null).filter(Boolean);
 }
 
 export function evaluateCase(state, { today = todayUTC() } = {}) {
@@ -142,7 +148,18 @@ export function evaluateCase(state, { today = todayUTC() } = {}) {
   const decisions = state?.decisions ?? {};
   const documents = Array.isArray(state?.documents) ? state.documents : [];
   const docs = new Map(documents.map(doc => [doc.id, doc]));
-  const received = id => docs.get(id)?.received === true && isText(docs.get(id)?.text);
+  const strictSources = requiresSelectedSources(state);
+  const roleDocs = role => documents.filter(doc => documentRoles(doc).includes(role));
+  const isReceived = doc => doc?.received === true && isText(doc?.text);
+  const received = role => roleDocs(role).some(isReceived);
+  const receivedDoc = id => isReceived(docs.get(id));
+  const docFor = role => roleDocs(role).find(isReceived) ?? roleDocs(role)[0];
+  const actualIds = ids => [...new Set(ids.flatMap(id => DOCUMENT_ROLES.includes(id)
+    ? roleDocs(id).map(doc => doc.id) : [id]))];
+  const selectedSources = new Map(FIELD_DEFINITIONS.map(field => [field.key,
+    strictSources ? fieldSelectionStatus(state, field.key) : { valid: true }]));
+  const sourceReady = key => selectedSources.get(key)?.valid === true;
+  const sourcesReady = keys => keys.every(sourceReady);
   const issues = [];
   const checks = [];
   const math = [];
@@ -152,28 +169,45 @@ export function evaluateCase(state, { today = todayUTC() } = {}) {
 
   const issue = (id, title, detail, documentIds = [], { evidence = false, actionKey, severity = 'blocking' } = {}) => {
     if (issues.some(item => item.id === id)) return;
-    issues.push({ id, title, detail, severity, documentIds, ...(actionKey ? { actionKey } : {}) });
+    issues.push({ id, title, detail, severity, documentIds: actualIds(documentIds), ...(actionKey ? { actionKey } : {}) });
     if (evidence) evidenceMissing = true;
     if (severity === 'blocking' && !evidence) manualReviewRequired = true;
   };
   const check = (id, label, status, detail, documentIds = []) => {
-    checks.push({ id, label, status, detail, documentIds });
+    checks.push({ id, label, status, detail, documentIds: actualIds(documentIds) });
   };
   const mathRow = (id, label, expression, valueCents, fields, documentIds, sourceIds = []) => {
-    math.push({ id, label, expression, valueCents, documentIds, sourceIds, evidence: sourceRefs(state, fields) });
+    const evidence = sourceRefs(state, fields);
+    math.push({ id, label, expression, valueCents,
+      documentIds: evidence.length ? [...new Set(evidence.map(ref => ref.documentId))] : actualIds(documentIds),
+      sourceIds, evidence });
   };
 
   for (const [id, label, actionKey] of DOC_REQUIREMENTS) {
     const present = received(id);
     check('document_' + id, label, present ? 'pass' : 'missing',
-      present ? 'Received: ' + docs.get(id).name : 'Add the ' + (docs.get(id)?.name ?? id.replaceAll('_', ' ')) + '.', [id]);
+      present ? 'Received: ' + roleDocs(id).filter(isReceived).map(doc => doc.name).join('; ')
+        : 'Add the ' + (docFor(id)?.name ?? id.replaceAll('_', ' ')) + '.', [id]);
     if (!present) issue('missing_' + id, 'Add ' + label.toLowerCase(),
       id === 'weight_sheet'
-        ? 'The bill of lading records all five crates. Add the warehouse weight sheet identifying C3.'
+        ? 'Add a weight record identifying the affected shipping piece and its gross weight, including packing.'
         : id === 'rate_confirmation'
           ? 'Attach the rate confirmation to select the applicable liability branch.'
           : 'This source document is required for the current claim review.',
-      [id], { evidence: true, actionKey });
+      [id], { evidence: true, ...(!strictSources ? { actionKey } : {}) });
+  }
+
+  if (strictSources) {
+    const fieldsForReview = FIELD_DEFINITIONS.filter(field => field.required || fieldValue(state, field.key) !== null);
+    for (const field of fieldsForReview) {
+      const selection = selectedSources.get(field.key);
+      if (!selection.valid) issue('source_' + field.key, 'Select evidence for ' + field.label.toLowerCase(),
+        selection.detail, selection.documentId ? [selection.documentId] : [], { evidence: true });
+    }
+    const complete = fieldsForReview.every(field => sourceReady(field.key));
+    check('selected_source_facts', 'Reviewed, source-linked shipment facts', complete ? 'pass' : 'missing',
+      fieldsForReview.filter(field => sourceReady(field.key)).length + ' of ' + fieldsForReview.length
+        + ' fields selected from exact, current document quotations.');
   }
 
   const scopeProblems = [];
@@ -189,20 +223,25 @@ export function evaluateCase(state, { today = todayUTC() } = {}) {
   if (facts.excessValueAgreement !== false) scopeProblems.push('Excess-value agreement: standard liability selection');
   if (facts.deliveryDamage !== 'visible_noted') scopeProblems.push('Damage: visible and recorded on delivery');
   if (!SUPPORTED_CLASSES.includes(String(facts.freightClass))) scopeProblems.push('Actual NMFC class: a listed class');
-  if (!['standard_tariff', 'spot_quote'].includes(facts.serviceType)) scopeProblems.push('Service: standard tariff or the documented spot-quote example');
+  if (!['standard_tariff', 'spot_quote'].includes(facts.serviceType)) scopeProblems.push('Service: standard tariff or a documented spot quote');
   if (!isText(facts.affectedPieceId)) scopeProblems.push('Affected piece: one identified shipping piece');
   if (!parseDate(shipment.pickupDate) || shipment.pickupDate < '2026-08-17') scopeProblems.push('Shipment date: August 17, 2026 or later under the selected tariff version');
-  const scopeSupported = scopeProblems.length === 0;
-  check('supported_scope', 'Supported shipment scope', scopeSupported ? 'pass' : 'review',
+  const scopeSourcesReady = sourcesReady(['carrier', 'mode', 'originCountry', 'destinationCountry', 'originState',
+    'destinationState', 'pickupDate', 'goodsCondition', 'commodityScope', 'arrangedBy', 'excessValueAgreement',
+    'deliveryDamage', 'freightClass', 'serviceType', 'affectedPieceId']);
+  const scopeSupported = scopeProblems.length === 0 && scopeSourcesReady;
+  check('supported_scope', 'Supported shipment scope', scopeSupported ? 'pass' : (scopeProblems.length ? 'review' : 'missing'),
     scopeSupported
       ? 'XPO US interstate LTL; new ordinary goods; documented class ' + facts.freightClass + '; one visibly damaged piece; direct shipper terms.'
-      : 'Manual review required. Current calculation scope: ' + scopeProblems.join('; ') + '.',
+      : scopeProblems.length ? 'Manual review required. Current calculation scope: ' + scopeProblems.join('; ') + '.'
+        : 'Select current source evidence for the route, goods, affected piece, and controlling service terms.',
     ['bill_of_lading', 'delivery_receipt', 'rate_confirmation']);
-  if (!scopeSupported) issue('manual_review_scope', 'Route this case to manual review',
+  if (scopeProblems.length) issue('manual_review_scope', 'Route this case to manual review',
     'The supported calculation requires: ' + scopeProblems.join('; ') + '.',
     ['bill_of_lading', 'delivery_receipt', 'rate_confirmation']);
 
-  const identityValid = [shipment.pro, shipment.bol, shipment.shipper, shipment.consignee].every(isText);
+  const identityValid = [shipment.pro, shipment.bol, shipment.shipper, shipment.consignee].every(isText)
+    && sourcesReady(['pro', 'bol', 'shipper', 'consignee']);
   check('shipment_identity', 'Shipment identity for the written claim', identityValid ? 'pass' : 'missing',
     identityValid ? 'PRO ' + shipment.pro + ' · BOL ' + shipment.bol + ' · affected piece ' + facts.affectedPieceId
       : 'Enter the PRO, bill of lading, shipper, and consignee.', ['bill_of_lading', 'delivery_receipt']);
@@ -211,7 +250,7 @@ export function evaluateCase(state, { today = todayUTC() } = {}) {
 
   let deadline = null;
   const validToday = parseDate(today);
-  const delivery = parseDate(shipment.deliveryDate);
+  const delivery = sourceReady('deliveryDate') ? parseDate(shipment.deliveryDate) : null;
   if (!validToday) issue('invalid_review_date', 'Enter a valid review date', 'Use YYYY-MM-DD for the review date.');
   if (delivery) {
     deadline = addCalendarMonths(shipment.deliveryDate, 9);
@@ -250,7 +289,7 @@ export function evaluateCase(state, { today = todayUTC() } = {}) {
     check('carrier_receipt_window', 'Carrier-receipt deadline', 'missing', 'Add the delivery date.', ['delivery_receipt']);
   }
 
-  let valuesValid = true;
+  let valuesValid = sourcesReady(['invoiceGrossCents', 'tradeDiscountBps', 'allowanceCents', 'salvageCents']);
   for (const field of MONEY_FIELDS) {
     if (!isMoney(facts[field])) {
       issue('invalid_' + field, 'Review the ' + field.replace(/Cents$/, '') + ' value',
@@ -296,7 +335,10 @@ export function evaluateCase(state, { today = todayUTC() } = {}) {
 
   const weightValid = typeof facts.affectedWeightLb === 'number' && Number.isFinite(facts.affectedWeightLb) && facts.affectedWeightLb > 0;
   const totalWeightValid = typeof shipment.totalWeightLb === 'number' && Number.isFinite(shipment.totalWeightLb) && shipment.totalWeightLb > 0;
-  let weightEvidenceValid = received('weight_sheet') && weightValid && totalWeightValid;
+  let weightEvidenceValid = received('weight_sheet') && weightValid && totalWeightValid
+    && sourcesReady(['affectedWeightLb', 'totalWeightLb', 'affectedPieceId']);
+  if (!Number.isSafeInteger(shipment.totalPieces) || shipment.totalPieces <= 0) issue('invalid_shipment_pieces', 'Review the shipping-piece count',
+    'Enter a positive whole number of total shipping pieces.', ['bill_of_lading']);
   if (!totalWeightValid) issue('invalid_shipment_weight', 'Review the shipment weight',
     'Enter a positive finite total shipment weight in pounds.', ['bill_of_lading']);
   if (received('weight_sheet') && !weightValid) {
@@ -308,8 +350,8 @@ export function evaluateCase(state, { today = todayUTC() } = {}) {
       'The affected-piece weight must fit within the total shipment weight.', ['weight_sheet', 'bill_of_lading']);
     weightEvidenceValid = false;
   }
-  if (received('weight_sheet')) {
-    const documented = docs.get('weight_sheet').text.match(/Affected piece\s+(\S+)\s+weighs\s+([\d,.]+)\s+lb/i);
+  if (!strictSources && received('weight_sheet')) {
+    const documented = docFor('weight_sheet').text.match(/Affected piece\s+(\S+)\s+weighs\s+([\d,.]+)\s+lb/i);
     if (documented && (documented[1] !== facts.affectedPieceId || Number(documented[2].replaceAll(',', '')) !== facts.affectedWeightLb)) {
       issue('weight_document_conflict', 'Reconcile the weight sheet and selected piece',
         'Use the identified piece and weight recorded on the received weight sheet.', ['weight_sheet', 'bill_of_lading']);
@@ -318,12 +360,13 @@ export function evaluateCase(state, { today = todayUTC() } = {}) {
   }
   check('affected_weight', 'Use the damaged piece’s weight', weightEvidenceValid ? 'pass' : 'missing',
     weightEvidenceValid
-      ? facts.affectedPieceId + ': ' + number(facts.affectedWeightLb) + ' lb. The original worksheet used ' + number(facts.worksheetWeightLb) + ' lb across the full shipment.'
-      : 'The original worksheet used the ' + number(facts.worksheetWeightLb) + ' lb shipment total. Add C3’s piece-level weight evidence.',
+      ? facts.affectedPieceId + ': ' + number(facts.affectedWeightLb) + ' lb.'
+        + (typeof facts.worksheetWeightLb === 'number' ? ' The original worksheet weight is preserved: ' + number(facts.worksheetWeightLb) + ' lb.' : '')
+      : 'Add and select the gross weight of ' + (facts.affectedPieceId || 'the affected piece') + ', including its packing.',
     ['weight_sheet', 'claim_worksheet', 'bill_of_lading']);
 
   for (const [field, ref] of Object.entries(facts.provenance ?? {})) {
-    if (!received(ref.documentId)) continue;
+    if (strictSources || !receivedDoc(ref.documentId)) continue;
     if (!isText(ref.quote) || !docs.get(ref.documentId).text.includes(ref.quote)) {
       issue('citation_' + field, 'Reconnect the ' + field + ' source quotation',
         'The selected quotation must appear in the current received document.', [ref.documentId]);
@@ -352,7 +395,7 @@ export function evaluateCase(state, { today = todayUTC() } = {}) {
   if (recommendedDemandCents !== null) {
     mathRow('recommended_demand', 'Recommended draft demand',
       'min(' + money(actualLossCents) + ' actual loss, ' + money(referenceLimitCents) + ' reference limit)',
-      recommendedDemandCents, ['invoiceGrossCents', 'tradeDiscountBps', 'salvageCents', 'affectedWeightLb', 'serviceType'],
+      recommendedDemandCents, ['invoiceGrossCents', 'tradeDiscountBps', 'allowanceCents', 'salvageCents', 'affectedWeightLb', 'freightClass', 'serviceType'],
       ['commercial_invoice', 'inspection_record', 'weight_sheet', 'rate_confirmation'], ['xpo_liability', 'cfr_invoice']);
   }
   if (decisions.demandCents !== null && decisions.demandCents !== undefined && !demandValid) {
@@ -360,8 +403,10 @@ export function evaluateCase(state, { today = todayUTC() } = {}) {
       'Select a positive whole-cent demand within the evidence-backed recommendation.', ['commercial_invoice', 'inspection_record', 'weight_sheet', 'rate_confirmation']);
   }
   check('specific_demand', 'A specific, supported requested amount', demandValid ? 'pass' : 'review',
-    demandValid ? 'Draft request: ' + money(draftDemandCents) + '. Original worksheet request retained: ' + money(facts.worksheetDemandCents) + '.'
-      : 'Current worksheet request: ' + money(facts.worksheetDemandCents) + '. Complete the evidence review to prepare the specific claim amount.',
+    demandValid ? 'Draft request: ' + money(draftDemandCents) + '.'
+      + (isMoney(facts.worksheetDemandCents) ? ' Original worksheet request retained: ' + money(facts.worksheetDemandCents) + '.' : '')
+      : (isMoney(facts.worksheetDemandCents) ? 'Original worksheet request: ' + money(facts.worksheetDemandCents) + '. ' : '')
+        + 'Complete the evidence review to prepare the specific claim amount.',
     ['claim_worksheet', 'commercial_invoice', 'inspection_record', 'weight_sheet', 'rate_confirmation']);
 
   const signature = reviewSignature(state);
@@ -422,6 +467,7 @@ export function applyAction(state, action, payload = {}) {
 
   switch (action) {
     case 'receive_weight': {
+      if (requiresSelectedSources(next)) throw new Error('Use a source-linked weight candidate for this document case.');
       const doc = docById('weight_sheet');
       const match = doc.text.match(/Affected piece\s+(\S+)\s+weighs\s+([\d,.]+)\s+lb/i);
       if (!match || match[1] !== next.facts.affectedPieceId) throw new Error('The weight sheet must identify the selected affected piece and its weight in pounds.');
@@ -432,6 +478,7 @@ export function applyAction(state, action, payload = {}) {
       break;
     }
     case 'receive_rate': {
+      if (requiresSelectedSources(next)) throw new Error('Select the service terms from this case’s received documents.');
       const doc = docById('rate_confirmation');
       doc.received = true;
       event.documentId = doc.id;
@@ -441,7 +488,7 @@ export function applyAction(state, action, payload = {}) {
     case 'set_service': {
       const service = payload.service ?? payload.serviceType ?? payload.value;
       if (!['standard_tariff', 'spot_quote'].includes(service)) throw new Error('Select standard_tariff or spot_quote for the example scenario.');
-      if (next.synthetic !== true) throw new Error('Example scenario controls require a synthetic case.');
+      if (requiresSelectedSources(next)) throw new Error('The scenario control belongs to the curated C3 example. Select terms from this case’s documents.');
       next.facts.serviceType = service;
       next.decisions.demandCents = null;
       const doc = docById('rate_confirmation');
@@ -461,6 +508,7 @@ export function applyAction(state, action, payload = {}) {
         if (value !== null && (!isMoney(value) || value === 0)) throw new Error('Enter a positive whole-cent demand, or null to use the recommendation.');
         next.decisions.demandCents = value;
       } else {
+        if (requiresSelectedSources(next)) throw new Error('Use a source-linked candidate to set a document fact.');
         if (!EDITABLE_FACTS.has(field)) throw new Error('Choose a supported fact field for the edit.');
         if (MONEY_FIELDS.has(field) && !isMoney(value)) throw new Error('Enter a non-negative whole number of USD cents.');
         if (field === 'tradeDiscountBps' && (!Number.isInteger(value) || value < 0 || value > 10000)) throw new Error('Enter discount basis points from 0 to 10,000.');
@@ -529,8 +577,14 @@ export function createPacket(state, { today = todayUTC() } = {}) {
   const files = [];
   const addFile = (name, type, content) => files.push({ name, type, content });
   const evidenceFiles = receivedDocs.map((doc, i) => ({
-    id: doc.id, name: doc.name, kind: doc.kind, synthetic: doc.synthetic === true,
+    id: doc.id, name: doc.name, kind: doc.kind, roles: documentRoles(doc), synthetic: doc.synthetic === true,
     received: true, file: 'evidence/' + String(i + 1).padStart(2, '0') + '-' + safeName(doc.id) + '.txt',
+    originalFile: doc.originalFile ?? null, originalName: doc.originalName ?? null,
+    mimeType: doc.mimeType ?? 'text/plain', byteLength: doc.byteLength ?? null, sha256: doc.sha256 ?? null,
+    textLength: doc.text.length, sourceFingerprint: evidenceFingerprint(doc.text),
+    offsetUnit: 'UTF-16 code units in document.text',
+    pages: clone(doc.pages ?? [{ page: 1, start: 0, end: doc.text.length }]),
+    selectedFields: Object.entries(facts.provenance ?? {}).filter(([, ref]) => ref.documentId === doc.id).map(([key]) => key),
   }));
   const cover = [
     marker,
@@ -542,7 +596,7 @@ export function createPacket(state, { today = todayUTC() } = {}) {
     'Consignee: ' + shipment.consignee,
     'PRO: ' + shipment.pro,
     'Bill of lading: ' + shipment.bol,
-    'Invoice: ' + shipment.invoiceNumber,
+    ...(isText(shipment.invoiceNumber) ? ['Invoice: ' + shipment.invoiceNumber] : []),
     'Delivery date: ' + shipment.deliveryDate,
     'Affected shipping piece: ' + facts.affectedPieceId,
     '',
@@ -564,9 +618,9 @@ export function createPacket(state, { today = todayUTC() } = {}) {
     'Affected-piece weight: ' + number(facts.affectedWeightLb) + ' lb',
     'Tariff reference limit: ' + money(result.referenceLimitCents),
     'Reviewed amount claimed: ' + amount,
-    'Original worksheet amount preserved in the audit: ' + money(facts.worksheetDemandCents),
+    ...(isMoney(facts.worksheetDemandCents) ? ['Original worksheet amount preserved in the audit: ' + money(facts.worksheetDemandCents)] : []),
     '',
-    'The crate, packaging, and damaged fixtures are retained for carrier inspection.',
+    'Retain the damaged goods and packaging for carrier inspection.',
     'Supporting records are listed in document-manifest.json and included in evidence/.',
     '',
     'Shipper review: ' + state.decisions.review.reviewer + ' · ' + state.decisions.review.date,
@@ -587,15 +641,20 @@ export function createPacket(state, { today = todayUTC() } = {}) {
     ...result.math.map(row => [
       row.label, row.expression, (row.valueCents / 100).toFixed(2),
       row.documentIds.join('; '),
-      row.evidence.map(ref => ref.documentId + ':L' + String(ref.line).padStart(2, '0') + ' ' + ref.quote).join(' | '),
+      row.evidence.map(ref => ref.documentId + (ref.page ? ':p' + ref.page : '') + ':L' + String(ref.line).padStart(2, '0')
+        + (Number.isInteger(ref.start) ? ' [' + ref.start + ':' + ref.end + ']' : '') + ' ' + ref.quote).join(' | '),
     ]),
     ['Reviewed specific demand', 'Shipper-confirmed amount', (result.draftDemandCents / 100).toFixed(2), '', ''],
-    ['Original worksheet demand', 'Original record retained', (facts.worksheetDemandCents / 100).toFixed(2), 'claim_worksheet', ''],
+    ...(isMoney(facts.worksheetDemandCents) ? [['Original worksheet demand', 'Original record retained',
+      (facts.worksheetDemandCents / 100).toFixed(2),
+      facts.provenance?.worksheetDemandCents?.documentId ?? 'claim_worksheet',
+      facts.provenance?.worksheetDemandCents?.quote ?? '']] : []),
   ];
   addFile('02-valuation-audit.csv', 'text/csv', csvRows.map(row => row.map(csv).join(',')).join('\r\n') + '\r\n');
   addFile('03-valuation-audit.json', 'application/json', JSON.stringify({
-    policyVersion: POLICY_VERSION, synthetic, shipment, facts, decisions: state.decisions,
-    evaluation: result, events: state.events,
+    policyVersion: POLICY_VERSION, sourceMode: state.sourceMode ?? 'curated_fixture', synthetic,
+    shipment, facts, documents: evidenceFiles, decisions: state.decisions,
+    evaluation: result, events: state.events, intakeRuns: clone(state.intake?.runs ?? []),
   }, null, 2) + '\n');
   addFile('04-official-sources.txt', 'text/plain',
     [marker, '', ...SOURCES.flatMap(source => [source.title, source.locator, source.url, source.description, 'Verified: ' + source.verifiedAt, ''])].join('\n'));
@@ -627,9 +686,10 @@ export function createPacket(state, { today = todayUTC() } = {}) {
     filingStatus: result.filingStatus,
   };
   const manifest = {
-    schema: 'dockproof-packet/v1', caseId: state.id, synthetic, createdDate: today,
+    schema: 'dockproof-packet/v2', caseId: state.id, synthetic, createdDate: today,
     policyVersion: POLICY_VERSION, reviewSignature: result.signature,
     review: clone(state.decisions.review), summary, documents: evidenceFiles,
+    sourceMode: state.sourceMode ?? 'curated_fixture', selections: clone(facts.provenance ?? {}),
     sources: clone(SOURCES),
     files: [...files.map(file => ({ name: file.name, type: file.type })), { name: 'document-manifest.json', type: 'application/json' }],
   };

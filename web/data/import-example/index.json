@@ -1,0 +1,77 @@
+{
+  "id": "dockproof-b4-import-example",
+  "title": "Raw files. One damaged crate. Two competing weights.",
+  "synthetic": true,
+  "description": "An original synthetic shipment of four crates. The original worksheet copied 600 lb from the whole shipment; the B4 packing record supplies 150 lb. Manually curated candidates support a source-by-source reviewer choice.",
+  "documents": [
+    {
+      "id": "import_bol_pod",
+      "name": "Bill of lading + delivery receipt (2 pages)",
+      "path": "bol-and-delivery.pdf",
+      "kind": "bill_of_lading",
+      "roles": [
+        "bill_of_lading",
+        "delivery_receipt"
+      ]
+    },
+    {
+      "id": "import_invoice",
+      "name": "Commercial invoice - B4 line",
+      "path": "commercial-invoice.pdf",
+      "kind": "commercial_invoice",
+      "roles": [
+        "commercial_invoice"
+      ]
+    },
+    {
+      "id": "import_inspection",
+      "name": "Warehouse inspection - retained salvage",
+      "path": "warehouse-inspection.txt",
+      "kind": "inspection_record",
+      "roles": [
+        "inspection_record"
+      ]
+    },
+    {
+      "id": "import_weights",
+      "name": "Packing sheet - B4 piece weight",
+      "path": "piece-weights.txt",
+      "kind": "weight_sheet",
+      "roles": [
+        "weight_sheet"
+      ]
+    },
+    {
+      "id": "import_terms",
+      "name": "Booking and tariff confirmation",
+      "path": "rate-confirmation.txt",
+      "kind": "rate_confirmation",
+      "roles": [
+        "rate_confirmation"
+      ]
+    },
+    {
+      "id": "import_worksheet",
+      "name": "Original worksheet - shipment weight copied",
+      "path": "original-worksheet.txt",
+      "kind": "claim_worksheet",
+      "roles": [
+        "claim_worksheet"
+      ]
+    }
+  ],
+  "candidates": "candidates.json",
+  "expected": {
+    "affectedPieceId": "B4",
+    "affectedWeightLb": 150,
+    "invoiceGrossCents": 200000,
+    "tradeDiscountBps": 500,
+    "allowanceCents": 0,
+    "salvageCents": 17500,
+    "netInvoiceCents": 190000,
+    "netLossCents": 172500,
+    "standardLiabilityCapCents": 75000,
+    "reviewedDemandCents": 75000
+  },
+  "license": "MIT - original DockProof synthetic demonstration material. All names, shipment identities, business records and events in this pack are fictional."
+}

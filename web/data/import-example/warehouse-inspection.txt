@@ -1,0 +1,9 @@
+SYNTHETIC DEMO - DockProof original warehouse inspection
+Inspection date: 2026-10-08
+PRO: SYN-XPO-1007-B4 | Bill of lading: SYN-BOL-1005-24
+Affected piece: B4.
+All 200 B4 steel brackets are bent and unsuitable for sale as new goods.
+Salvage value of retained B4 materials: $175.00.
+Crate B4, packing and damaged brackets are retained for carrier inspection.
+Inspected by: Morgan Dale, receiving lead (synthetic).
+This inspection refers to the B4 damage noted on the delivery receipt.

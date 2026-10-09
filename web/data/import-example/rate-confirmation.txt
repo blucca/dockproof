@@ -1,0 +1,13 @@
+SYNTHETIC DEMO - DockProof original booking and rate confirmation
+Booked: 2026-10-04 | Pickup: 2026-10-05
+PRO: SYN-XPO-1007-B4 | Bill of lading: SYN-BOL-1005-24
+Carrier: XPO | Mode: LTL | Route: Ohio, US to Virginia, US
+Booking principal: shipper. Foundry Lane Supply booked directly with XPO.
+Service type: standard tariff shipment.
+Applicable tariff: CNWY 199-AK.3, effective 2026-08-17, Item 25.
+Freight class: 70.
+Goods condition: new.
+Commodity scope: ordinary goods. Contents are ordinary industrial steel brackets.
+Purchased excess-value coverage: none. Excess-value agreement: false.
+This shipment uses the standard tariff liability terms documented above.
+Prepared by: Taylor Reed (synthetic).

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#183c34">
-  <meta name="description" content="Trace a freight claim from original evidence to a reviewed amount and a complete, downloadable packet. Try DockProof's interactive XPO example.">
+  <meta name="description" content="Bring your freight PDFs and emails to one evidence desk. Select sourced facts, reconcile the amount, and download a shipper-reviewed claim packet.">
   <meta property="og:title" content="DockProof — every claim dollar, traced.">
   <meta property="og:description" content="One damaged crate. Five crates on the bill. Find the right amount, fill the evidence gaps, and prepare the claim.">
   <title>DockProof · Every claim dollar, traced</title>
@@ -27,6 +27,7 @@
         <div class="eyebrow"><span class="live-dot"></span> A SMALL TEAM'S CLAIMS DESK</div>
         <h1>Every claim dollar,<br><em>traced.</em></h1>
         <p class="intro-copy">Find the amount your evidence supports.<br>Close the gaps. Hand over a claim that holds together.</p>
+        <div class="intro-actions"><button class="button primary" data-case="own">Bring your documents →</button><button class="button secondary" data-case="import-example">Try the PDF case</button></div>
       </div>
       <div class="story-card">
         <div class="story-top"><span>YOUR FIRST CASE</span><span class="tiny-pill">Interactive example</span></div>
@@ -38,16 +39,30 @@
       </div>
     </section>
     <section class="workspace" id="workspace" aria-label="Interactive freight claim workspace">
+      <div class="case-switcher" aria-label="Saved workspaces"><button data-case="walkthrough" aria-pressed="true">Guided example</button><button data-case="import-example" aria-pressed="false">PDF example</button><button data-case="own" aria-pressed="false">My claim <span class="local-dot"></span></button><span>Separate, browser-local workspaces</span></div>
       <div class="case-bar">
-        <div><div class="eyebrow">CASE 048 <span class="slash">/</span> XPO · US DOMESTIC LTL</div><h2>C3 · Visible damage at delivery</h2></div>
+        <div><div class="eyebrow" id="case-label">CASE 048 <span class="slash">/</span> XPO · US DOMESTIC LTL</div><h2 id="case-title">C3 · Visible damage at delivery</h2></div>
         <div class="case-actions"><span class="save-state" id="save-state">Saved in this browser</span><button id="reset-case" class="button-plain">Reset example ↺</button></div>
       </div>
       <div id="overview" class="overview" aria-live="polite"></div>
       <div id="steps" class="steps" aria-label="Claim preparation progress"></div>
       <div class="workspace-tabs" role="tablist" aria-label="Workspace views">
+        <button id="tab-intake" role="tab" aria-selected="false" aria-controls="panel-intake" data-tab="intake" hidden>Documents &amp; facts <span id="facts-badge"></span></button>
         <button id="tab-desk" role="tab" aria-selected="true" aria-controls="panel-desk" data-tab="desk">Evidence desk</button>
         <button id="tab-packet" role="tab" aria-selected="false" aria-controls="panel-packet" data-tab="packet">Claim packet <span id="packet-badge"></span></button>
         <button id="tab-rules" role="tab" aria-selected="false" aria-controls="panel-rules" data-tab="rules">Rules &amp; scope</button>
+      </div>
+      <div id="panel-intake" role="tabpanel" aria-labelledby="tab-intake" class="tab-panel" hidden>
+        <div class="intake-layout">
+          <section class="intake-sources" aria-label="Import original documents">
+            <div class="eyebrow">01 / ORIGINAL MATERIALS</div><h3>One shipment. All its records.</h3><p class="intake-description">Add selectable-text PDFs and text records. Assign each record its role, then select the facts it supports.</p>
+            <label class="file-drop" for="document-files"><strong>Add PDF / text files</strong><span>Up to 12 records · 10 MB each · 25 MB total</span><input id="document-files" type="file" multiple accept=".pdf,.txt,.md,.csv,.eml,application/pdf,text/plain"></label>
+            <details class="paste-record"><summary>Paste an email or document text</summary><label for="pasted-name">Record name</label><input id="pasted-name" value="Warehouse reply.txt" maxlength="120"><label for="pasted-text">Original text</label><textarea id="pasted-text" rows="7" placeholder="Paste the complete reply or your transcription…"></textarea><button id="add-pasted" class="button secondary small">Add text record</button></details>
+            <p id="import-status" class="inline-status" role="status">PDF text and original bytes are stored in this browser.</p><div id="intake-documents"></div>
+            <div class="model-card"><div class="eyebrow">OPTIONAL / NVIDIA NEMOTRON</div><h4>Read together. Review every selection.</h4><p id="model-status">Manual source selection works in this browser.</p><button id="extract-live" class="button primary" disabled>Extract with Nemotron</button><p class="data-note">This action sends the imported document text to your Nebius account. Original files remain in this browser.</p><div id="extraction-results" role="status"></div></div>
+          </section>
+          <section class="fact-review" aria-label="Review candidate facts"><div class="eyebrow">02 / SOURCE-LINKED SELECTIONS</div><div class="facts-heading"><div><h3>Choose the facts that drive the claim.</h3><p class="intake-description" id="facts-summary"></p></div><button class="button secondary small" data-tab="desk">See the calculation →</button></div><div class="fact-toolbar"><button id="select-unambiguous" class="button primary small" disabled>Select single-value fields</button><label for="fact-filter">Show <select id="fact-filter"><option value="pending">Awaiting selection</option><option value="conflicts">Conflicting sources</option><option value="all">All fields</option></select></label></div><p class="data-note" id="candidate-origin"></p><div id="candidate-questions"></div><div id="fact-fields"></div></section>
+        </div>
       </div>
       <div id="panel-desk" role="tabpanel" aria-labelledby="tab-desk" class="tab-panel">
         <div class="desk-grid">
@@ -61,17 +76,18 @@
       </div>
       <div id="panel-packet" role="tabpanel" aria-labelledby="tab-packet" class="tab-panel" hidden><div id="packet"></div></div>
       <div id="panel-rules" role="tabpanel" aria-labelledby="tab-rules" class="tab-panel" hidden><div id="rules"></div></div>
-      <div class="workspace-footer"><span><span class="local-dot"></span> Curated example · deterministic audit</span><span>Synthetic shipment and records · USD</span></div>
+      <div class="workspace-footer"><span id="workspace-method"><span class="local-dot"></span> Curated example · deterministic audit</span><span id="workspace-origin">Synthetic shipment and records · USD</span></div>
     </section>
     <section class="under-desk">
       <div><div class="eyebrow">EVIDENCE → DECISION → PACKET</div><h2>A useful second pair of eyes.</h2><p>For shipping teams working between invoices, delivery records, and carrier portals. Each calculation links back to the record and the published rule that drives it.</p></div>
-      <div class="next-card"><span class="eyebrow">BUILD IN PROGRESS</span><h3>Bring a real claim to the desk.</h3><p>The source includes a local NVIDIA Nemotron adapter for document-text extraction on Nebius Token Factory. The public example runs with curated facts.</p><a class="text-link" href="https://github.com/blucca/dockproof#run-locally" target="_blank" rel="noreferrer">Run with your own documents ↗</a><button id="open-extraction" class="button-plain">Open local extraction workspace →</button></div>
+      <div class="next-card"><span class="eyebrow">YOUR DOCUMENTS / YOUR REVIEW</span><h3>From PDF to a traceable demand.</h3><p>Read PDFs locally, resolve conflicting values, and take the original files into your reviewed packet. NVIDIA Nemotron candidate extraction runs through your local server and Nebius account.</p><button class="button primary" data-case="own">Open my claim →</button><a class="text-link setup-link" href="https://github.com/blucca/dockproof#run-locally" target="_blank" rel="noreferrer">Connect Nemotron locally ↗</a></div>
     </section>
   </main>
-  <footer class="site-footer"><a class="footer-brand" href="https://github.com/blucca">Built by Blucca</a><span>DockProof 0.1 · Evidence-linked freight claims</span><a href="https://www.xpo.com/help-center/claims-and-refunds/how-file-claims-and-refunds/" target="_blank" rel="noreferrer">Official XPO filing guide ↗</a></footer>
+  <footer class="site-footer"><a class="footer-brand" href="https://github.com/blucca">Built by Blucca</a><span>DockProof 0.2 · Evidence-linked freight claims</span><a href="https://www.xpo.com/help-center/claims-and-refunds/how-file-claims-and-refunds/" target="_blank" rel="noreferrer">Official XPO filing guide ↗</a></footer>
   <div id="toast" class="toast" role="status" hidden></div>
   <dialog id="request-dialog" class="modal"><form method="dialog" class="modal-top"><span class="eyebrow">ASK FOR THE EXACT MISSING EVIDENCE</span><button aria-label="Close evidence request" class="close-button">×</button></form><h2 id="request-title"></h2><pre id="request-body"></pre><button id="copy-request" class="button primary">Copy request</button></dialog>
-  <dialog id="extraction-dialog" class="modal extraction-modal"><form method="dialog" class="modal-top"><span class="eyebrow">LOCAL NVIDIA NEMOTRON EXTRACTION</span><button aria-label="Close extraction workspace" class="close-button">×</button></form><h2>Read the evidence, with citations.</h2><p id="extraction-status">The local server supplies the model connection.</p><label for="document-text">Paste a document's extracted text</label><textarea id="document-text" rows="9" placeholder="Invoice, bill of lading, delivery receipt, or warehouse reply…"></textarea><div class="extract-actions"><button id="extract-live" class="button primary">Extract candidate facts</button><button id="load-extract-example" class="button secondary">Use example invoice</button></div><div id="extraction-results" aria-live="polite"></div></dialog>
+  <dialog id="fact-dialog" class="modal fact-modal"><form method="dialog" class="modal-top"><span class="eyebrow">RECORD A SOURCE-LINKED VALUE</span><button aria-label="Close source selection" class="close-button">×</button></form><h2 id="manual-title">Select a fact</h2><p>Choose the original record and exact excerpt. Enter the value supported by that excerpt.</p><label for="manual-source">Source record</label><select id="manual-source"></select><label for="manual-line">Excerpt starts at</label><select id="manual-line"></select><label for="manual-quote">Exact source excerpt</label><textarea id="manual-quote" rows="4"></textarea><label id="manual-value-label" for="manual-value">Selected value</label><div id="manual-value-editor"></div><label for="manual-reason">Selection reason <span class="optional-label">optional</span></label><input id="manual-reason" maxlength="300" placeholder="For example, warehouse record identifies the damaged piece"><p id="manual-error" class="inline-status" role="status"></p><button id="save-manual-fact" class="button primary">Select this sourced value</button></dialog>
+  <dialog id="reset-dialog" class="modal"><form method="dialog" class="modal-top"><span class="eyebrow">MY CLAIM</span><button aria-label="Close new claim dialog" class="close-button">×</button></form><h2>Start a fresh claim?</h2><p>This replaces My claim and its locally saved original files. Download the current packet first to retain a copy. Both examples keep their separate records.</p><button id="confirm-reset-own" class="button primary">Start a fresh claim</button></dialog>
   <noscript><p class="noscript">Enable JavaScript to use the evidence desk. The source repository contains the sample documents and rules.</p></noscript>
 </body>
 </html>

@@ -1,0 +1,9 @@
+SYNTHETIC DEMO - DockProof original warehouse claim worksheet
+Prepared: 2026-10-08
+PRO: SYN-XPO-1007-B4 | Bill of lading: SYN-BOL-1005-24
+Affected piece: B4.
+Affected-piece weight entered in original worksheet: 600 lb (total shipment weight).
+Source for worksheet weight: total-shipment field on the bill of lading.
+Original worksheet calculation: 600 lb x $5.00/lb = $3,000.00.
+Original requested claim amount: $3,000.00.
+Keep this original worksheet alongside the reviewed affected-piece valuation.

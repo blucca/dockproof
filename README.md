@@ -2,37 +2,50 @@
 
 **Every claim dollar, traced.**
 
-[Open the evidence desk](https://blucca.github.io/dockproof/) · [Rule sources](docs/sources.md) · [Product walkthrough](docs/product.md)
+[Try the PDF case](https://blucca.github.io/dockproof/?case=import-example) · [Bring your documents](https://blucca.github.io/dockproof/?case=own) · [Rule sources](docs/sources.md)
 
-One crate arrives damaged. The bill lists five. The original worksheet asks for **$5,000** using the entire shipment's weight.
+One damaged shipping piece. An invoice, a delivery receipt, and a worksheet using the whole shipment's weight.
 
-DockProof follows the evidence to a reviewed **$880** claim:
+DockProof brings those records to one desk: **read the source, resolve conflicting facts, reconcile the amount, and hand over a shipper-reviewed packet with the original files.**
 
-1. Inspect the invoice, delivery receipt, bill of lading, and salvage record.
-2. Send precise requests for the damaged crate's weight and booking terms.
-3. Add the example replies: **200 lb** for C3 and the selected carrier service.
-4. Trace **$1,200 − $120 discount − $200 salvage = $880** in evidenced loss.
-5. Compare the **$1,000** standard-tariff reference limit, review the amount, and export the claim packet.
+## Try the complete document path
 
-Change the example to a spot quote and the reference limit becomes **$200**. The prior review clears and the packet requires a fresh decision.
+The **PDF example** reads six original synthetic records in your browser, including a two-page bill of lading / delivery receipt and a PDF invoice.
+
+1. Inspect the candidate values and their exact page / line excerpts.
+2. Select the single-value fields. The conflicting weight stays open for your decision.
+3. Choose **150 lb for B4** from the packing sheet. The inherited worksheet's **600 lb** stays in the evidence record.
+4. Follow **$2,000 − $100 discount − $175 retained salvage = $1,725** in evidenced loss.
+5. Review the **$750** class-70 reference limit and proposed demand.
+6. Download the **18-file packet**, including all six originals, source-text copies, valuation, references, and a SHA-256 original-file manifest.
+
+The original **Guided example** explores a separate C3 claim: a $5,000 worksheet, $880 supported demand, missing-record requests, and a $200 spot-quote branch. Each example and **My claim** has its own browser-local saved workspace.
 
 ![DockProof's evidence-linked claim workspace](web/preview.png)
 
-## What works
+## Bring a shipment to the desk
 
-- A complete interactive, browser-local example with seven original synthetic records.
-- Line-linked evidence, targeted requests, and explicit received-document status.
-- One shared JavaScript engine for monetary arithmetic, calendar deadlines, scope, and review snapshots.
-- Separate actual loss, tariff reference limit, and shipper-selected demand.
-- A 13-file ZIP: claim letter, CSV/JSON valuation, source references, original records, printable review, and document manifest.
-- A printable claim and persistent workspace, with a responsive mobile layout.
-- A local Nebius Token Factory adapter for NVIDIA Nemotron structured document-text extraction and exact-quote checks.
+Open **My claim** on the hosted page or your local server:
 
-The hosted desk uses curated example facts. The live extraction adapter is an account-activation milestone; the current release's integration checks use controlled API responses. Candidate extraction and the example claim desk are separate workspaces in this revision.
+1. Add selectable-text PDFs or UTF-8 records (`.txt`, `.md`, `.csv`, `.eml`), or paste an email / transcript.
+2. Assign record roles: bill of lading, delivery receipt, invoice, inspection / salvage, piece weight, or booking terms. One PDF can serve several roles.
+3. Use **Record a sourced value** to select an exact excerpt and its value. A connected NVIDIA Nemotron model can propose candidates for the whole document set.
+4. Resolve conflicting values and review the calculation. The same deterministic engine handles both paths.
+5. Approve the current evidence snapshot and download the packet for your carrier filing process.
+
+Every required identity, valuation, and scope field needs a source-linked selection. A changed fact, document, or role opens a fresh review. Earlier selections retain their values, source excerpts, and reasons.
+
+### Documents and storage
+
+- PDF text extraction runs locally using self-hosted **PDF.js 6.4.299**. Pages and lines retain exact UTF-16 positions in the extracted text.
+- Original PDF / text bytes stay in **IndexedDB**; extracted text, selections, and review state stay in browser-local storage. Reload restores both. Downloads check original-file SHA-256 against the imported record.
+- Limits: **12 records**, **10 MB per file**, **25 MB combined**, **40 pages per PDF**, and **80,000 extracted text characters per case**.
+- Image-only pages request a searchable PDF or a separate UTF-8 transcript. A transcript carries its own source identity and citations.
+- The hosted application supports importing, manual review, calculation, and export. **Extract with Nemotron** sends the selected case's document text through your local server to your Nebius account.
 
 ## Run locally
 
-Requires Node.js 22 or newer. The application uses native Node and browser APIs.
+Requires **Node.js 22+**. The server and claim engine use native APIs; the browser PDF parser is vendored with its Apache-2.0 license and provenance.
 
 ```sh
 git clone https://github.com/blucca/dockproof.git
@@ -40,9 +53,9 @@ cd dockproof
 npm start
 ```
 
-Open **http://127.0.0.1:4318/**. The example works immediately.
+Open **http://127.0.0.1:4318/**. Document import, manual source selection, and both examples are ready immediately.
 
-For live document-text extraction, put your Nebius key in your local environment:
+For NVIDIA Nemotron candidate extraction, set your local server environment:
 
 ```sh
 export NEBIUS_API_KEY='your-key'
@@ -51,41 +64,47 @@ export NEBIUS_BASE_URL='https://api.tokenfactory.us-central1.nebius.com/v1'
 npm start
 ```
 
-Open **Local extraction workspace** below the evidence desk. Paste document text and select **Extract candidate facts**. The server sends the text to your Nebius account; the browser displays the candidate values and exact source quotes for review.
+In **My claim → Documents & facts**, add the documents and choose **Extract with Nemotron**. The adapter requests `response_format.json_schema`, validates field types and exact source positions, and returns candidate facts and evidence questions. You select the values that enter the claim engine. The browser retains the provider model, duration, request ID, and reported usage with the case. API credentials stay in the server environment; the server handles document text in memory.
 
-The endpoint also accepts multiple text documents:
+**Provider status for v0.2:** the NVIDIA adapter and controlled-response integration checks are implemented. Live-provider execution is the next account-activation milestone. The published PDF example uses **curated candidates**, labeled `sample_curated`, and actual browser PDF parsing.
+
+The endpoint also accepts extracted text directly:
 
 ```sh
 curl http://127.0.0.1:4318/api/extract \
   -H 'Content-Type: application/json' \
-  --data '{"documents":[{"id":"weight","name":"Warehouse weight sheet","text":"Crate C3 actual gross weight: 200 lb."}]}'
+  --data '{"documents":[{"id":"weight","name":"Warehouse weight sheet","text":"Crate B4 actual gross weight: 150 lb."}]}'
 ```
-
-The request uses `response_format.json_schema` with NVIDIA Nemotron. Each candidate contains `field`, `value`, `document_id`, and `quote`; the adapter checks that the quote appears verbatim in the named input and returns its character span. Missing and conflicting facts become evidence questions. API credentials stay in the server environment. Text payloads are handled in memory.
 
 ## Rule scope
 
-The initial example covers **XPO US interstate LTL**, new ordinary goods, one visibly damaged shipping piece, actual class 70, direct shipper terms, and a standard-tariff or spot-quote basis. The rule version is **CNWY 199-AK.3, effective August 17, 2026**.
+The calculation covers **XPO US interstate LTL**, **new ordinary goods**, **one visibly damaged shipping piece**, a documented actual freight class, direct shipper terms, and a standard-tariff or spot-quote basis. The selected rule version is **CNWY 199-AK.3, effective August 17, 2026**.
 
-The engine routes special commodities, used goods, broker terms, excess-value agreements, and other unsupported inputs to manual review. The filing deadline uses delivery plus nine calendar months and describes **carrier receipt**. An exported packet retains `awaiting_carrier_submission` until receipt evidence is recorded.
+Special commodities, used goods, broker terms, purchased excess-value agreements, and concealed damage enter a separate terms review. Shipment-specific selections establish the applicable scope. The three amounts remain distinct: **evidenced loss**, **tariff reference limit**, and **requested demand**.
 
-The public example's companies, shipment identifiers, records, and amounts are synthetic. The tariff and federal regulation links point to official sources. [Read the source mapping](docs/sources.md).
+The filing deadline uses delivery plus **nine calendar months** and tracks **carrier receipt**. Export prepares the filing packet. Receipt and payment are subsequent events recorded from their own evidence. [See the official source mapping](docs/sources.md).
+
+Both public examples contain conspicuously synthetic companies, shipment identifiers, records, and values. **My claim** begins with an empty evidence and fact set.
 
 ## Architecture
 
 ```text
-web/data/sample-case.json     Original evidence + curated example facts
-web/core/case-engine.mjs      Deterministic valuation, deadlines, review, packet
-web/core/zip.mjs              Small UTF-8 ZIP writer
-web/app.mjs                  Evidence desk, citations, scenarios, local workspace
-src/nebius.mjs               NVIDIA structured extraction + exact citation spans
-src/server.mjs               Local static server and extraction endpoint
+web/data/import-example/      Original PDF/text example + curated candidates
+web/data/sample-case.json     Guided missing-evidence example
+web/core/document-intake.mjs  PDF/text reading, pages, hashes, original storage
+web/core/fact-review.mjs      Typed fields, exact citations, reviewer selections
+web/core/case-engine.mjs      Deterministic valuation, scope, deadlines, packet
+web/core/zip.mjs              UTF-8 and binary ZIP writer
+web/intake-ui.mjs             Import, source selection, candidate review
+web/app.mjs                   Isolated workspaces, evidence desk, export
+src/nebius.mjs                NVIDIA structured extraction and source validation
+src/server.mjs                Local static server and extraction endpoint
 ```
 
 ```sh
 npm test
 ```
 
-The focused checks cover missing evidence, affected-piece weight, invoice discounts and salvage, month-end deadlines, scope, changed-evidence review invalidation, export readiness, and model response citations. The browser walkthrough also checks the downloaded archive, the spot-quote branch, persistence, and a 390 px mobile viewport.
+Focused checks cover the core calculation, source selection, changed-evidence review, exact citation positions, document parsing, and provider response validation. Browser acceptance covers the PDF-to-packet path, conflicting weight selection, page-two citations, manual entry, original-byte export after reload, and a 390 px layout.
 
-Built by [Blucca](https://github.com/blucca) with autonomous AI development assistance. MIT-licensed application code and original synthetic records.
+Built by [Blucca](https://github.com/blucca) with autonomous AI development assistance. MIT application code and original synthetic records. PDF.js retains its upstream Apache-2.0 license in [`web/vendor/pdfjs/`](web/vendor/pdfjs/).
