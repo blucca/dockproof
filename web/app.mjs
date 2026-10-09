@@ -100,7 +100,7 @@ function renderOverview() {
   const gaps=evaluation.issues.filter(issue=>issue.severity==='blocking').length;
   const original=state.facts.worksheetDemandCents;
   $('#overview').innerHTML=`
-    <div class="stat"><div class="stat-label">${original===null||original===undefined?'Source records':'Original worksheet'}</div><div class="stat-value ${amountKnown&&original!=null?'struck':''}">${original==null?state.documents.length:money(original)}</div><div class="stat-detail">${original==null?'PDFs and text, kept with their sources':state.facts.worksheetWeightLb?`Original weight: ${number(state.facts.worksheetWeightLb)} lb`:'Original requested amount retained'}</div></div>
+    <div class="stat"><div class="stat-label">${original===null||original===undefined?'Source records':'Original worksheet'}</div><div class="stat-value ${amountKnown&&original!=null?'struck':''}">${original==null?state.documents.length:money(original)}</div><div class="stat-detail">${original==null?'PDFs, scans, photos & text, with their sources':state.facts.worksheetWeightLb?`Original weight: ${number(state.facts.worksheetWeightLb)} lb`:'Original requested amount retained'}</div></div>
     <div class="stat"><div class="stat-label">Evidenced loss · ${html(piece)}</div><div class="stat-value">${money(evaluation.actualLossCents)}</div><div class="stat-detail">Net invoice, less retained salvage</div></div>
     <div class="stat"><div class="stat-label">${evaluation.reviewValid?'Reviewed demand':'Proposed demand'}</div><div class="stat-value ${amountKnown?'':'pending'}">${amountKnown?money(evaluation.draftDemandCents):mode==='walkthrough'?`${state.documents.filter(doc=>!doc.received).length} records to collect`:'Select sourced facts'}</div><div class="stat-detail">${evaluation.reviewValid?'Current evidence snapshot approved':evaluation.canConfirm?'Ready for the shipper’s review':`${gaps} evidence / scope checks to resolve`}</div></div>`;
   const doneDocs=state.documents.length>0&&state.documents.every(doc=>doc.received)&&!evaluation.issues.some(issue=>issue.id.startsWith('missing_'));
@@ -130,19 +130,23 @@ function renderQuestions() {
 
 function renderEvidence() {
   const doc=state.documents.find(doc=>doc.id===selectedId)||state.documents[0];
-  if(!doc){$('#evidence-viewer').innerHTML='<div class="empty-viewer"><h3>Your evidence, in context.</h3><p>Import a PDF or text record. Its pages and lines appear here, linked to each selected fact and calculation.</p><button class="button secondary small" data-tab="intake">Add the first record →</button></div>';return;}
+  if(!doc){$('#evidence-viewer').innerHTML='<div class="empty-viewer"><h3>Your evidence, in context.</h3><p>Import a PDF, scan, photo, or text record. Its pages and lines appear here, linked to each selected fact and calculation.</p><button class="button secondary small" data-tab="intake">Add the first record →</button></div>';return;}
   const heading=`<div class="viewer-heading"><h3>${html(doc.name)}</h3><span>${doc.received?'SOURCE RECORD':'AWAITING RECORD'}</span></div>`;
   if(!doc.received) {
     const key=Object.keys(requests).find(key=>requests[key].documentId===doc.id);
     $('#evidence-viewer').innerHTML=heading+`<div style="padding:18px"><p style="font-size:11px;line-height:1.7;color:var(--muted)">This requested record will be added to the case when its reply arrives. Use the example reply to continue the walkthrough.</p><button class="button secondary small" data-action="${html(key)}">${html(requests[key].button)}</button></div>`;
     return;
   }
+  const isImage=['image/png','image/jpeg'].includes(doc.mimeType);
+  const photo=isImage?`<div class="original-photo"><img id="original-photo-preview" alt="Original photo: ${html(doc.name)}"><p>Original photo · ${doc.image?.width||'?'} × ${doc.image?.height||'?'} pixels <button class="cite" data-open-original="${html(doc.id)}">Open full original ↗</button></p></div>`:'';
+  const blank=!doc.text.trim()?`<div class="empty-viewer"><p>Visual evidence attached. Open the original to inspect it. Read printed text with local English OCR in Documents &amp; facts.</p></div>`:'';
   let offset=0;
-  $('#evidence-viewer').innerHTML=heading+`<div class="document-lines">${doc.text.split('\n').map((line,i)=>{
+  $('#evidence-viewer').innerHTML=heading+photo+blank+`<div class="document-lines">${doc.text.split('\n').map((line,i)=>{
     const match=line.match(/^L(\d+)\s+(.*)$/);const lineNumber=match?Number(match[1]):i+1; const body=match?match[2]:line;
     const page=doc.pages?.find(page=>offset>=page.start&&offset<=page.end);const lineInfo=page?.lines?.find(item=>offset>=item.start&&offset<=item.end);offset+=line.length+1;
-    return `${page&&page.start===offset-line.length-1?`<div class="source-page-label">PAGE ${page.page}</div>`:''}<div class="document-line ${selectedLine===lineNumber?'highlighted':''}" data-line="${lineNumber}"><span class="line-no">${String(lineInfo?.line||lineNumber).padStart(2,'0')}</span><span>${html(body)}</span></div>`;
+    return `${page&&page.start===offset-line.length-1?`<div class="source-page-label">PAGE ${page.page} · ${page.extraction?.derived ? 'OCR-DERIVED TEXT · COMPARE WITH ORIGINAL' : isImage ? 'ORIGINAL IMAGE' : 'SOURCE TEXT'}</div>`:''}<div class="document-line ${selectedLine===lineNumber?'highlighted':''}" data-line="${lineNumber}"><span class="line-no">${String(lineInfo?.line||lineNumber).padStart(2,'0')}</span><span>${html(body)}</span></div>`;
   }).join('')}</div><div class="viewer-footer">${doc.synthetic?'Synthetic example record':'Imported source record'} · ${doc.pages?.length||1} page${doc.pages?.length>1?'s':''} · ${doc.text.split('\n').length} lines${doc.sha256?`<br>SHA-256 ${html(doc.sha256.slice(0,16))}… <button class="cite" data-open-original="${html(doc.id)}" data-page="${selectedPage}">Open original · p${selectedPage} ↗</button>`:''}</div>`;
+  if(isImage)intake?.displayOriginalImage(doc.id,$('#original-photo-preview'));
 }
 
 function cite(evidence,label='↗ source') {
@@ -178,7 +182,7 @@ function renderPacket() {
   const deadline=evaluation.deadlines.find(item=>item.id==='carrier_receipt_deadline');
   const letter=packet?.files.find(file=>file.name.includes('cover-letter'))?.content||draftLetter();
   const originalDocs=state.documents.filter(doc=>doc.sha256);
-  const files=packet?[...packet.files.map(file=>file.name),...originalDocs.map(doc=>`Original · ${doc.originalName||doc.name}`)]:['Claim cover letter','Valuation audit · CSV & JSON','Official rule sources','Source text and original PDF / text files','Printable review','Document and original-file manifest'];
+  const files=packet?[...packet.files.map(file=>file.name),...originalDocs.map(doc=>`Original · ${doc.originalName||doc.name}`)]:['Claim cover letter','Valuation audit · CSV & JSON','Official rule sources','Source / OCR text and original PDFs, photos & text files','Printable review','Document and original-file manifest'];
   $('#packet').innerHTML=`<div class="packet-layout"><article class="packet-paper"><div class="paper-label">${state.synthetic?'SYNTHETIC EXAMPLE · ':''}${ready?'SHIPPER-REVIEWED DRAFT':'PREPARATION IN PROGRESS'}</div><h2>Freight damage claim</h2><div class="mini-label">${html(state.shipment.pro||'Shipment identity pending')} · Piece ${html(state.facts.affectedPieceId||'pending')}</div><div class="amount-large">${ready?money(evaluation.draftDemandCents):'Review to prepare'}</div><pre>${html(letter)}</pre></article><aside class="packet-side"><span class="status-tag ${ready?'green':'amber'}">${ready?'Ready for download':'Awaiting evidence review'}</span><h3 style="margin-top:16px">A complete record copy.</h3><p>The packet includes the reviewed claim, source text, original files, valuation, and rule references. Imported originals are matched to their SHA-256 fingerprints on download.</p><button class="button primary" id="download-packet" ${ready?'':'disabled'}>Download evidence packet (.zip)</button><button class="button secondary" id="print-packet" ${ready?'':'disabled'}>Print reviewed claim / Save PDF</button>${ready?'':`<button class="button-plain" data-tab="desk">Return to the evidence desk →</button>`}<div class="deadline">Written claim received by XPO<strong>${deadline?date(deadline.date):'Confirm delivery date'}</strong><span>Delivery + 9 calendar months</span></div><p style="font-size:10px">Filing status: <strong>${html(evaluation.filingStatus.replaceAll('_',' '))}.</strong><br>Attach the packet through the <a class="text-link" target="_blank" rel="noreferrer" href="https://www.xpo.com/help-center/claims-and-refunds/how-file-claims-and-refunds/">official filing process</a>. Record the carrier’s confirmation when received.</p><ul>${files.map((name,i)=>`<li><span>${String(i+1).padStart(2,'0')}</span>${html(name)}</li>`).join('')}</ul></aside></div>`;
 }
 

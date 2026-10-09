@@ -1,4 +1,6 @@
 /** Browser-local document intake. Original bytes stay in this origin's IndexedDB. */
+import { createOCRSession, rasterSize, imageCanvas, OCR_LIMITS, OCR_VERSION } from './local-ocr.mjs';
+
 export const PDFJS_VERSION = '6.4.299';
 export const DOCUMENT_LIMITS = Object.freeze({ maxBytes: 10 * 1024 * 1024, maxPages: 40, maxTextChars: 80000 });
 
@@ -24,7 +26,7 @@ async function getPDFLibrary() {
 const fail = (message, code) => { throw new DocumentIntakeError(message, code); };
 const normalizeLF = (value) => value.replace(/\r\n?/g, '\n');
 
-function pageMap(pageTexts) {
+export function pageMap(pageTexts, extractions = []) {
   let offset = 0;
   let globalLine = 1;
   return pageTexts.map((pageText, index) => {
@@ -35,7 +37,7 @@ function pageMap(pageTexts) {
       lineStart = line.end + 1;
       return line;
     });
-    const page = { page: index + 1, start, end: start + pageText.length, lines };
+    const page = { page: index + 1, start, end: start + pageText.length, lines, ...(extractions[index] ? { extraction: extractions[index] } : {}) };
     offset = page.end + 2;
     // A page separator contributes one additional empty line to canonical text.
     if (index < pageTexts.length - 1) globalLine++;
@@ -91,12 +93,14 @@ export function pdfTextLines(items, viewportTransform = [1, 0, 0, -1, 0, 0]) {
   });
 }
 
-async function parsePDF(bytes) {
+async function parsePDF(bytes, { onProgress = () => {}, ocr = true } = {}) {
   const prior = pdfSlot;
   let release;
   pdfSlot = new Promise((resolve) => { release = resolve; });
   await prior;
   let loadingTask;
+  let ocrSession;
+  let activePage = 1;
   try {
     const library = await getPDFLibrary();
     loadingTask = library.getDocument({
@@ -114,28 +118,55 @@ async function parsePDF(bytes) {
     if (pdf.numPages > DOCUMENT_LIMITS.maxPages) fail(`This PDF has ${pdf.numPages} pages. Choose a document with up to ${DOCUMENT_LIMITS.maxPages} pages.`, 'too_many_pages');
     const pageTexts = [];
     const warnings = [];
+    const extractions = [];
     let characters = 0;
     for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
       const page = await pdf.getPage(pageNumber);
       try {
         const content = await page.getTextContent({ disableNormalization: true });
-        const pageText = pdfTextLines(content.items, page.getViewport({ scale: 1 }).transform).join('\n');
+        let pageText = pdfTextLines(content.items, page.getViewport({ scale: 1 }).transform).join('\n');
+        let extraction = { method: 'pdfjs_selectable_text', version: PDFJS_VERSION, derived: false };
+        activePage = pageNumber;
+        onProgress({ status: 'reading PDF page', page: pageNumber, pageCount: pdf.numPages });
+        if (!pageText.trim()) {
+          extraction = { method: 'pdf_original', derived: false, status: 'attached' };
+          if (ocr) {
+            let canvas;
+            try {
+              ocrSession ??= await createOCRSession({ onProgress: event => onProgress({ ...event, page: activePage, pageCount: pdf.numPages }) });
+              const base = page.getViewport({ scale: 1 });
+              const size = rasterSize(base.width, base.height, 200 / 72);
+              const viewport = page.getViewport({ scale: size.scale });
+              canvas = document.createElement('canvas');
+              canvas.width = size.width; canvas.height = size.height;
+              await page.render({ canvasContext: canvas.getContext('2d', { alpha: false }), viewport, background: '#ffffff' }).promise;
+              const recognized = await ocrSession.recognize(canvas);
+              pageText = recognized.text; extraction = recognized.extraction;
+              warnings.push(`Page ${pageNumber}: English OCR-derived text. Compare selected facts with the original page.`);
+              if (!pageText.trim()) warnings.push(`Page ${pageNumber}: OCR returned 0 readable characters. The original page remains attached; add a UTF-8 transcript for sourced facts.`);
+            } catch (error) {
+              extraction = { method: 'tesseract_ocr', version: OCR_VERSION, language: 'eng', derived: true, status: 'failed' };
+              warnings.push(`Page ${pageNumber}: OCR failed (${error?.message || String(error)}). The original page remains attached for visual review.`);
+              await ocrSession?.close(); ocrSession = undefined;
+            } finally { if (canvas) { canvas.width = 1; canvas.height = 1; } }
+          } else warnings.push(`Page ${pageNumber}: original page attached with 0 selectable characters. Read its text with local English OCR.`);
+        }
+        extractions.push(extraction);
         characters += pageText.length + (pageNumber > 1 ? 2 : 0);
         if (characters > DOCUMENT_LIMITS.maxTextChars) fail(`Extracted text exceeds ${DOCUMENT_LIMITS.maxTextChars.toLocaleString('en-US')} characters. Split the document into a smaller evidence selection.`, 'text_too_large');
         pageTexts.push(pageText);
-        if (!pageText.trim()) warnings.push(`Page ${pageNumber}: text extraction returned 0 selectable characters. Add a searchable page or a UTF-8 transcript for its evidence.`);
         if (content.items.some((item) => item.dir === 'ttb')) warnings.push(`Page ${pageNumber}: vertical text was arranged into visible rows. Review its reading order before selecting facts.`);
       } finally {
         page.cleanup();
       }
     }
     const text = pageTexts.join('\n\n');
-    if (!text.trim()) fail('PDF text extraction returned 0 selectable characters. Add a searchable PDF or a UTF-8 transcript.', 'empty_document');
     return {
-      text, pages: pageMap(pageTexts), warnings,
+      text, pages: pageMap(pageTexts, extractions), warnings,
       extraction: {
-        method: 'pdfjs_selectable_text', version: PDFJS_VERSION,
-        normalization: 'Visible baselines sorted top-to-bottom; each row follows horizontal reading direction. Geometric gaps become spaces. Page lines use LF; pages are separated by two LF characters. Offsets count JavaScript UTF-16 code units in this canonical text.',
+        method: new Set(extractions.map(item => item.method)).size > 1 ? 'pdfjs_mixed' : extractions[0].method, pdfjsVersion: PDFJS_VERSION,
+        ocrPages: extractions.flatMap((item, index) => item.method === 'tesseract_ocr' ? [index + 1] : []),
+        normalization: 'Visible baselines sorted top-to-bottom; each row follows horizontal reading direction. Geometric gaps become spaces. Empty selectable-text pages use browser-local English OCR with per-page method records. OCR output is derived text for comparison with the original. Page lines use LF; pages are separated by two LF characters. Offsets count JavaScript UTF-16 code units in this canonical text.',
       },
     };
   } catch (error) {
@@ -143,6 +174,7 @@ async function parsePDF(bytes) {
     if (error?.name === 'PasswordException') fail('This PDF requires a password. Export an unlocked copy for this case.', 'encrypted_pdf');
     fail(`PDF extraction failed: ${error?.message || 'invalid PDF data'}. Try a searchable PDF or a UTF-8 transcript.`, 'pdf_parse_failed');
   } finally {
+    try { await ocrSession?.close(); } catch { /* Release the PDF slot after OCR cleanup. */ }
     try { await loadingTask?.destroy(); } catch { /* The completed parse already carries its result or error. */ }
     release();
   }
@@ -165,9 +197,71 @@ function parseText(bytes) {
   };
 }
 
-/** Read one PDF or UTF-8 text file, retaining exact canonical-text source offsets. */
-export async function readDocument(file, { id, kind = 'supporting', synthetic = false } = {}) {
-  if (!file || typeof file.arrayBuffer !== 'function') fail('Choose a PDF or a UTF-8 text file.', 'invalid_file');
+/** Signature-based PNG / JPEG dimensions, before allocating decoded image pixels. */
+export function imageDimensions(bytes) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  if (bytes.length >= 24 && [137,80,78,71,13,10,26,10].every((byte, index) => bytes[index] === byte)
+    && [73,72,68,82].every((byte, index) => bytes[12 + index] === byte)) {
+    return { mimeType: 'image/png', width: view.getUint32(16), height: view.getUint32(20) };
+  }
+  if (bytes[0] === 0xff && bytes[1] === 0xd8) {
+    let offset = 2;
+    while (offset + 3 < bytes.length) {
+      if (bytes[offset++] !== 0xff) break;
+      while (bytes[offset] === 0xff) offset++;
+      const marker = bytes[offset++];
+      if (marker === 0xd9 || marker === 0xda) break;
+      if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) continue;
+      if (offset + 1 >= bytes.length) break;
+      const length = view.getUint16(offset);
+      if (length < 2 || offset + length > bytes.length) break;
+      if ([0xc0,0xc1,0xc2,0xc3,0xc5,0xc6,0xc7,0xc9,0xca,0xcb,0xcd,0xce,0xcf].includes(marker) && length >= 8) {
+        return { mimeType: 'image/jpeg', width: view.getUint16(offset + 5), height: view.getUint16(offset + 3) };
+      }
+      offset += length;
+    }
+  }
+  fail('Image reading failed. Choose an original PNG or JPEG photo.', 'invalid_image');
+}
+
+async function parseImage(bytes, { ocrImages = false, onProgress = () => {} } = {}) {
+  const dimensions = imageDimensions(bytes);
+  if (!(dimensions.width > 0 && dimensions.height > 0) || dimensions.width * dimensions.height > OCR_LIMITS.maxSourcePixels) {
+    fail('Choose a PNG or JPEG photo of up to 24 megapixels.', 'image_too_large');
+  }
+  let text = '';
+  let extraction = { method: 'original_image', derived: false, status: 'attached' };
+  const warnings = [];
+  if (ocrImages) {
+    let canvas;
+    let session;
+    try {
+      canvas = await imageCanvas(bytes, dimensions.mimeType);
+      session = await createOCRSession({ onProgress });
+      const recognized = await session.recognize(canvas);
+      text = recognized.text; extraction = recognized.extraction;
+      if (text.length > DOCUMENT_LIMITS.maxTextChars) fail('Photo text exceeds 80,000 characters. Use a smaller evidence selection.', 'text_too_large');
+      warnings.push('English OCR-derived text. Compare each selected fact with the original photo.');
+      if (!text.trim()) warnings.push('OCR returned 0 readable characters. The original photo remains attached as visual evidence.');
+    } catch (error) {
+      if (error instanceof DocumentIntakeError) throw error;
+      extraction = { method: 'tesseract_ocr', version: OCR_VERSION, language: 'eng', derived: true, status: 'failed' };
+      warnings.push(`Photo OCR failed (${error?.message || String(error)}). The original photo remains attached for visual review.`);
+    } finally {
+      await session?.close();
+      if (canvas) { canvas.width = 1; canvas.height = 1; }
+    }
+  }
+  return {
+    text, pages: pageMap([text], [extraction]), warnings, image: dimensions,
+    extraction: { method: ocrImages ? 'image_ocr' : 'image_original', language: ocrImages ? 'eng' : null,
+      normalization: 'The original image is preserved byte-for-byte. Optional local English OCR produces a derived UTF-16 text transcript; line breaks use LF and trailing whitespace is trimmed. Review selected excerpts against the original image.' },
+  };
+}
+
+/** Read PDF, PNG/JPEG photo, or UTF-8 text; preserve originals and exact canonical offsets. */
+export async function readDocument(file, { id, kind = 'supporting', synthetic = false, ocr = true, ocrImages = false, onProgress } = {}) {
+  if (!file || typeof file.arrayBuffer !== 'function') fail('Choose a PDF, PNG/JPEG photo, or UTF-8 text file.', 'invalid_file');
   if (Number(file.size) > DOCUMENT_LIMITS.maxBytes) fail('This file exceeds 10 MB. Choose a smaller evidence file.', 'file_too_large');
   const buffer = await file.arrayBuffer();
   if (buffer.byteLength > DOCUMENT_LIMITS.maxBytes) fail('This file exceeds 10 MB. Choose a smaller evidence file.', 'file_too_large');
@@ -177,17 +271,18 @@ export async function readDocument(file, { id, kind = 'supporting', synthetic = 
   const declaredType = String(file.type || '').toLowerCase().split(';')[0];
   const prefix = new TextDecoder('latin1').decode(bytes.subarray(0, Math.min(bytes.length, 1024)));
   const isPDF = prefix.includes('%PDF-') || declaredType === 'application/pdf' || /\.pdf$/i.test(originalName);
-  if (!isPDF && !/\.(?:txt|text|md|csv|eml)$/i.test(originalName) && !declaredType.startsWith('text/')) {
-    fail('Choose a selectable-text PDF or a UTF-8 text record (.txt, .md, .csv, or .eml).', 'unsupported_type');
+  const isImage = !isPDF && (/\.(?:png|jpe?g)$/i.test(originalName) || ['image/png', 'image/jpeg'].includes(declaredType) || (bytes[0] === 137 && bytes[1] === 80) || (bytes[0] === 255 && bytes[1] === 216));
+  if (!isPDF && !isImage && !/\.(?:txt|text|md|csv|eml)$/i.test(originalName) && !declaredType.startsWith('text/')) {
+    fail('Choose a PDF, PNG/JPEG photo, or UTF-8 text record (.txt, .md, .csv, or .eml).', 'unsupported_type');
   }
   const hash = await crypto.subtle.digest('SHA-256', buffer);
   const sha256 = Array.from(new Uint8Array(hash), (value) => value.toString(16).padStart(2, '0')).join('');
   const byteLength = bytes.byteLength;
-  const content = isPDF ? await parsePDF(bytes) : parseText(bytes);
+  const content = isPDF ? await parsePDF(bytes, { ocr, onProgress }) : isImage ? await parseImage(bytes, { ocrImages, onProgress }) : parseText(bytes);
   return {
     id: id || `doc_${crypto.randomUUID()}`, name: originalName, originalName,
     kind, roles: [kind], received: true, synthetic: Boolean(synthetic),
-    ...content, sha256, mimeType: isPDF ? 'application/pdf' : (declaredType.startsWith('text/') ? declaredType : 'text/plain'), byteLength,
+    ...content, sha256, mimeType: isPDF ? 'application/pdf' : isImage ? content.image.mimeType : (declaredType.startsWith('text/') ? declaredType : 'text/plain'), byteLength,
   };
 }
 

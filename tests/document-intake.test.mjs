@@ -33,7 +33,8 @@ test('blank, binary, unsupported, and malformed UTF-8 sources receive actionable
   for (const [name, content, type, code] of [
     ['blank.txt', ' \r\n', 'text/plain', 'empty_document'],
     ['binary.txt', 'A\0B', 'text/plain', 'binary_text'],
-    ['photo.png', new Uint8Array([1, 2, 3]), 'image/png', 'unsupported_type'],
+    ['photo.png', new Uint8Array([1, 2, 3]), 'image/png', 'invalid_image'],
+    ['archive.zip', new Uint8Array([1, 2, 3]), 'application/zip', 'unsupported_type'],
     ['invalid.txt', new Uint8Array([0xff]), 'text/plain', 'invalid_utf8'],
   ]) {
     await assert.rejects(readDocument(new File([content], name, { type })), { code });

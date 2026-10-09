@@ -37,7 +37,7 @@ export const FIELD_DEFINITIONS = Object.freeze([
 
 export const DOCUMENT_ROLES = Object.freeze([
   'bill_of_lading', 'delivery_receipt', 'commercial_invoice', 'inspection_record',
-  'weight_sheet', 'rate_confirmation', 'claim_worksheet', 'supporting',
+  'weight_sheet', 'rate_confirmation', 'claim_worksheet', 'damage_photo', 'supporting',
 ]);
 
 const fieldByKey = new Map(FIELD_DEFINITIONS.map(field => [field.key, field]));
@@ -217,7 +217,9 @@ export function addDocuments(state, documents) {
     const index = next.documents.findIndex(doc => doc.id === incoming.id);
     const previous = index >= 0 ? next.documents[index] : null;
     const doc = { ...(previous ?? {}), ...clone(incoming) };
-    if (!nonempty(doc.text)) throw new FactReviewError('Add extracted document text before assigning this evidence.', 'document_text');
+    const visualOriginal = ['application/pdf', 'image/png', 'image/jpeg'].includes(doc.mimeType)
+      && /^[a-f0-9]{64}$/i.test(doc.sha256 ?? '') && Number.isInteger(doc.byteLength) && doc.byteLength > 0;
+    if (typeof doc.text !== 'string' || (!nonempty(doc.text) && !visualOriginal)) throw new FactReviewError('Add source text or a fingerprinted original PDF / photo before assigning this evidence.', 'document_text');
     doc.name = nonempty(doc.name) ? doc.name : doc.id;
     doc.kind ??= 'supporting';
     doc.received ??= true;

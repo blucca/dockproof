@@ -2,7 +2,7 @@
   "id": "dockproof-b4-import-example",
   "title": "Raw files. One damaged crate. Two competing weights.",
   "synthetic": true,
-  "description": "An original synthetic shipment of four crates. The original worksheet copied 600 lb from the whole shipment; the B4 packing record supplies 150 lb. Manually curated candidates support a source-by-source reviewer choice.",
+  "description": "An original synthetic four-crate shipment. A recorded NVIDIA Nemotron Super run distinguishes the B4 packing weight (150 lb) from the inherited worksheet weight (600 lb), with exact source quotations for review.",
   "documents": [
     {
       "id": "import_bol_pod",
@@ -73,5 +73,7 @@
     "standardLiabilityCapCents": 75000,
     "reviewedDemandCents": 75000
   },
-  "license": "MIT - original DockProof synthetic demonstration material. All names, shipment identities, business records and events in this pack are fictional."
+  "license": "MIT - original DockProof synthetic demonstration material. All names, shipment identities, business records and events in this pack are fictional.",
+  "candidateMethod": "nemotron_recorded",
+  "revision": "nemotron-bounded-v1"
 }

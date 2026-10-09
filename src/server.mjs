@@ -3,11 +3,12 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_MODEL, extractFacts } from './nebius.mjs';
+import { budgetStatus } from './budget.mjs';
 
 const root = fileURLToPath(new URL('../web/', import.meta.url));
 const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 4318);
-const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.json':'application/json', '.svg':'image/svg+xml', '.txt':'text/plain; charset=utf-8', '.png':'image/png', '.pdf':'application/pdf' };
+const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.json':'application/json', '.svg':'image/svg+xml', '.txt':'text/plain; charset=utf-8', '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.pdf':'application/pdf', '.wasm':'application/wasm', '.gz':'application/gzip' };
 let activeExtraction = false;
 const json = (res, status, value) => { res.writeHead(status, { 'Content-Type':'application/json', 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff' }); res.end(JSON.stringify(value)); };
 
@@ -26,7 +27,10 @@ const server = http.createServer(async (req,res) => {
   try {
     const url = new URL(req.url, `http://${host}:${port}`);
     if (url.pathname === '/api/status' && req.method === 'GET') {
-      return json(res, 200, { product:'DockProof', model:process.env.NEBIUS_MODEL || DEFAULT_MODEL, extractionReady:Boolean(process.env.NEBIUS_API_KEY), storage:'browser-local' });
+      const budget = budgetStatus();
+      return json(res, 200, { product:'DockProof', model:process.env.NEBIUS_MODEL || DEFAULT_MODEL,
+        extractionReady:Boolean(process.env.NEBIUS_API_KEY) && budget.ready,
+        budget:{ ready:budget.ready, code:budget.code, message:budget.message }, storage:'browser-local' });
     }
     if (url.pathname === '/api/extract' && req.method === 'POST') {
       const origin = req.headers.origin;

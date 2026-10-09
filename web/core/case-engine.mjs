@@ -584,6 +584,9 @@ export function createPacket(state, { today = todayUTC() } = {}) {
     textLength: doc.text.length, sourceFingerprint: evidenceFingerprint(doc.text),
     offsetUnit: 'UTF-16 code units in document.text',
     pages: clone(doc.pages ?? [{ page: 1, start: 0, end: doc.text.length }]),
+    extraction: clone(doc.extraction ?? { method: 'curated_text' }),
+    warnings: clone(doc.warnings ?? []),
+    textKind: doc.pages?.some(page => page.extraction?.derived) ? 'contains_ocr_derived_text' : doc.text.trim() ? 'source_text' : 'visual_attachment',
     selectedFields: Object.entries(facts.provenance ?? {}).filter(([, ref]) => ref.documentId === doc.id).map(([key]) => key),
   }));
   const cover = [
@@ -662,7 +665,8 @@ export function createPacket(state, { today = todayUTC() } = {}) {
 
   const mathHTML = result.math.map(row => '<tr><th scope="row">' + html(row.label) + '</th><td>'
     + html(row.expression) + '</td><td>' + html(money(row.valueCents)) + '</td></tr>').join('');
-  const evidenceHTML = evidenceFiles.map(doc => '<li><a href="' + html(doc.file) + '">' + html(doc.name) + '</a></li>').join('');
+  const evidenceHTML = evidenceFiles.map(doc => '<li><a href="' + html(doc.file) + '">' + html(doc.name) + '</a>'
+    + (doc.textKind === 'contains_ocr_derived_text' ? ' — OCR-derived text; compare with the original.' : doc.textKind === 'visual_attachment' ? ' — visual attachment; open its original file in the originals folder.' : '') + '</li>').join('');
   const sourcesHTML = SOURCES.map(source => '<li><a href="' + html(source.url) + '" target="_blank" rel="noopener noreferrer">'
     + html(source.title) + '</a> — ' + html(source.locator) + '</li>').join('');
   addFile('review.html', 'text/html', '<!doctype html><html lang="en"><meta charset="utf-8">'

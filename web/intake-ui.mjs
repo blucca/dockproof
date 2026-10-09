@@ -11,7 +11,7 @@ const roles = [
   ['bill_of_lading', 'Bill of lading'], ['delivery_receipt', 'Delivery receipt'],
   ['commercial_invoice', 'Invoice'], ['inspection_record', 'Inspection / salvage'],
   ['weight_sheet', 'Piece weight'], ['rate_confirmation', 'Booking terms'],
-  ['claim_worksheet', 'Original worksheet'],
+  ['claim_worksheet', 'Original worksheet'], ['damage_photo', 'Damage photo'],
 ];
 const definitions = new Map(FIELD_DEFINITIONS.map(field => [field.key, field]));
 const formatValue = (field, value) => {
@@ -30,7 +30,7 @@ const selectedRef = (state, key) => state.facts?.provenance?.[key];
 
 function sourceLines(doc) {
   let start = 0;
-  return doc.text.split('\n').map((text, index) => {
+  return (doc?.text || '').split('\n').map((text, index) => {
     const page = doc.pages?.find(page => start >= page.start && start <= page.end);
     const pageLine = page?.lines?.find(line => start >= line.start && start <= line.end);
     const line = { start, text, globalLine:index + 1, page:page?.page || 1, line:pageLine?.line || index + 1 };
@@ -55,9 +55,9 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
     busy = value;
     $('#document-files').disabled = busy;
     $('#add-pasted').disabled = busy;
-    $('#extract-live').disabled = busy || !modelReady || !getState().documents.length;
+    $('#extract-live').disabled = busy || !modelReady || !getState().documents.some(doc => doc.text?.trim());
     $('#save-manual-fact').disabled = busy;
-    for (const input of document.querySelectorAll('[data-record-role]')) input.disabled = busy;
+    for (const input of document.querySelectorAll('[data-record-role], [data-ocr-original]')) input.disabled = busy;
   }
 
   async function retain(doc, file) {
@@ -73,7 +73,7 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
     try {
       const blob = originals.get(id) || await getOriginal(id);
       if (!blob) throw new Error(`Reattach ${doc?.originalName || doc?.name || 'this original file'} to restore its saved bytes.`);
-      const viewBlob = new Blob([blob], { type:doc?.mimeType === 'application/pdf' ? 'application/pdf' : 'text/plain;charset=utf-8' });
+      const viewBlob = new Blob([blob], { type:['application/pdf', 'image/png', 'image/jpeg'].includes(doc?.mimeType) ? doc.mimeType : 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(viewBlob);
       if (windowRef) windowRef.location.href = url + (doc?.mimeType === 'application/pdf' ? `#page=${page}` : '');
       else {
@@ -81,6 +81,45 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
       }
       setTimeout(() => URL.revokeObjectURL(url), 120000);
     } catch (error) { windowRef?.close(); notify(error.message); }
+  }
+
+  function progressFor(name) {
+    let previous = '';
+    return event => {
+      const progress = Number.isFinite(event.progress) ? ` · ${Math.round(event.progress * 100)}%` : '';
+      const page = event.page ? ` · page ${event.page}${event.pageCount ? '/' + event.pageCount : ''}` : '';
+      const message = `${name}${page} · ${event.status || 'local English OCR'}${progress}. Processing in this browser…`;
+      if (message !== previous) { setStatus(message); previous = message; }
+    };
+  }
+
+  async function displayOriginalImage(id, element) {
+    if (!element) return;
+    try {
+      const blob = originals.get(id) || await getOriginal(id);
+      if (!blob) throw new Error('Reattach the original photo to view it here.');
+      if (!element.isConnected) return;
+      const url = URL.createObjectURL(blob);
+      element.addEventListener('load', () => URL.revokeObjectURL(url), { once:true });
+      element.addEventListener('error', () => { URL.revokeObjectURL(url); element.alt = 'Photo preview failed. Open the original file for review.'; }, { once:true });
+      element.src = url;
+    } catch (error) { if (element.isConnected) element.alt = error.message; }
+  }
+
+  async function readOriginalText(id) {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const doc = getState().documents.find(item => item.id === id);
+      const blob = originals.get(id) || await getOriginal(id);
+      if (!doc || !blob) throw new Error('Reattach this original file to read its text.');
+      const file = new File([blob], doc.originalName || doc.name, { type:doc.mimeType });
+      const parsed = await readDocument(file, { id, kind:doc.kind, synthetic:doc.synthetic, ocrImages:true, onProgress:progressFor(doc.name) });
+      if (getState().documents.filter(item => item.id !== id).reduce((total, item) => total + item.text.length, 0) + parsed.text.length > 80000) throw new Error('Use up to 80,000 extracted text characters in one case.');
+      commit(addDocuments(getState(), [{ ...parsed, name:doc.name, roles:doc.roles, originalStorage:doc.originalStorage }]));
+      setStatus(`${doc.name}: ${number(parsed.text.length)} OCR text characters saved. Compare sourced values with the original; its file fingerprint is preserved.`);
+    } catch (error) { setStatus(error.message); }
+    finally { setBusy(false); render(); }
   }
 
   async function addFiles(files) {
@@ -92,7 +131,8 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
       for (const file of files) {
         setStatus(`Reading ${file.name} in this browser…`);
         try {
-          const parsed = await readDocument(file, { id:`doc-${crypto.randomUUID()}`, kind:'supporting', synthetic:false });
+          const parsed = await readDocument(file, { id:`doc-${crypto.randomUUID()}`, kind:'supporting', synthetic:false, onProgress:progressFor(file.name) });
+          if (parsed.image) { parsed.kind = 'damage_photo'; parsed.roles = ['damage_photo']; }
           const state = getState();
           const existing = state.documents.find(doc => doc.sha256 === parsed.sha256);
           if (existing) {
@@ -140,10 +180,10 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
       if (!candidateResponse.ok) throw new Error('The example candidate selections failed to load.');
       const supplied = await candidateResponse.json();
       state.intake = {
-        candidates:(supplied.facts || supplied).map(raw => normalizeCandidate({ ...raw, method:'sample_curated' }, documents)),
-        questions:supplied.questions || [], runs:[], method:'sample_curated',
+        candidates:(supplied.facts || supplied).map(raw => normalizeCandidate({ ...raw, method:supplied.method || 'sample_curated' }, documents)),
+        questions:supplied.questions || [], runs:supplied.run ? [supplied.run] : [], method:supplied.method || 'sample_curated', exampleRevision:manifest.revision,
       };
-      setStatus(`${documents.length} original example records parsed in this browser. The PDF case uses curated candidate facts.`);
+      setStatus(`${documents.length} original example records parsed here. Candidate facts come from a recorded NVIDIA Nemotron run on these exact originals.`);
       return state;
     } finally { setBusy(false); }
   }
@@ -158,7 +198,7 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
       if (!response.ok) throw new Error('server');
       const status = await response.json();
       modelReady = Boolean(status.extractionReady);
-      $('#model-status').textContent = modelReady ? `${status.model} · ready through your local server.` : 'Set NEBIUS_API_KEY in your local server environment, restart the server, and reload this page. Source-linked manual selection is ready now.';
+      $('#model-status').textContent = modelReady ? `${status.model} · local server connected · credit budget active.` : `${status.budget?.message || 'Configure a private credit budget.'} Set NEBIUS_API_KEY and NEBIUS_BUDGET_FILE in the local server environment. Source-linked manual selection is ready.`;
     } catch { $('#model-status').textContent = 'Start npm start locally to connect NVIDIA Nemotron. Source-linked manual selection is ready here.'; }
     setBusy(busy);
   }
@@ -171,7 +211,7 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
       const state = getState();
       const response = await fetch('/api/extract', {
         method:'POST', headers:{ 'Content-Type':'application/json' },
-        body:JSON.stringify({ documents:state.documents.map(({ id, name, text, pages, kind, roles, sha256, synthetic }) => ({ id, name, text, kind, roles, sha256, synthetic, pages:pages?.map(({ page, start, end }) => ({ page, start, end })) })) }),
+        body:JSON.stringify({ documents:state.documents.map(({ id, name, text, pages, kind, roles, sha256, synthetic, mimeType, byteLength, extraction }) => ({ id, name, text, kind, roles, sha256, synthetic, mimeType, byteLength, extraction, pages:pages?.map(({ page, start, end, extraction }) => ({ page, start, end, extraction })) })) }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || `Extraction failed: HTTP ${response.status}.`);
@@ -185,7 +225,7 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
       };
       next.decisions.review = null;
       commit(next);
-      $('#extraction-results').textContent = `${candidates.length} source-matched candidate facts · ${Math.round(result.execution.durationMs / 1000)} s · ${result.execution.usage?.total_tokens ?? 'usage pending'} tokens. Select the supported values below.`;
+      $('#extraction-results').textContent = `${candidates.length} source-matched candidate facts · ${Math.round(result.execution.durationMs / 1000)} s · review every source excerpt. Select the supported values below.`;
     } catch (error) { $('#extraction-results').textContent = error.message; }
     finally { setBusy(false); render(); }
   }
@@ -221,10 +261,14 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
 
   function renderDocuments() {
     const state = getState();
+    const expanded = new Map([...document.querySelectorAll('#intake-documents [data-role-document]')].map(element => [element.dataset.roleDocument, element.open]));
     $('#intake-documents').innerHTML = state.documents.map(doc => {
       const selectedRoles = Array.isArray(doc.roles) ? doc.roles : [doc.kind];
+      const isImage = ['image/png', 'image/jpeg'].includes(doc.mimeType);
+      const hasOCR = doc.pages?.some(page => page.extraction?.derived);
+      const method = isImage ? (hasOCR ? 'Photo + OCR-derived text' : 'Photo original') : hasOCR ? 'PDF + OCR-derived text' : 'Source text';
       const warnings = (doc.warnings || []).map(warning => typeof warning === 'string' ? warning : warning.message || JSON.stringify(warning));
-      return `<article class="intake-record"><div class="record-heading"><h4>${html(doc.name)}</h4><span>${doc.pages?.length || 1}p</span></div><p class="record-meta">${number(doc.byteLength || new TextEncoder().encode(doc.text).length)} bytes · ${doc.originalStorage === 'tab' ? 'Original held in this tab' : 'Browser-local original'}</p>${warnings.map(warning => `<p class="record-warning">${html(warning)}</p>`).join('')}<div class="record-actions"><button class="cite" data-show-source="${html(doc.id)}">Read source ↗</button><button class="cite" data-open-original="${html(doc.id)}">Open original ↗</button></div><details class="record-roles" ${selectedRoles.includes('supporting') ? 'open' : ''}><summary>${html(roleNames(doc))}</summary><div>${roles.map(([role, label]) => `<label><input type="checkbox" data-record-role="${role}" data-record-id="${html(doc.id)}" ${selectedRoles.includes(role) ? 'checked' : ''} ${busy ? 'disabled' : ''}>${label}</label>`).join('')}</div></details></article>`;
+      return `<article class="intake-record"><div class="record-heading"><h4>${html(doc.name)}</h4><span>${doc.pages?.length || 1}p</span></div><p class="record-meta">${method} · ${number(doc.byteLength || new TextEncoder().encode(doc.text).length)} bytes · ${doc.originalStorage === 'tab' ? 'Original held in this tab' : 'Browser-local original'}</p>${warnings.map(warning => `<p class="record-warning">${html(warning)}</p>`).join('')}<div class="record-actions"><button class="cite" data-show-source="${html(doc.id)}">Read source ↗</button><button class="cite" data-open-original="${html(doc.id)}">Open original ↗</button>${isImage || doc.pages?.some(page => !doc.text.slice(page.start, page.end).trim()) ? `<button class="cite" data-ocr-original="${html(doc.id)}" ${busy ? 'disabled' : ''}>${hasOCR ? 'Reread' : 'Read'} ${isImage ? 'photo' : 'scan'} text · English</button>` : ''}</div><details class="record-roles" data-role-document="${html(doc.id)}" ${(expanded.get(doc.id) ?? selectedRoles.includes('supporting')) ? 'open' : ''}><summary>${html(roleNames(doc))}</summary><div>${roles.map(([role, label]) => `<label><input type="checkbox" data-record-role="${role}" data-record-id="${html(doc.id)}" ${selectedRoles.includes(role) ? 'checked' : ''} ${busy ? 'disabled' : ''}>${label}</label>`).join('')}</div></details></article>`;
     }).join('') || '<div class="empty-note">The original record list starts here. A single PDF may supply several roles.</div>';
   }
 
@@ -240,7 +284,7 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
     $('#select-unambiguous').textContent = `Select ${singles.length} single-value fields`;
     $('#select-unambiguous').disabled = busy || !singles.length;
     const runs = state.intake?.runs || [];
-    $('#candidate-origin').textContent = runs.length ? `Candidate sources: NVIDIA Nemotron · ${runs.length} recorded ${runs.length === 1 ? 'run' : 'runs'}; manual selections keep their own method. Matching excerpts locates the evidence; the reviewer chooses the supported value.` : state.intake?.method === 'sample_curated' ? 'PDF example: real browser PDF parsing with curated candidate facts. The two weight candidates preserve the original source conflict.' : 'Choose “Record a sourced value” to select a fact manually. A connected local Nemotron model can propose candidates for the full document set.';
+    $('#candidate-origin').textContent = runs.length ? `${runs.at(-1).mode === 'recorded' ? 'Recorded NVIDIA Nemotron run on these originals' : 'Live NVIDIA Nemotron extraction'} · ${runs.at(-1).exactCitations} source-matched candidates. Review the affected piece, worksheet and original excerpts before selecting values.` : state.intake?.method === 'sample_curated' ? 'PDF example: real browser PDF parsing with curated candidate facts. The two weight candidates preserve the original source conflict.' : 'Choose “Record a sourced value” to select a fact manually. A connected local Nemotron model can propose candidates for the full document set.';
     $('#candidate-questions').innerHTML = (state.intake?.questions || []).map(question => `<div class="candidate-question"><strong>${html(definitions.get(question.field)?.label || question.field)}</strong><p>${html(question.question)}</p></div>`).join('');
     const filter = $('#fact-filter').value;
     const visible = FIELD_DEFINITIONS.filter(definition => filter === 'all' || (filter === 'conflicts' ? conflicts.includes(definition) : !selectedRef(state, definition.key)?.candidateId && (definition.required || candidatesFor(state, definition.key).length)));
@@ -258,7 +302,8 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
         return `<article class="fact-field ${conflict ? 'has-conflict' : ''}" data-field="${html(definition.key)}"><div class="fact-field-heading"><h4>${html(definition.label)}</h4><span class="status-tag ${ref?.candidateId ? 'green' : 'amber'}">${ref?.candidateId ? 'Selected' : conflict ? 'Choose between sources' : definition.required ? 'Required' : 'Optional'}</span></div>${ref?.candidateId ? `<p class="selected-value">${html(formatValue(definition.key, valueFor(state, definition)))} ${citationButton(ref)}</p>` : ''}${candidates.map(candidate => {
           const chosen = ref?.candidateId === candidate.id;
           const doc = state.documents.find(doc => doc.id === candidate.document_id);
-          return `<div class="candidate ${chosen ? 'chosen' : ''}"><div class="candidate-top"><strong>${html(formatValue(definition.key, candidate.value))}</strong><button class="button ${chosen ? 'secondary' : 'primary'} small" data-select-candidate="${html(candidate.id)}" ${chosen || busy ? 'disabled' : ''}>${chosen ? 'Selected ✓' : 'Select value'}</button></div><blockquote>${html(candidate.quote)}</blockquote><div class="candidate-source"><span>${html(doc?.name || candidate.document_id)} · ${html(candidate.method === 'nemotron' ? 'Nemotron candidate' : candidate.method === 'sample_curated' ? 'Curated example' : 'Reviewer entry')}</span>${citationButton(candidate.citation)}</div></div>`;
+          const derived = doc?.pages?.find(page => page.page === candidate.citation.page)?.extraction?.derived;
+          return `<div class="candidate ${chosen ? 'chosen' : ''}"><div class="candidate-top"><strong>${html(formatValue(definition.key, candidate.value))}</strong><button class="button ${chosen ? 'secondary' : 'primary'} small" data-select-candidate="${html(candidate.id)}" ${chosen || busy ? 'disabled' : ''}>${chosen ? 'Selected ✓' : 'Select value'}</button></div><blockquote>${html(candidate.quote)}</blockquote><div class="candidate-source"><span>${html(doc?.name || candidate.document_id)} · ${html(candidate.method === 'nemotron' ? 'Live Nemotron candidate' : candidate.method === 'nemotron_recorded' ? 'Recorded Nemotron candidate' : candidate.method === 'sample_curated' ? 'Curated example' : 'Reviewer entry')}${derived ? ' · OCR-derived source' : ''}</span>${citationButton(candidate.citation)}</div></div>`;
         }).join('')}<button class="button-plain" data-edit-field="${html(definition.key)}">${ref?.candidateId ? 'Revise with a source excerpt' : 'Record a sourced value'} →</button>${ref?.history?.length ? `<details class="selection-history"><summary>${ref.history.length} previous ${ref.history.length === 1 ? 'selection' : 'selections'}</summary>${ref.history.map(previous => `<p>${html(formatValue(definition.key, previous.value))} · ${html(previous.reason || previous.method || 'Earlier selection')}</p>`).join('')}</details>` : ''}</article>`;
       }).join('')}</details>`;
     }).join('');
@@ -279,17 +324,20 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
     const doc = getState().documents.find(doc => doc.id === $('#manual-source').value);
     const line = sourceLines(doc).find(line => line.start === Number($('#manual-line').value));
     $('#manual-quote').value = line?.text || '';
+    const derived = doc?.pages?.find(page => page.page === line?.page)?.extraction?.derived;
+    $('#manual-source-method').textContent = derived ? 'OCR-derived excerpt · Open the original page and compare the selected value.' : 'Source-text excerpt · Review the record in context.';
   }
 
   function openManual(field) {
     if (busy) return;
     const state = getState();
-    if (!state.documents.length) { notify('Add a source record first.'); return; }
+    const textDocuments = state.documents.filter(doc => doc.text?.trim());
+    if (!textDocuments.length) { notify('Add source text, or read the text in an attached scan / photo first.'); return; }
     manualField = definitions.get(field);
     const ref = selectedRef(state, field);
     $('#manual-title').textContent = manualField.label;
-    $('#manual-source').innerHTML = state.documents.map(doc => `<option value="${html(doc.id)}">${html(doc.name)}</option>`).join('');
-    if (ref?.documentId && state.documents.some(doc => doc.id === ref.documentId)) $('#manual-source').value = ref.documentId;
+    $('#manual-source').innerHTML = textDocuments.map(doc => `<option value="${html(doc.id)}">${html(doc.name)}</option>`).join('');
+    if (ref?.documentId && textDocuments.some(doc => doc.id === ref.documentId)) $('#manual-source').value = ref.documentId;
     updateManualLines();
     if (ref?.quote) {
       $('#manual-quote').value = ref.quote;
@@ -362,6 +410,7 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
     if (button.dataset.selectCandidate) select(button.dataset.selectCandidate);
     if (button.dataset.editField) openManual(button.dataset.editField);
     if (button.dataset.showSource) openDocument(button.dataset.showSource, 1);
+    if (button.dataset.ocrOriginal) readOriginalText(button.dataset.ocrOriginal);
     if (button.dataset.openOriginal) openOriginal(button.dataset.openOriginal, Number(button.dataset.page) || 1);
     if (button.id === 'select-unambiguous') selectSingles();
     if (button.id === 'save-manual-fact') saveManual();
@@ -389,5 +438,5 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
     }
   });
   connect();
-  return { render, addFiles, loadExample, openOriginal, preparePacket, forgetOriginals:ids => ids.forEach(id => originals.delete(id)), get busy() { return busy; } };
+  return { render, addFiles, loadExample, openOriginal, displayOriginalImage, preparePacket, forgetOriginals:ids => ids.forEach(id => originals.delete(id)), get busy() { return busy; } };
 }

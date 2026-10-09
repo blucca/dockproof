@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FACT_FIELDS, extractFacts, validateExtraction } from '../src/nebius.mjs';
+import { FACT_FIELDS, MAX_OUTPUT_TOKENS, extractFacts, validateDocuments, validateExtraction } from '../src/nebius.mjs';
 import { FIELD_DEFINITIONS, selectCandidate, addDocuments, createEmptyCase } from '../web/core/fact-review.mjs';
 
 const documents = [{ id:'weight', text:'Crate C3 actual gross weight: 200 lb.' }];
@@ -8,7 +8,14 @@ const response = { facts:[{ field:'affectedWeightLb', value:'200', document_id:'
 
 test('structured extraction sends the NVIDIA model and preserves exact evidence spans', async () => {
   let sent;
-  const result = await extractFacts(documents, { apiKey:'test-only', fetchImpl:async (url,init) => {
+  let reserved = false;
+  const result = await extractFacts(documents, { apiKey:'test-only', reserveBudget:({model,request}) => {
+    assert.equal(model, request.model);
+    assert.equal(request.max_tokens, MAX_OUTPUT_TOKENS);
+    reserved = true;
+    return { requestJson:JSON.stringify(request) };
+  }, fetchImpl:async (url,init) => {
+    assert.equal(reserved, true);
     sent = { url, ...JSON.parse(init.body) };
     return { ok:true, json:async () => ({ id:'test-response', choices:[{message:{content:JSON.stringify(response)},finish_reason:'stop'}], usage:{total_tokens:12} }) };
   } });
@@ -17,6 +24,21 @@ test('structured extraction sends the NVIDIA model and preserves exact evidence 
   assert.equal(sent.response_format.json_schema.strict,true);
   assert.equal(result.extraction.facts[0].citation.start,0);
   assert.equal(result.execution.exactCitations,1);
+});
+
+test('text extraction keeps empty original attachments outside model input', () => {
+  const photo = { id:'photo', text:'', sha256:'a'.repeat(64), mimeType:'image/jpeg' };
+  assert.equal(validateDocuments([...documents, photo]).length, 1);
+  assert.throws(() => validateDocuments([photo]), { code:'document_text' });
+});
+
+test('an exhausted credit budget stops the HTTP request', async () => {
+  let sent = false;
+  await assert.rejects(() => extractFacts(documents, { apiKey:'test-only',
+    reserveBudget:() => { throw Object.assign(new Error('Approved budget exhausted.'), {code:'budget_reached'}); },
+    fetchImpl:async () => { sent = true; },
+  }), {code:'budget_reached'});
+  assert.equal(sent, false);
 });
 
 test('an invented document quote stops extraction review', () => {
@@ -40,4 +62,15 @@ test('canonical model fields reach typed selections with page-aware quotation re
   assert.equal(state.facts.excessValueAgreement, false);
   assert.equal(state.facts.provenance.excessValueAgreement.documentId, docs[0].id);
   assert.equal(state.facts.provenance.excessValueAgreement.method, 'nemotron');
+});
+
+test('bounded field slots retain typed values and exact source quotes', () => {
+  const raw = { fields:{ affectedWeightLb:{ candidates:[{value:200,document_id:'weight',quote:documents[0].text,page:1}], question:null } } };
+  const result = validateExtraction(raw,documents);
+  assert.equal(result.facts[0].value,200);
+  assert.equal(result.facts[0].citation.start,0);
+  assert.equal(result.facts[0].citation.end,documents[0].text.length);
+  assert.deepEqual(result.questions,[]);
+  const repeated = {fields:{affectedWeightLb:{...raw.fields.affectedWeightLb,candidates:Array(4).fill(raw.fields.affectedWeightLb.candidates[0])}}};
+  assert.throws(() => validateExtraction(repeated,documents),{code:'response_shape'});
 });

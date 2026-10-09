@@ -10,11 +10,11 @@ DockProof brings those records to one desk: **read the source, resolve conflicti
 
 ## Try the complete document path
 
-The **PDF example** reads six original synthetic records in your browser, including a two-page bill of lading / delivery receipt and a PDF invoice.
+The **PDF example** reads six original synthetic records in your browser, including a two-page bill of lading / delivery receipt and a PDF invoice. Its **32 candidate facts** come from a recorded, successful **NVIDIA Nemotron Super** run on those same files; the page labels their recorded origin.
 
 1. Inspect the candidate values and their exact page / line excerpts.
-2. Select the single-value fields. The conflicting weight stays open for your decision.
-3. Choose **150 lb for B4** from the packing sheet. The inherited worksheet's **600 lb** stays in the evidence record.
+2. Review and select the single-value fields.
+3. Compare **150 lb for B4** from the packing sheet with the inherited worksheet's **600 lb**. Both values keep their distinct sources and roles.
 4. Follow **$2,000 − $100 discount − $175 retained salvage = $1,725** in evidenced loss.
 5. Review the **$750** class-70 reference limit and proposed demand.
 6. Download the **18-file packet**, including all six originals, source-text copies, valuation, references, and a SHA-256 original-file manifest.
@@ -27,8 +27,8 @@ The original **Guided example** explores a separate C3 claim: a $5,000 worksheet
 
 Open **My claim** on the hosted page or your local server:
 
-1. Add selectable-text PDFs or UTF-8 records (`.txt`, `.md`, `.csv`, `.eml`), or paste an email / transcript.
-2. Assign record roles: bill of lading, delivery receipt, invoice, inspection / salvage, piece weight, or booking terms. One PDF can serve several roles.
+1. Add PDFs, scanned PDFs, PNG/JPEG photos, or UTF-8 records (`.txt`, `.md`, `.csv`, `.eml`), or paste an email / transcript.
+2. Assign record roles: bill of lading, delivery receipt, invoice, inspection / salvage, piece weight, booking terms, or damage photos. One PDF can serve several roles.
 3. Use **Record a sourced value** to select an exact excerpt and its value. A connected NVIDIA Nemotron model can propose candidates for the whole document set.
 4. Resolve conflicting values and review the calculation. The same deterministic engine handles both paths.
 5. Approve the current evidence snapshot and download the packet for your carrier filing process.
@@ -37,10 +37,11 @@ Every required identity, valuation, and scope field needs a source-linked select
 
 ### Documents and storage
 
-- PDF text extraction runs locally using self-hosted **PDF.js 6.4.299**. Pages and lines retain exact UTF-16 positions in the extracted text.
-- Original PDF / text bytes stay in **IndexedDB**; extracted text, selections, and review state stay in browser-local storage. Reload restores both. Downloads check original-file SHA-256 against the imported record.
-- Limits: **12 records**, **10 MB per file**, **25 MB combined**, **40 pages per PDF**, and **80,000 extracted text characters per case**.
-- Image-only pages request a searchable PDF or a separate UTF-8 transcript. A transcript carries its own source identity and citations.
+- PDF text extraction runs locally using self-hosted **PDF.js 6.4.299**. Empty-text pages use **Tesseract.js 6.0.1** English OCR. A mixed PDF retains the extraction method for each page. Pages and lines retain exact UTF-16 positions in the extracted text.
+- PNG/JPEG photos stay as original visual evidence. Choose **Read photo text · English** for printed labels or photographed documents; an image with zero recognized characters stays attached. OCR text is marked as derived and links to the original page or image for comparison.
+- Original PDF / photo / text bytes stay in **IndexedDB**; extracted text, selections, and review state stay in browser-local storage. Reload restores both. Downloads check original-file SHA-256 against the imported record.
+- Limits: **12 records**, **10 MB per file**, **25 MB combined**, **40 pages per PDF**, **24 MP per photo**, and **80,000 extracted text characters per case**. OCR uses one CPU worker, a 4 MP rendered-page ceiling, and a two-minute page timeout; the worker is released after the document.
+- OCR assets are self-hosted and load on demand (about 6 MB). Original images and OCR stay in the browser; model extraction sends the derived text through the configured local server.
 - The hosted application supports importing, manual review, calculation, and export. **Extract with Nemotron** sends the selected case's document text through your local server to your Nebius account.
 
 ## Run locally
@@ -61,12 +62,18 @@ For NVIDIA Nemotron candidate extraction, set your local server environment:
 export NEBIUS_API_KEY='your-key'
 export NEBIUS_MODEL='nvidia/nemotron-3-super-120b-a12b'
 export NEBIUS_BASE_URL='https://api.tokenfactory.us-central1.nebius.com/v1'
+export NEBIUS_BUDGET_FILE='/absolute/path/to/private/budget.json'
+export NEBIUS_BUDGET_RUNTIME_DIR='/absolute/path/to/temp/dockproof-budget'
 npm start
 ```
 
-In **My claim → Documents & facts**, add the documents and choose **Extract with Nemotron**. The adapter requests `response_format.json_schema`, validates field types and exact source positions, and returns candidate facts and evidence questions. You select the values that enter the claim engine. The browser retains the provider model, duration, request ID, and reported usage with the case. API credentials stay in the server environment; the server handles document text in memory.
+Copy [`budget.example.json`](budget.example.json) into your private directory and fill it from your account's **confirmed remaining credits, current model prices, a credit reserve, and a short approval expiry**. The example starts with a zero budget. `approvedUsd` must fit inside `confirmedCreditsUsd − creditReserveUsd`; preserve cumulative `reservedMicroUsd` and `requests` across restarts. Use one runtime directory for every process sharing that ledger, on the same filesystem as the budget file.
 
-**Provider status for v0.2:** the NVIDIA adapter and controlled-response integration checks are implemented. Live-provider execution is the next account-activation milestone. The published PDF example uses **curated candidates**, labeled `sample_curated`, and actual browser PDF parsing.
+Each HTTP request first reserves its full input-byte and output-token cost ceiling in the private ledger. Failed requests retain their reservation; exhausted, expired, or unavailable budgets stop extraction before HTTP. These application controls apply to requests through this server. Account-wide payment settings are managed in the provider console.
+
+In **My claim → Documents & facts**, add the documents and choose **Extract with Nemotron**. The adapter requests a typed, bounded `response_format.json_schema` with one slot for every identity, valuation, and scope field. It matches exact quotes and returns candidate facts for your selection; empty visual attachments stay in the packet. Provider credentials remain in the server environment.
+
+**Provider result for v0.3:** a real Nebius-hosted Nemotron Super request extracted **32 valid source-matched candidates**, covering all **27 required fields**, from the six original synthetic records. The published PDF example loads this recorded result, labeled `nemotron_recorded`, and parses the actual PDFs in your browser. [Model integration observations](docs/model-feedback.md) describe the initial failure and the working bounded contract.
 
 The endpoint also accepts extracted text directly:
 
@@ -89,9 +96,10 @@ Both public examples contain conspicuously synthetic companies, shipment identif
 ## Architecture
 
 ```text
-web/data/import-example/      Original PDF/text example + curated candidates
+web/data/import-example/      Original PDF/text example + recorded NVIDIA candidates
 web/data/sample-case.json     Guided missing-evidence example
-web/core/document-intake.mjs  PDF/text reading, pages, hashes, original storage
+web/core/document-intake.mjs  PDF/photo/text reading, pages, hashes, original storage
+web/core/local-ocr.mjs        Lazy local English OCR with per-page provenance
 web/core/fact-review.mjs      Typed fields, exact citations, reviewer selections
 web/core/case-engine.mjs      Deterministic valuation, scope, deadlines, packet
 web/core/zip.mjs              UTF-8 and binary ZIP writer

@@ -17,7 +17,7 @@ shipment IDs, and values are original synthetic material.
 
 1. Import a two-page BOL/POD, PDF invoice, and four supporting text records.
 2. Review source-linked candidate facts. Select the single-value fields together.
-3. Resolve the remaining conflict: 600 lb copied from the full shipment versus B4's 150 lb packing-sheet weight.
+3. Compare the retained 600 lb worksheet weight with B4's 150 lb packing-sheet weight, each with its own role and source.
 4. Follow the $1,725 loss and the $750 standard-tariff reference limit.
 5. Approve $750 for the selected evidence snapshot.
 6. Download 18 files, including the six original PDFs/texts, source-text copies, and valuation.
@@ -39,8 +39,7 @@ money, dates, scope checks, and evidence-version review. The original PDFs and b
 available alongside the extracted text. Model execution metadata and reviewer selection
 history remain separate records.
 
-Release v0.2 uses curated candidates in the public PDF example and a complete manual
-source-selection path for imported materials. Live NVIDIA execution follows account activation.
+Release v0.3 uses 32 source-matched candidates from a recorded real NVIDIA run in the public PDF example. The recorded result covers all 27 required fields. Imported materials use local English OCR, manual source selection and optional live model extraction through a credit-budgeted local server.
 
 ## Current calculation boundary
 
@@ -49,8 +48,9 @@ documented actual class, direct shipper booking, and confirmed standard-tariff o
 spot-quote terms. A separate terms review handles commodity exceptions, broker agreements,
 purchased excess value, used goods, and concealed damage.
 
-Selectable-text PDFs and UTF-8 records are the input formats. Scanned pages request a
-searchable copy or transcript. The application stores documents in the current browser;
+PDFs, scanned PDF pages, PNG/JPEG photos and UTF-8 records enter the same evidence path.
+Local English OCR produces marked, per-page derived text for comparison with the originals.
+Photos with zero text remain visual attachments. The application stores documents in the current browser;
 the explicit model action transmits extracted text to the configured Nebius account.
 
 ## Next commercial proof
