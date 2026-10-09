@@ -1,0 +1,274 @@
+{
+  "method": "nemotron_recorded",
+  "synthetic": true,
+  "run": {
+    "mode": "recorded",
+    "model": "nvidia/nemotron-3-super-120b-a12b",
+    "startedAt": "2026-10-09T17:01:09.779Z",
+    "durationMs": 12064,
+    "documentCount": 7,
+    "originalCount": 8,
+    "attachmentCount": 1,
+    "exactCitations": 30,
+    "sourceRunCandidates": 31,
+    "omittedAfterSemanticReview": 1,
+    "schemaVersion": "bounded-fields-v1"
+  },
+  "reviewNote": "1 candidate omitted after semantic review: the inspection date described warehouse inspection. Carrier claim receipt remains open for its own receipt evidence.",
+  "description": "A real Nebius Token Factory run on these eight synthetic originals produced 31 candidates. The published set retains 30 after semantic review. Current browser OCR and PDF text supply the exact quote locations.",
+  "documents": [
+    {
+      "id": "scan_1",
+      "originalName": "synthetic-mixed-bol-pod.pdf",
+      "sha256": "db1ff80da27cc8e3b3ee70617167fcbaa24939d66a03a14bbc5caaeb8a7399a6"
+    },
+    {
+      "id": "scan_2",
+      "originalName": "commercial-invoice.pdf",
+      "sha256": "a8638f5df37fbe9c5c15b52caa83e8ee45006bacdf9f258b9355e50243590ae1"
+    },
+    {
+      "id": "scan_3",
+      "originalName": "warehouse-inspection.txt",
+      "sha256": "f86b7697d8e158c9e9160c4f0827272744dab623005d47565e29634c6589739b"
+    },
+    {
+      "id": "scan_4",
+      "originalName": "piece-weights.txt",
+      "sha256": "e5c7fc521522283eeea2cdafba3f3cdf57a4593698a8319a9cda1875c4c799b9"
+    },
+    {
+      "id": "scan_5",
+      "originalName": "rate-confirmation.txt",
+      "sha256": "42b97adfd4d8c12bdcdd3371848d0499a94582511bab7c514762d3df81cd683a"
+    },
+    {
+      "id": "scan_6",
+      "originalName": "original-worksheet.txt",
+      "sha256": "a15a227081ff2a897dd5ec4ef59b2ec3c5eb2252dce183a22ed9e9a7860af133"
+    },
+    {
+      "id": "scan_7",
+      "originalName": "synthetic-piece-label.png",
+      "sha256": "c9336ebfcc51d6b12646bf047c0cfe709b46e546c8eb329f30540a3938988f76"
+    },
+    {
+      "id": "scan_8",
+      "originalName": "synthetic-damage-photo.jpg",
+      "sha256": "9b97a36e29460a7d3dbe342cf3977c9cf4e16fc8004caa7a7712ce8fcfdc34dd"
+    }
+  ],
+  "facts": [
+    {
+      "field": "carrier",
+      "value": "XPO",
+      "document_id": "scan_1",
+      "quote": "Carrier: XPO",
+      "page": 1
+    },
+    {
+      "field": "mode",
+      "value": "LTL",
+      "document_id": "scan_1",
+      "quote": "Mode: LTL",
+      "page": 1
+    },
+    {
+      "field": "originCountry",
+      "value": "US",
+      "document_id": "scan_1",
+      "quote": "Origin country: US",
+      "page": 1
+    },
+    {
+      "field": "destinationCountry",
+      "value": "US",
+      "document_id": "scan_1",
+      "quote": "Destination country: US",
+      "page": 1
+    },
+    {
+      "field": "originState",
+      "value": "OH",
+      "document_id": "scan_1",
+      "quote": "Origin state: OH",
+      "page": 1
+    },
+    {
+      "field": "destinationState",
+      "value": "VA",
+      "document_id": "scan_1",
+      "quote": "Destination state: VA",
+      "page": 1
+    },
+    {
+      "field": "shipper",
+      "value": "Foundry Lane Supply (synthetic)",
+      "document_id": "scan_1",
+      "quote": "Shipper: Foundry Lane Supply (synthetic)",
+      "page": 1
+    },
+    {
+      "field": "consignee",
+      "value": "Cedar Mill Fabrication (synthetic)",
+      "document_id": "scan_1",
+      "quote": "Consignee: Cedar Mill Fabrication (synthetic)",
+      "page": 1
+    },
+    {
+      "field": "pro",
+      "value": "SYN-XPO-1007-B4",
+      "document_id": "scan_1",
+      "quote": "PRO: SYN-XPO-1007-B4",
+      "page": 1
+    },
+    {
+      "field": "bol",
+      "value": "SYN-BOL-1005-24",
+      "document_id": "scan_1",
+      "quote": "Bill of lading: SYN-BOL-1005-24",
+      "page": 1
+    },
+    {
+      "field": "pickupDate",
+      "value": "2026-10-05",
+      "document_id": "scan_1",
+      "quote": "Pickup date: 2026-10-05",
+      "page": 1
+    },
+    {
+      "field": "deliveryDate",
+      "value": "2026-10-07",
+      "document_id": "scan_1",
+      "quote": "Delivery date: 2026-10-07",
+      "page": 2
+    },
+    {
+      "field": "totalPieces",
+      "value": 4,
+      "document_id": "scan_1",
+      "quote": "Total pieces: 4 crates",
+      "page": 1
+    },
+    {
+      "field": "totalWeightLb",
+      "value": 600,
+      "document_id": "scan_1",
+      "quote": "Total shipment weight: 600 lb",
+      "page": 1
+    },
+    {
+      "field": "invoiceNumber",
+      "value": "SYN-INV-1004-28",
+      "document_id": "scan_2",
+      "quote": "Invoice: SYN-INV-1004-28",
+      "page": 1
+    },
+    {
+      "field": "affectedPieceId",
+      "value": "B4",
+      "document_id": "scan_1",
+      "quote": "Affected piece: B4.",
+      "page": 2
+    },
+    {
+      "field": "invoiceGrossCents",
+      "value": 200000,
+      "document_id": "scan_2",
+      "quote": "B4 gross invoice value: $2,000.00.",
+      "page": 1
+    },
+    {
+      "field": "tradeDiscountBps",
+      "value": 500,
+      "document_id": "scan_2",
+      "quote": "Trade discount for B4: 5% ($100.00).",
+      "page": 1
+    },
+    {
+      "field": "allowanceCents",
+      "value": 0,
+      "document_id": "scan_2",
+      "quote": "B4 additional allowances: $0.00.",
+      "page": 1
+    },
+    {
+      "field": "salvageCents",
+      "value": 17500,
+      "document_id": "scan_3",
+      "quote": "Salvage value of retained B4 materials: $175.00.",
+      "page": 1
+    },
+    {
+      "field": "affectedWeightLb",
+      "value": 150,
+      "document_id": "scan_4",
+      "quote": "B4: 150 lb",
+      "page": 1
+    },
+    {
+      "field": "worksheetWeightLb",
+      "value": 600,
+      "document_id": "scan_6",
+      "quote": "Affected-piece weight entered in original worksheet: 600 lb (total shipment weight).",
+      "page": 1
+    },
+    {
+      "field": "worksheetDemandCents",
+      "value": 300000,
+      "document_id": "scan_6",
+      "quote": "Original worksheet calculation: 600 lb x $5.00/lb = $3,000.00.",
+      "page": 1
+    },
+    {
+      "field": "goodsCondition",
+      "value": "new",
+      "document_id": "scan_5",
+      "quote": "Goods condition: new.",
+      "page": 1
+    },
+    {
+      "field": "commodityScope",
+      "value": "ordinary",
+      "document_id": "scan_5",
+      "quote": "Commodity scope: ordinary goods. Contents are ordinary industrial steel brackets.",
+      "page": 1
+    },
+    {
+      "field": "arrangedBy",
+      "value": "shipper",
+      "document_id": "scan_5",
+      "quote": "Booking principal: shipper. Foundry Lane Supply booked directly with XPO.",
+      "page": 1
+    },
+    {
+      "field": "excessValueAgreement",
+      "value": false,
+      "document_id": "scan_5",
+      "quote": "Excess-value agreement: false.",
+      "page": 1
+    },
+    {
+      "field": "deliveryDamage",
+      "value": "visible_noted",
+      "document_id": "scan_1",
+      "quote": "Visible damage was noted jointly by driver and receiver at delivery.",
+      "page": 2
+    },
+    {
+      "field": "freightClass",
+      "value": "70",
+      "document_id": "scan_1",
+      "quote": "Freight class: 70",
+      "page": 1
+    },
+    {
+      "field": "serviceType",
+      "value": "standard_tariff",
+      "document_id": "scan_5",
+      "quote": "Service type: standard tariff shipment.",
+      "page": 1
+    }
+  ],
+  "questions": []
+}

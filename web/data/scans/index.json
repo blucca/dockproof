@@ -1,0 +1,111 @@
+{
+  "id": "dockproof-b4-scan-example",
+  "title": "Eight originals. One damaged crate. Every dollar traced.",
+  "synthetic": true,
+  "description": "Synthetic shipment records with live browser OCR and recorded NVIDIA Nemotron candidate extraction.",
+  "documents": [
+    {
+      "id": "scan_1",
+      "name": "synthetic-mixed-bol-pod.pdf",
+      "path": "synthetic-mixed-bol-pod.pdf",
+      "kind": "bill_of_lading",
+      "roles": [
+        "bill_of_lading",
+        "delivery_receipt"
+      ],
+      "sha256": "db1ff80da27cc8e3b3ee70617167fcbaa24939d66a03a14bbc5caaeb8a7399a6",
+      "ocrImages": false
+    },
+    {
+      "id": "scan_2",
+      "name": "commercial-invoice.pdf",
+      "path": "commercial-invoice.pdf",
+      "kind": "commercial_invoice",
+      "roles": [
+        "commercial_invoice"
+      ],
+      "sha256": "a8638f5df37fbe9c5c15b52caa83e8ee45006bacdf9f258b9355e50243590ae1",
+      "ocrImages": false
+    },
+    {
+      "id": "scan_3",
+      "name": "warehouse-inspection.txt",
+      "path": "warehouse-inspection.txt",
+      "kind": "inspection_record",
+      "roles": [
+        "inspection_record"
+      ],
+      "sha256": "f86b7697d8e158c9e9160c4f0827272744dab623005d47565e29634c6589739b",
+      "ocrImages": false
+    },
+    {
+      "id": "scan_4",
+      "name": "piece-weights.txt",
+      "path": "piece-weights.txt",
+      "kind": "weight_sheet",
+      "roles": [
+        "weight_sheet"
+      ],
+      "sha256": "e5c7fc521522283eeea2cdafba3f3cdf57a4593698a8319a9cda1875c4c799b9",
+      "ocrImages": false
+    },
+    {
+      "id": "scan_5",
+      "name": "rate-confirmation.txt",
+      "path": "rate-confirmation.txt",
+      "kind": "rate_confirmation",
+      "roles": [
+        "rate_confirmation"
+      ],
+      "sha256": "42b97adfd4d8c12bdcdd3371848d0499a94582511bab7c514762d3df81cd683a",
+      "ocrImages": false
+    },
+    {
+      "id": "scan_6",
+      "name": "original-worksheet.txt",
+      "path": "original-worksheet.txt",
+      "kind": "claim_worksheet",
+      "roles": [
+        "claim_worksheet"
+      ],
+      "sha256": "a15a227081ff2a897dd5ec4ef59b2ec3c5eb2252dce183a22ed9e9a7860af133",
+      "ocrImages": false
+    },
+    {
+      "id": "scan_7",
+      "name": "synthetic-piece-label.png",
+      "path": "synthetic-piece-label.png",
+      "kind": "damage_photo",
+      "roles": [
+        "damage_photo",
+        "weight_sheet"
+      ],
+      "sha256": "c9336ebfcc51d6b12646bf047c0cfe709b46e546c8eb329f30540a3938988f76",
+      "ocrImages": true
+    },
+    {
+      "id": "scan_8",
+      "name": "synthetic-damage-photo.jpg",
+      "path": "synthetic-damage-photo.jpg",
+      "kind": "damage_photo",
+      "roles": [
+        "damage_photo"
+      ],
+      "sha256": "9b97a36e29460a7d3dbe342cf3977c9cf4e16fc8004caa7a7712ce8fcfdc34dd",
+      "ocrImages": false
+    }
+  ],
+  "candidates": "candidates.json",
+  "candidateMethod": "nemotron_recorded",
+  "revision": "scan-nemotron-reviewed-v1",
+  "expected": {
+    "affectedPieceId": "B4",
+    "affectedWeightLb": 150,
+    "evidencedLossCents": 172500,
+    "referenceLimitCents": 75000,
+    "reviewedDemandCents": 75000,
+    "originals": 8,
+    "packetFiles": 22
+  },
+  "license": "MIT \u2014 original synthetic DockProof demonstration records; companies, people and shipment events are fictional."
+}

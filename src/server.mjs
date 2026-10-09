@@ -8,7 +8,7 @@ import { budgetStatus } from './budget.mjs';
 const root = fileURLToPath(new URL('../web/', import.meta.url));
 const host = process.env.HOST || '127.0.0.1';
 const port = Number(process.env.PORT || 4318);
-const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.json':'application/json', '.svg':'image/svg+xml', '.txt':'text/plain; charset=utf-8', '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.pdf':'application/pdf', '.wasm':'application/wasm', '.gz':'application/gzip' };
+const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.json':'application/json', '.svg':'image/svg+xml', '.txt':'text/plain; charset=utf-8', '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.pdf':'application/pdf', '.wasm':'application/wasm', '.gz':'application/gzip', '.mp4':'video/mp4', '.vtt':'text/vtt; charset=utf-8', '.zip':'application/zip' };
 let activeExtraction = false;
 const json = (res, status, value) => { res.writeHead(status, { 'Content-Type':'application/json', 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff' }); res.end(JSON.stringify(value)); };
 
@@ -44,7 +44,7 @@ const server = http.createServer(async (req,res) => {
       finally { activeExtraction = false; }
     }
     if (req.method !== 'GET' && req.method !== 'HEAD') return json(res,405,{error:'Use GET for this resource.'});
-    const relative = decodeURIComponent(url.pathname).replace(/^\/+/, '') || 'index.html';
+    const relative = decodeURIComponent(url.pathname.endsWith('/') ? `${url.pathname}index.html` : url.pathname).replace(/^\/+/, '');
     const target = path.resolve(root, relative);
     if (!target.startsWith(root)) return json(res,404,{error:'Resource missing.'});
     let data;

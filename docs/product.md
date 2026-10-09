@@ -12,6 +12,9 @@ or service-term assumption before it enters the completed claim.
 
 ## Complete document story
 
+The default **Scan example** loads eight synthetic originals in one click, runs local English OCR, and supplies 30 reviewed candidates from a labeled recorded NVIDIA run. Review all 27 required fields, follow the $1,725 loss / $750 demand, and download the 22-file packet with all eight originals. The [2:44 film](https://blucca.github.io/dockproof/demo/) shows a separate real-time model run through the complete document path.
+
+
 The PDF example starts with selectable-text PDFs and UTF-8 records. Its companies,
 shipment IDs, and values are original synthetic material.
 

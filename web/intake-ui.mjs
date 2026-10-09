@@ -153,11 +153,11 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
     } finally { setBusy(false); $('#document-files').value = ''; render(); }
   }
 
-  async function loadExample() {
+  async function loadExample(example = 'import-example') {
     if (busy) throw new Error('Finish the current document operation first.');
     setBusy(true);
     try {
-      const base = new URL('./data/import-example/', import.meta.url);
+      const base = new URL(example === 'scan-example' ? './data/scans/' : './data/import-example/', import.meta.url);
       const response = await fetch(new URL('index.json', base));
       if (!response.ok) throw new Error('The PDF example failed to load. Retry the example.');
       const manifest = await response.json();
@@ -165,11 +165,12 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
       state.intake = { candidates:[], questions:[], runs:[] };
       const documents = [];
       for (const entry of manifest.documents) {
-        setStatus(`Reading example PDF / text: ${entry.name}…`);
+        setStatus(`Reading example original: ${entry.name}…`);
         const fileResponse = await fetch(new URL(entry.path, base));
         if (!fileResponse.ok) throw new Error(`Example record failed to load: ${entry.path}.`);
-        const file = new File([await fileResponse.arrayBuffer()], entry.path.split('/').pop(), { type:entry.path.endsWith('.pdf') ? 'application/pdf' : 'text/plain' });
-        const doc = await readDocument(file, { id:entry.id, kind:entry.kind, synthetic:true });
+        const file = new File([await fileResponse.arrayBuffer()], entry.path.split('/').pop(), { type:entry.path.endsWith('.pdf') ? 'application/pdf' : entry.path.endsWith('.png') ? 'image/png' : /\.jpe?g$/i.test(entry.path) ? 'image/jpeg' : 'text/plain' });
+        const doc = await readDocument(file, { id:entry.id, kind:entry.kind, synthetic:true, ocrImages:entry.ocrImages === true, onProgress:progressFor(entry.name) });
+        if (entry.sha256 && doc.sha256 !== entry.sha256) throw new Error(`Example original fingerprint changed: ${entry.name}.`);
         doc.roles = entry.roles || [entry.kind];
         doc.name = entry.name || doc.name;
         await retain(doc, file);
@@ -181,7 +182,7 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
       const supplied = await candidateResponse.json();
       state.intake = {
         candidates:(supplied.facts || supplied).map(raw => normalizeCandidate({ ...raw, method:supplied.method || 'sample_curated' }, documents)),
-        questions:supplied.questions || [], runs:supplied.run ? [supplied.run] : [], method:supplied.method || 'sample_curated', exampleRevision:manifest.revision,
+        questions:supplied.questions || [], runs:supplied.run ? [supplied.run] : [], method:supplied.method || 'sample_curated', exampleRevision:manifest.revision, reviewNote:supplied.reviewNote || '',
       };
       setStatus(`${documents.length} original example records parsed here. Candidate facts come from a recorded NVIDIA Nemotron run on these exact originals.`);
       return state;
@@ -232,7 +233,7 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
 
   function unambiguous(state) {
     return FIELD_DEFINITIONS.flatMap(definition => {
-      if (selectedRef(state, definition.key)?.candidateId) return [];
+      if (definition.key === 'claimReceivedDate' || selectedRef(state, definition.key)?.candidateId) return [];
       const candidates = candidatesFor(state, definition.key);
       return candidates.length && distinctValues(candidates).size === 1 ? [candidates[0]] : [];
     });
@@ -285,6 +286,7 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
     $('#select-unambiguous').disabled = busy || !singles.length;
     const runs = state.intake?.runs || [];
     $('#candidate-origin').textContent = runs.length ? `${runs.at(-1).mode === 'recorded' ? 'Recorded NVIDIA Nemotron run on these originals' : 'Live NVIDIA Nemotron extraction'} · ${runs.at(-1).exactCitations} source-matched candidates. Review the affected piece, worksheet and original excerpts before selecting values.` : state.intake?.method === 'sample_curated' ? 'PDF example: real browser PDF parsing with curated candidate facts. The two weight candidates preserve the original source conflict.' : 'Choose “Record a sourced value” to select a fact manually. A connected local Nemotron model can propose candidates for the full document set.';
+    if (state.intake?.reviewNote) $('#candidate-origin').textContent += ` ${state.intake.reviewNote}`;
     $('#candidate-questions').innerHTML = (state.intake?.questions || []).map(question => `<div class="candidate-question"><strong>${html(definitions.get(question.field)?.label || question.field)}</strong><p>${html(question.question)}</p></div>`).join('');
     const filter = $('#fact-filter').value;
     const visible = FIELD_DEFINITIONS.filter(definition => filter === 'all' || (filter === 'conflicts' ? conflicts.includes(definition) : !selectedRef(state, definition.key)?.candidateId && (definition.required || candidatesFor(state, definition.key).length)));

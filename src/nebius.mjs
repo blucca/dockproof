@@ -51,6 +51,7 @@ For goodsCondition use new, used, or unknown. For serviceType use standard_tarif
 For commodityScope use ordinary, special, or unknown. For arrangedBy use shipper, broker, other, or unknown.
 For excessValueAgreement use the JSON boolean true or false, based on an explicit agreement or a statement of the chosen standard coverage.
 For deliveryDamage use visible_noted, visible_unnoted, concealed, none, or unknown.
+claimReceivedDate is the date the carrier acknowledged receipt of the written freight claim. Supply a candidate with an explicit claim-receipt acknowledgement and its date. A document set containing delivery, inspection, invoice or worksheet dates alone leaves this field empty, with a question requesting the carrier acknowledgement.
 For mode use LTL, FTL, parcel, other, or unknown. Country and state fields use 2-letter codes.
 Use the canonical party fields shipper and consignee. Copy identifiers faithfully.
 Each route, identity, condition, commodity, booking principal, and liability-coverage value needs its own quoted evidence. Ask for missing terms.
@@ -112,12 +113,21 @@ export function validateExtraction(result, documents) {
     throw new ExtractionError('The model response needs facts and questions arrays.', 'response_shape');
   }
   const docs = new Map(documents.map(doc => [doc.id, doc]));
-  const facts = result.facts.map(fact => {
+  const omitted = [];
+  const facts = result.facts.flatMap(fact => {
     if (!fact || !FACT_FIELDS.includes(fact.field) || typeof fact.value !== 'string'
       || typeof fact.quote !== 'string' || !fact.quote.trim()) {
       throw new ExtractionError('A candidate fact has an invalid field, value, or quote.', 'fact_shape');
     }
-    try { return normalizeCandidate({ ...fact, method: 'nemotron' }, documents); }
+    try {
+      const candidate = normalizeCandidate({ ...fact, method: 'nemotron' }, documents);
+      if (fact.field === 'claimReceivedDate' && !(/\b(?:claim|demand)\b/i.test(fact.quote)
+        && /\b(?:received|receipt|acknowledg(?:ed|ement|ment|es))\b/i.test(fact.quote))) {
+        omitted.push({ field:fact.field, document_id:fact.document_id, reason:'Carrier claim-receipt wording required in the source excerpt.' });
+        return [];
+      }
+      return [candidate];
+    }
     catch (error) { throw new ExtractionError(error.message, error.code || 'fact_shape'); }
   });
   const questions = result.questions.map(question => {
@@ -127,11 +137,19 @@ export function validateExtraction(result, documents) {
     }
     return { field: question.field, question: question.question, document_ids: question.document_ids };
   });
-  return { facts, questions };
+  if (omitted.length && !facts.some(fact => fact.field === 'claimReceivedDate')
+    && !questions.some(question => question.field === 'claimReceivedDate')) {
+    questions.push({ field:'claimReceivedDate', question:'Add the carrier’s written acknowledgement showing when it received this freight claim. Filing remains awaiting submission.', document_ids:[] });
+  }
+  return { facts, questions, ...(omitted.length ? { omitted } : {}) };
 }
 
 export async function extractFacts(documents, options = {}) {
   const prepared = validateDocuments(documents);
+  const schema = structuredClone(EXTRACTION_SCHEMA);
+  for (const entry of Object.values(schema.properties.fields.properties)) {
+    entry.properties.candidates.items.properties.document_id = { type:'string', enum:prepared.map(doc => doc.id) };
+  }
   const apiKey = options.apiKey ?? process.env.NEBIUS_API_KEY;
   if (!apiKey) throw new ExtractionError('Configure NEBIUS_API_KEY on the local server to run live extraction.', 'provider_setup', 503);
   const model = options.model || process.env.NEBIUS_MODEL || DEFAULT_MODEL;
@@ -143,7 +161,7 @@ export async function extractFacts(documents, options = {}) {
       { role: 'user', content: JSON.stringify({ documents: prepared }) },
     ],
     temperature: 0.6, top_p: 0.95, repetition_penalty: 1.05, max_tokens: MAX_OUTPUT_TOKENS, reasoning_effort: 'low',
-    response_format: { type: 'json_schema', json_schema: { name: 'dockproof_evidence', strict: true, schema: EXTRACTION_SCHEMA } },
+    response_format: { type: 'json_schema', json_schema: { name: 'dockproof_evidence', strict: true, schema } },
   };
   const reservation = (options.reserveBudget || reserveBudget)({ model, request, file: options.budgetFile });
   const started = performance.now(); const startedAt = new Date().toISOString();

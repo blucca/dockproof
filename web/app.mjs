@@ -14,8 +14,8 @@ const storageKey = `dockproof.case.v2.${POLICY_VERSION}`;
 const sample = await fetch(new URL('./data/sample-case.json',import.meta.url)).then(response => {
   if(!response.ok) throw new Error('The example document set failed to load.'); return response.json();
 });
-const slots={walkthrough:structuredClone(sample),own:null,'import-example':null};
-let mode='walkthrough';
+const slots={walkthrough:structuredClone(sample),own:null,'import-example':null,'scan-example':null};
+let mode='scan-example';
 try {
   for(const key of Object.keys(slots)) {
     const saved=JSON.parse(localStorage.getItem(`${storageKey}.${key}`)||'null');
@@ -24,7 +24,7 @@ try {
   const last=localStorage.getItem('dockproof.active-workspace');
   if(slots[last])mode=last;
 } catch { $('#save-state').textContent='Browser session'; }
-let state=slots[mode];let selectedId=mode==='walkthrough'?'claim_worksheet':state.documents[0]?.id;let selectedLine=mode==='walkthrough'?4:1;let selectedPage=1;let activeTab=mode==='walkthrough'?'desk':'intake';let evaluation;let toastTimer;let intake;
+let state=slots[mode] || createEmptyCase({id:'dockproof-scan-loading',title:'Loading eight synthetic originals with local OCR…',synthetic:true});let selectedId=mode==='walkthrough'?'claim_worksheet':state.documents[0]?.id;let selectedLine=mode==='walkthrough'?4:1;let selectedPage=1;let activeTab=mode==='walkthrough'?'desk':'intake';let evaluation;let toastTimer;let intake;
 
 const documentNames = {
   bill_of_lading:['Bill of lading','Shipment · class 70'],
@@ -72,9 +72,9 @@ async function changeCase(nextMode,{fresh=false}={}) {
   if(intake?.busy){notify('Finish the current document operation, then switch workspaces.');return;}
   save();
   try {
-    if(nextMode==='import-example' && (!slots[nextMode]||fresh)) {
-      notify('Reading the original PDF example in this browser…');
-      slots[nextMode]=await intake.loadExample();
+    if(['import-example','scan-example'].includes(nextMode) && (!slots[nextMode]?.intake?.exampleRevision||fresh)) {
+      notify(nextMode==='scan-example'?'Loading eight originals and running English OCR in this browser…':'Reading the original PDF example in this browser…');
+      slots[nextMode]=await intake.loadExample(nextMode);
     }
     if(nextMode==='own' && (!slots.own||fresh)) slots.own=createEmptyCase({id:`dockproof-own-${crypto.randomUUID()}`,title:'My freight claim'});
     if(nextMode==='walkthrough' && fresh)slots.walkthrough=structuredClone(sample);
@@ -192,13 +192,15 @@ function renderRules() {
 
 function render() {
   evaluation=evaluateCase(state,{today:today()});
-  $('#case-label').textContent=`${mode==='own'?'MY CLAIM':mode==='import-example'?'PDF EXAMPLE':'GUIDED EXAMPLE'} / ${state.shipment.pro||'SOURCE SELECTION IN PROGRESS'}`;
+  $('#case-label').textContent=`${mode==='own'?'MY CLAIM':mode==='scan-example'?'SCAN EXAMPLE':mode==='import-example'?'PDF EXAMPLE':'GUIDED EXAMPLE'} / ${state.shipment.pro||'SOURCE SELECTION IN PROGRESS'}`;
   $('#case-title').textContent=mode==='walkthrough'?'C3 · Visible damage at delivery':state.facts.affectedPieceId?`${state.facts.affectedPieceId} · Source-linked claim review`:state.title;
-  $('#reset-case').textContent=mode==='own'?'Start new claim':mode==='import-example'?'Reload PDF example ↺':'Reset example ↺';
+  $('#reset-case').textContent=mode==='own'?'Start new claim':mode==='scan-example'?'Reload scan example ↺':mode==='import-example'?'Reload PDF example ↺':'Reset example ↺';
   $('#workspace-method').textContent=mode==='walkthrough'?'Curated example · deterministic audit':'Selected facts · deterministic audit · local originals';
   $('#workspace-origin').textContent=state.synthetic?'Synthetic shipment and records · USD':'Your imported records · USD';
   $('#tab-intake').hidden=mode==='walkthrough';
   for(const button of document.querySelectorAll('.case-switcher [data-case]'))button.setAttribute('aria-pressed',String(button.dataset.case===mode));
+  $('#example-instructions').hidden=!['scan-example','import-example'].includes(mode);
+  $('#example-instructions').textContent=mode==='scan-example'?'TRY IT: Inspect the scanned delivery page and B4’s 150 lb source. Select the sourced fields, review the $750 demand, and download all eight originals with the calculation. Synthetic records · browser OCR · recorded NVIDIA extraction.':'TRY IT: Inspect the source excerpts, select the sourced fields, review the $750 demand, and download the six-original packet. Synthetic records · browser PDF parsing · recorded NVIDIA extraction.';
   renderOverview();renderDocuments();renderQuestions();renderEvidence();renderCalculation();renderReview();renderPacket();renderRules();
   if(mode!=='walkthrough')intake?.render();
 }
@@ -260,3 +262,4 @@ for(const tab of ['intake','desk','packet','rules']) {
 }
 const linkedCase=new URLSearchParams(location.search).get('case');
 if(linkedCase&&Object.hasOwn(slots,linkedCase))changeCase(linkedCase);
+else if(mode==='scan-example'&&!state.intake?.exampleRevision)changeCase('scan-example');

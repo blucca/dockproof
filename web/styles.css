@@ -11,3 +11,8 @@
 @media print{.site-header,.intro,.case-switcher,.case-bar,.overview,.steps,.workspace-tabs,.workspace-footer,.under-desk,.site-footer,.packet-side,.toast{display:none!important}main{max-width:none;padding:0}.workspace{border:0;box-shadow:none}.tab-panel{display:none!important}#panel-packet{display:block!important}.packet-layout{display:block;padding:0}.packet-paper{border:0;box-shadow:none;padding:0}.packet-paper pre{color:black}.packet-paper .paper-label{color:black}}
 
 .original-photo{padding:16px;background:#eef2e8;border-bottom:1px solid var(--line)}.original-photo img{display:block;max-width:100%;max-height:480px;object-fit:contain;margin:auto;border-radius:4px}.original-photo p{font-size:10px;line-height:1.7;color:var(--muted);margin:10px 0 0}.record-meta{line-height:1.65}
+
+/* The example explains the complete review path before its source fields. */
+.example-instructions{margin:0;padding:14px 24px;background:#f5f7ee;border-bottom:1px solid var(--line);font-size:12px;line-height:1.7;color:var(--green)}
+.case-switcher{flex-wrap:wrap}.intro-actions a.button{text-decoration:none;display:inline-flex;align-items:center}
+@media(max-width:760px){.example-instructions{padding:13px 16px;font-size:11px}.case-switcher button{padding:8px;font-size:10px}}

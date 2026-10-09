@@ -2,13 +2,24 @@
 
 **Every claim dollar, traced.**
 
-[Try the PDF case](https://blucca.github.io/dockproof/?case=import-example) · [Bring your documents](https://blucca.github.io/dockproof/?case=own) · [Rule sources](docs/sources.md)
+[Watch the 2:44 demo](https://blucca.github.io/dockproof/demo/) · [Try the scan case](https://blucca.github.io/dockproof/?case=scan-example) · [Watch the demo](https://blucca.github.io/dockproof/demo/) · [PDF case](https://blucca.github.io/dockproof/?case=import-example) · [Bring your documents](https://blucca.github.io/dockproof/?case=own) · [Rule sources](docs/sources.md)
 
 One damaged shipping piece. An invoice, a delivery receipt, and a worksheet using the whole shipment's weight.
 
 DockProof brings those records to one desk: **read the source, resolve conflicting facts, reconcile the amount, and hand over a shipper-reviewed packet with the original files.**
 
-## Try the complete document path
+## Try the scan-to-packet path
+
+Open the **Scan example**. Its eight synthetic originals load with their record roles assigned. PDF parsing, English OCR of the delivery scan and printed label, fact selection, calculation and ZIP creation all run in your browser.
+
+1. Inspect the scanned delivery page and B4’s **150 lb** packing record alongside the inherited **600 lb / $3,000** worksheet.
+2. Review the source excerpts and choose **Select single-value fields**. The example offers **30 source-matched candidates** from a real, recorded Nebius-hosted **NVIDIA Nemotron Super** run. One additional source-run candidate was omitted after semantic review: an inspection date had been assigned to carrier claim receipt.
+3. Open **See the calculation**: **$2,000 − $100 discount − $175 retained salvage = $1,725** evidenced loss; the documented class-70 reference is **150 lb × $5/lb = $750**. The proposed demand is **$750**.
+4. Review the evidence snapshot, approve the example packet, and download the **22-file ZIP**, including all **eight original files**, source/OCR text, the calculation and SHA-256 manifest. Carrier submission is the next recorded event.
+
+This complete public example uses recorded model candidates and live browser processing. **My claim** accepts your own records; live NVIDIA extraction connects through the local Node server described below. Each example and personal claim has its own browser-local saved workspace.
+
+## Try the PDF document path
 
 The **PDF example** reads six original synthetic records in your browser, including a two-page bill of lading / delivery receipt and a PDF invoice. Its **32 candidate facts** come from a recorded, successful **NVIDIA Nemotron Super** run on those same files; the page labels their recorded origin.
 
@@ -19,7 +30,7 @@ The **PDF example** reads six original synthetic records in your browser, includ
 5. Review the **$750** class-70 reference limit and proposed demand.
 6. Download the **18-file packet**, including all six originals, source-text copies, valuation, references, and a SHA-256 original-file manifest.
 
-The original **Guided example** explores a separate C3 claim: a $5,000 worksheet, $880 supported demand, missing-record requests, and a $200 spot-quote branch. Each example and **My claim** has its own browser-local saved workspace.
+The supplementary **Guided example** explores a separate C3 claim: a $5,000 worksheet, $880 supported demand, missing-record requests, and a $200 spot-quote branch. Each example and **My claim** has its own browser-local saved workspace.
 
 ![DockProof's evidence-linked claim workspace](web/preview.png)
 
@@ -93,11 +104,12 @@ Special commodities, used goods, broker terms, purchased excess-value agreements
 
 The filing deadline uses delivery plus **nine calendar months** and tracks **carrier receipt**. Export prepares the filing packet. Receipt and payment are subsequent events recorded from their own evidence. [See the official source mapping](docs/sources.md).
 
-Both public examples contain conspicuously synthetic companies, shipment identifiers, records, and values. **My claim** begins with an empty evidence and fact set.
+All public examples contain conspicuously synthetic companies, shipment identifiers, records, and values. **My claim** begins with an empty evidence and fact set.
 
 ## Architecture
 
 ```text
+web/data/scans/               Eight originals + reviewed recorded NVIDIA candidates
 web/data/import-example/      Original PDF/text example + recorded NVIDIA candidates
 web/data/sample-case.json     Guided missing-evidence example
 web/core/document-intake.mjs  PDF/photo/text reading, pages, hashes, original storage

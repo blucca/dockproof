@@ -1,0 +1,80 @@
+WEBVTT
+
+00:00:00.550 --> 00:00:08.241
+A damaged shipment leaves a small shipping team with scattered records and a costly question: how much should we claim?
+
+00:00:08.241 --> 00:00:14.241
+This worksheet uses all six hundred pounds and asks for three thousand dollars.
+
+00:00:14.241 --> 00:00:19.463
+DockProof traces the amount for one damaged crate, B4.
+
+00:00:21.430 --> 00:00:31.649
+I bring eight synthetic evidence files to the desk: a mixed PDF, an invoice, warehouse records, a printed label, and a damage photo.
+
+00:00:31.649 --> 00:00:36.593
+Local English OCR reads the scanned delivery page and label.
+
+00:00:36.593 --> 00:00:42.080
+Original files stay in the browser, alongside their extracted text.
+
+00:00:44.038 --> 00:00:47.257
+Now, Extract with Nemotron.
+
+00:00:47.257 --> 00:00:53.299
+This is a real NVIDIA Nemotron Super request on Nebius Token Factory.
+
+00:00:53.299 --> 00:00:59.826
+The model reads the document text and proposes typed values with exact source excerpts.
+
+00:00:59.826 --> 00:01:06.090
+DockProof locates those excerpts for review, including the scanned delivery date.
+
+00:01:08.062 --> 00:01:13.128
+The reviewer checks the source before accepting each selected fact.
+
+00:01:13.128 --> 00:01:18.128
+The original worksheet carries six hundred pounds for the whole shipment.
+
+00:01:18.128 --> 00:01:22.656
+B4's own record supports one hundred fifty pounds.
+
+00:01:22.656 --> 00:01:25.475
+Both sources stay available.
+
+00:01:25.475 --> 00:01:32.156
+The affected piece, the original worksheet, and the chosen amount each keep their own evidence.
+
+00:01:34.126 --> 00:01:37.512
+The calculation follows that evidence.
+
+00:01:37.512 --> 00:01:48.873
+Two thousand dollars in goods, less a hundred-dollar discount and one hundred seventy-five dollars in retained salvage, gives seventeen hundred twenty-five dollars in loss.
+
+00:01:48.873 --> 00:01:55.956
+The selected class-seventy terms give a seven-hundred-fifty-dollar reference limit and proposed demand.
+
+00:01:57.910 --> 00:02:03.448
+After reviewing the sources and terms, I approve this evidence snapshot.
+
+00:02:03.448 --> 00:02:12.171
+DockProof prepares the claim letter, valuation, rule references, and all eight original files with their fingerprints.
+
+00:02:12.171 --> 00:02:17.462
+The shipper can download the packet and use the carrier's filing process.
+
+00:02:17.462 --> 00:02:21.240
+Carrier receipt is a separate recorded event.
+
+00:02:23.206 --> 00:02:26.508
+Try the same scan case in your browser.
+
+00:02:26.508 --> 00:02:35.272
+It runs local OCR and loads clearly labeled results from a recorded NVIDIA request, ready for your own review.
+
+00:02:35.272 --> 00:02:38.550
+The application and source are public.
+
+00:02:38.550 --> 00:02:42.258
+DockProof: every claim dollar, traced.
+

@@ -22,6 +22,7 @@ test('structured extraction sends the NVIDIA model and preserves exact evidence 
   assert.match(sent.url, /tokenfactory.*chat\/completions$/);
   assert.equal(sent.model,'nvidia/nemotron-3-super-120b-a12b');
   assert.equal(sent.response_format.json_schema.strict,true);
+  assert.deepEqual(sent.response_format.json_schema.schema.properties.fields.properties.affectedWeightLb.properties.candidates.items.properties.document_id.enum, ['weight']);
   assert.equal(result.extraction.facts[0].citation.start,0);
   assert.equal(result.execution.exactCitations,1);
 });
@@ -73,4 +74,17 @@ test('bounded field slots retain typed values and exact source quotes', () => {
   assert.deepEqual(result.questions,[]);
   const repeated = {fields:{affectedWeightLb:{...raw.fields.affectedWeightLb,candidates:Array(4).fill(raw.fields.affectedWeightLb.candidates[0])}}};
   assert.throws(() => validateExtraction(repeated,documents),{code:'response_shape'});
+});
+
+test('carrier claim receipt candidates require an explicit receipt acknowledgement', () => {
+  const docs = [{ id:'inspection', text:'Inspection date: 2026-10-08' },
+    { id:'ack', text:'XPO received this freight claim on 2026-10-09.' }];
+  const fact = { field:'claimReceivedDate', value:'2026-10-08', document_id:'inspection', quote:docs[0].text };
+  const inspection = validateExtraction({ facts:[fact], questions:[] }, docs);
+  assert.equal(inspection.facts.length, 0);
+  assert.equal(inspection.omitted[0].field, 'claimReceivedDate');
+  assert.equal(inspection.questions[0].field, 'claimReceivedDate');
+  const acknowledgement = validateExtraction({ facts:[{ ...fact, value:'2026-10-09', document_id:'ack', quote:docs[1].text }], questions:[] }, docs);
+  assert.equal(acknowledgement.facts[0].value, '2026-10-09');
+  assert.equal(acknowledgement.questions.length, 0);
 });
