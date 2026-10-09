@@ -8,6 +8,8 @@ One damaged shipping piece. An invoice, a delivery receipt, and a worksheet usin
 
 DockProof brings those records to one desk: **read the source, resolve conflicting facts, reconcile the amount, and hand over a shipper-reviewed packet with the original files.**
 
+**Have a claim to work through?** [The $99 one-shipment review](https://blucca.github.io/dockproof/review/) offers a source-linked amount worksheet, specific missing-record requests and a packet for your team to approve and file. The offer page includes a complete synthetic sample packet and the current shipment scope.
+
 ## Try the scan-to-packet path
 
 Open the **Scan example**. Its eight synthetic originals load with their record roles assigned. PDF parsing, English OCR of the delivery scan and printed label, fact selection, calculation and ZIP creation all run in your browser.
