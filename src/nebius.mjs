@@ -1,4 +1,5 @@
 import { FIELD_DEFINITIONS, normalizeCandidate } from '../web/core/fact-review.mjs';
+import { SUPPORTED_CLASSES } from '../web/core/case-engine.mjs';
 import { reserveBudget } from './budget.mjs';
 
 export const DEFAULT_MODEL = 'nvidia/nemotron-3-super-120b-a12b';
@@ -8,6 +9,7 @@ export const MAX_OUTPUT_TOKENS = 12000;
 export const FACT_FIELDS = FIELD_DEFINITIONS.map(field => field.key);
 
 function valueSchema(field) {
+  if (field.key === 'freightClass') return { type:'string', enum:SUPPORTED_CLASSES };
   if (field.type === 'enum') return { type:'string', enum:field.options };
   if (field.type === 'integer' || field.type === 'number') return { type:field.type, minimum:0 };
   if (field.type === 'boolean') return { type:'boolean' };
@@ -47,6 +49,7 @@ OCR-derived text is labeled by its extraction method. Copy its characters faithf
 Preserve conflicting values as separate candidates under their field and ask a specific question.
 Extract the value of the affected item or crate; identify the shipment's total weight separately.
 Use numeric JSON values for cents, basis points, pounds and counts: $2,000 becomes 200000 cents; 5% becomes 500 basis points; 150 lb becomes 150. Dates use YYYY-MM-DD.
+For freightClass copy the actual class number from the source as one supported string value, such as "70" or "77.5". Its exact quote must contain that standalone class number. Leave candidates empty and request the original class record when this evidence is missing.
 For goodsCondition use new, used, or unknown. For serviceType use standard_tariff, spot_quote, or unknown.
 For commodityScope use ordinary, special, or unknown. For arrangedBy use shipper, broker, other, or unknown.
 For excessValueAgreement use the JSON boolean true or false, based on an explicit agreement or a statement of the chosen standard coverage.
@@ -121,6 +124,12 @@ export function validateExtraction(result, documents) {
     }
     try {
       const candidate = normalizeCandidate({ ...fact, method: 'nemotron' }, documents);
+      if (fact.field === 'freightClass' && (!SUPPORTED_CLASSES.includes(candidate.value)
+        || !(fact.quote.match(/(?<![\w.])\d+(?:\.\d+)?(?!\w|\.\d)/g) || []).includes(candidate.value))) {
+        omitted.push({ field:fact.field, document_id:fact.document_id, value:candidate.value,
+          reason:'Freight class requires a supported number present in the exact source excerpt.' });
+        return [];
+      }
       if (fact.field === 'claimReceivedDate' && !(/\b(?:claim|demand)\b/i.test(fact.quote)
         && /\b(?:received|receipt|acknowledg(?:ed|ement|ment|es))\b/i.test(fact.quote))) {
         omitted.push({ field:fact.field, document_id:fact.document_id, reason:'Carrier claim-receipt wording required in the source excerpt.' });
@@ -137,9 +146,15 @@ export function validateExtraction(result, documents) {
     }
     return { field: question.field, question: question.question, document_ids: question.document_ids };
   });
-  if (omitted.length && !facts.some(fact => fact.field === 'claimReceivedDate')
+  if (omitted.some(item => item.field === 'claimReceivedDate') && !facts.some(fact => fact.field === 'claimReceivedDate')
     && !questions.some(question => question.field === 'claimReceivedDate')) {
     questions.push({ field:'claimReceivedDate', question:'Add the carrier’s written acknowledgement showing when it received this freight claim. Filing remains awaiting submission.', document_ids:[] });
+  }
+  if (omitted.some(item => item.field === 'freightClass') && !facts.some(fact => fact.field === 'freightClass')) {
+    const guidance = 'Open the original bill of lading or booking record and use Record a sourced value to select its actual freight class, with the exact excerpt containing that class number.';
+    const existing = questions.find(question => question.field === 'freightClass');
+    if (existing) existing.question += ' ' + guidance;
+    else questions.push({ field:'freightClass', question:guidance, document_ids:[] });
   }
   return { facts, questions, ...(omitted.length ? { omitted } : {}) };
 }

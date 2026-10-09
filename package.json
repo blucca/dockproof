@@ -1,6 +1,6 @@
 {
   "name": "dockproof",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "description": "An evidence-linked freight claim desk for small shipping teams.",

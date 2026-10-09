@@ -42,3 +42,13 @@ The recorded live film request processed eight original synthetic files, sent se
 The preceding successful request returned 31 candidates and left the explicit zero allowance as an open question, covering 26 of 27 required fields. The application keeps that field open for a source-linked manual selection. This observation accompanies the full-coverage film run. Reviewer selection establishes field meaning; the quote matcher establishes the exact source location.
 
 The one-click hosted scan case uses a separate v0.3 request: 31 source-matched candidates, with the inspection-date-to-claim-receipt assignment removed during semantic review. Its **30 published candidates** cover all 27 required fields. The interface labels the recorded origin and the single omitted candidate.
+
+## v0.5 hosted review: freight-class value validation
+
+An October 10 hosted judge run returned HTTP 200 and **32 source-matched candidates in 8.397 seconds**. Its freight-class candidate contained the value `, no quotes found, maybe missing` with the exact source quote `Freight class: 70`. After selection of all 27 required fields, the deterministic scope engine **stopped packet approval** because the selected class was outside its supported table.
+
+The extraction schema now uses the engine's shared `SUPPORTED_CLASSES` string enum. Runtime validation also requires the selected class to appear as a standalone number in its exact source quotation. A failed class candidate moves to `omitted`; other valid candidates remain available, and a focused question directs the reviewer to select the class from the original bill of lading or booking record with **Record a sourced value**. Citation errors and invalid candidates in other fields retain their existing extraction-stop behavior.
+
+The reviewer continued the same hosted run by recording class **70** from the exact original excerpt `Freight class: 70`. The corrected selection enabled **$750 approval and a 22-file packet containing all eight originals**, each matching its imported SHA-256. The earlier model value remains in selection history. The entered reviewer name or role, approval and live-run state persisted through a same-browser refresh; the 390 px layout and page-error check also passed.
+
+After deployment and service restart, a single live API recheck of the updated adapter returned **HTTP 200 in 7.535 seconds**, **30 valid candidates**, class **70** from `Freight class: 70`, **zero omissions** and all **27 required fields**. Deterministic evaluation yielded **canConfirm=true, a $750 demand and zero blocking issues**. This recheck exercised the deployed adapter API; full public-browser packet acceptance came from the preceding 8.397-second run with its documented manual correction.

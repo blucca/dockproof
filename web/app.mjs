@@ -11,6 +11,8 @@ const date = value => new Date(value+'T12:00:00Z').toLocaleDateString('en-US',{m
 const number = value => new Intl.NumberFormat('en-US').format(value);
 const today = () => new Date().toISOString().slice(0,10);
 const storageKey = `dockproof.case.v2.${POLICY_VERSION}`;
+const liveExample = Boolean(document.querySelector('meta[name="dockproof-api"]')) && new URLSearchParams(location.search).get('live') === '1';
+const slotKey = key => `${storageKey}.${key}${liveExample && key === 'scan-example' ? '.live' : ''}`;
 const sample = await fetch(new URL('./data/sample-case.json',import.meta.url)).then(response => {
   if(!response.ok) throw new Error('The example document set failed to load.'); return response.json();
 });
@@ -18,7 +20,7 @@ const slots={walkthrough:structuredClone(sample),own:null,'import-example':null,
 let mode='scan-example';
 try {
   for(const key of Object.keys(slots)) {
-    const saved=JSON.parse(localStorage.getItem(`${storageKey}.${key}`)||'null');
+    const saved=JSON.parse(localStorage.getItem(slotKey(key))||'null');
     if(saved?.id && Array.isArray(saved.documents)) { evaluateCase(saved); slots[key]=saved; }
   }
   const last=localStorage.getItem('dockproof.active-workspace');
@@ -55,7 +57,7 @@ function notify(message) {
 }
 function save() {
   slots[mode]=state;
-  try {localStorage.setItem(`${storageKey}.${mode}`,JSON.stringify(state));localStorage.setItem('dockproof.active-workspace',mode); $('#save-state').textContent='Saved in this browser';}
+  try {localStorage.setItem(slotKey(mode),JSON.stringify(state));localStorage.setItem('dockproof.active-workspace',mode); $('#save-state').textContent='Saved in this browser';}
   catch {$('#save-state').textContent='Current session';}
 }
 function commit(next) {state=next;save();render();}
@@ -74,7 +76,7 @@ async function changeCase(nextMode,{fresh=false}={}) {
   try {
     if(['import-example','scan-example'].includes(nextMode) && (!slots[nextMode]?.intake?.exampleRevision||fresh)) {
       notify(nextMode==='scan-example'?'Loading eight originals and running English OCR in this browser…':'Reading the original PDF example in this browser…');
-      slots[nextMode]=await intake.loadExample(nextMode);
+      slots[nextMode]=await intake.loadExample(nextMode,{live:liveExample && nextMode==='scan-example'});
     }
     if(nextMode==='own' && (!slots.own||fresh)) slots.own=createEmptyCase({id:`dockproof-own-${crypto.randomUUID()}`,title:'My freight claim'});
     if(nextMode==='walkthrough' && fresh)slots.walkthrough=structuredClone(sample);
@@ -166,10 +168,10 @@ function renderCalculation() {
 
 function renderReview() {
   if(evaluation.reviewValid) {
-    $('#review').innerHTML=`<div class="review-area"><div class="reviewed-mark"><span class="check-icon" aria-hidden="true">✓</span> Current evidence reviewed</div><p>${money(evaluation.draftDemandCents)} is the selected demand. The packet preserves the original records and the complete calculation.</p><button class="button primary" data-tab="packet">Open claim packet →</button><button class="button-plain" data-action="reset_review">Reopen review</button></div>`;
+    $('#review').innerHTML=`<div class="review-area"><div class="reviewed-mark"><span class="check-icon" aria-hidden="true">✓</span> Current evidence reviewed</div><p>${money(evaluation.draftDemandCents)} is the selected demand. Reviewed by ${html(state.decisions.review.reviewer)}. The packet preserves the original records and the complete calculation.</p><button class="button primary" data-tab="packet">Open claim packet →</button><button class="button-plain" data-action="reset_review">Reopen review</button></div>`;
     return;
   }
-  $('#review').innerHTML=`<div class="review-area"><h4>Shipper’s review</h4><p>${evaluation.canConfirm?`Review the ${money(evaluation.actualLossCents)} actual loss, ${money(evaluation.referenceLimitCents)} reference limit, and selected booking terms.`:'Complete the evidence requests and source selections to review a supported, specific amount.'}</p><label class="review-check"><input id="review-check" type="checkbox" ${evaluation.canConfirm?'':'disabled'}><span>I reviewed the evidence, terms, and ${evaluation.canConfirm?money(evaluation.draftDemandCents):'proposed'} demand.</span></label><button class="button primary" id="confirm-review" data-action="confirm_review" disabled>Approve ${evaluation.canConfirm?money(evaluation.draftDemandCents):'the'} ${state.synthetic?'example ':''}packet</button></div>`;
+  $('#review').innerHTML=`<div class="review-area"><h4>Shipper’s review</h4><p>${evaluation.canConfirm?`Review the ${money(evaluation.actualLossCents)} actual loss, ${money(evaluation.referenceLimitCents)} reference limit, and selected booking terms.`:'Complete the evidence requests and source selections to review a supported, specific amount.'}</p><label class="scenario-label" for="reviewer-name">Reviewer name or role</label><input id="reviewer-name" maxlength="80" value="${state.synthetic?'Example shipper reviewer':''}" placeholder="Name or role for this review" ${evaluation.canConfirm?'':'disabled'}><label class="review-check"><input id="review-check" type="checkbox" ${evaluation.canConfirm?'':'disabled'}><span>I reviewed the evidence, terms, and ${evaluation.canConfirm?money(evaluation.draftDemandCents):'proposed'} demand.</span></label><button class="button primary" id="confirm-review" data-action="confirm_review" disabled>Approve ${evaluation.canConfirm?money(evaluation.draftDemandCents):'the'} ${state.synthetic?'example ':''}packet</button></div>`;
 }
 
 function draftLetter() {
@@ -201,6 +203,7 @@ function render() {
   for(const button of document.querySelectorAll('.case-switcher [data-case]'))button.setAttribute('aria-pressed',String(button.dataset.case===mode));
   $('#example-instructions').hidden=!['scan-example','import-example'].includes(mode);
   $('#example-instructions').textContent=mode==='scan-example'?'TRY IT: Inspect the scanned delivery page and B4’s 150 lb source. Select the sourced fields, review the $750 demand, and download all eight originals with the calculation. Synthetic records · browser OCR · recorded NVIDIA extraction.':'TRY IT: Inspect the source excerpts, select the sourced fields, review the $750 demand, and download the six-original packet. Synthetic records · browser PDF parsing · recorded NVIDIA extraction.';
+  if(mode==='scan-example' && state.intake?.liveExample) $('#example-instructions').textContent='LIVE TRY-OUT: Eight synthetic originals load with local OCR and their record roles. Choose Extract with Nemotron, review its source-matched candidates, then approve and download your packet. This workspace starts with an empty candidate list.';
   renderOverview();renderDocuments();renderQuestions();renderEvidence();renderCalculation();renderReview();renderPacket();renderRules();
   if(mode!=='walkthrough')intake?.render();
 }
@@ -231,7 +234,7 @@ document.addEventListener('click',async event=>{
   if(element.dataset.request) {
     currentRequest=requests[element.dataset.request];$('#request-title').textContent=currentRequest.title;$('#request-body').textContent=currentRequest.text();$('#request-dialog').showModal();return;
   }
-  if(element.dataset.action) {act(element.dataset.action);return;}
+  if(element.dataset.action) {act(element.dataset.action,element.dataset.action==='confirm_review'?{reviewer:$('#reviewer-name').value.trim()}:{});return;}
   if(element.id==='reset-case') {if(intake.busy){notify('Finish the current document operation first.');return;}if(mode==='own')$('#reset-dialog').showModal();else await changeCase(mode,{fresh:true});}
   if(element.id==='confirm-reset-own') {
     if(intake.busy){notify('Finish the current document operation first.');return;}
@@ -250,8 +253,11 @@ document.addEventListener('click',async event=>{
   if(element.id==='print-packet') {switchTab('packet');window.print();}
 });
 document.addEventListener('change',event=>{
-  if(event.target.id==='review-check') $('#confirm-review').disabled=!event.target.checked||!evaluation.canConfirm;
+  if(event.target.id==='review-check') $('#confirm-review').disabled=!event.target.checked||!evaluation.canConfirm||!$('#reviewer-name').value.trim();
   if(event.target.id==='service-scenario') {selectedId='rate_confirmation';selectedLine=3;act('set_service',{service:event.target.value});}
+});
+document.addEventListener('input',event=>{
+  if(event.target.id==='reviewer-name') $('#confirm-review').disabled=!$('#review-check').checked||!evaluation.canConfirm||!event.target.value.trim();
 });
 
 intake=createIntakeUI({getState:()=>state,commit,notify,openDocument});

@@ -2,7 +2,7 @@
 
 **Every claim dollar, traced.**
 
-[Watch the 2:44 demo](https://blucca.github.io/dockproof/demo/) · [Try the scan case](https://blucca.github.io/dockproof/?case=scan-example) · [Watch the demo](https://blucca.github.io/dockproof/demo/) · [PDF case](https://blucca.github.io/dockproof/?case=import-example) · [Bring your documents](https://blucca.github.io/dockproof/?case=own) · [Rule sources](docs/sources.md)
+[Watch the 2:44 demo](https://youtu.be/PxcxiehxLzY) · [Try the scan case](https://blucca.github.io/dockproof/?case=scan-example) · [Live evaluation](https://blucca.github.io/dockproof/judge/) · [Bring your documents](https://blucca.github.io/dockproof/?case=own) · [Rule sources](docs/sources.md)
 
 One damaged shipping piece. An invoice, a delivery receipt, and a worksheet using the whole shipment's weight.
 
@@ -17,7 +17,18 @@ Open the **Scan example**. Its eight synthetic originals load with their record 
 3. Open **See the calculation**: **$2,000 − $100 discount − $175 retained salvage = $1,725** evidenced loss; the documented class-70 reference is **150 lb × $5/lb = $750**. The proposed demand is **$750**.
 4. Review the evidence snapshot, approve the example packet, and download the **22-file ZIP**, including all **eight original files**, source/OCR text, the calculation and SHA-256 manifest. Carrier submission is the next recorded event.
 
-This complete public example uses recorded model candidates and live browser processing. **My claim** accepts your own records; live NVIDIA extraction connects through the local Node server described below. Each example and personal claim has its own browser-local saved workspace.
+This complete public example uses recorded model candidates and live browser processing. **My claim** accepts your own records; live NVIDIA extraction connects through the hosted evaluation build or the local Node server described below. Each example and personal claim has its own browser-local saved workspace.
+
+## Run the full live evaluation
+
+Open [Live evaluation](https://blucca.github.io/dockproof/judge/) and enter the access code in the Devpost testing instructions. The complete workflow is free for the sponsor, administrator and judges through **December 15, 2026, 12:00 PM Pacific**.
+
+- **Open the live scan case** loads the eight original synthetic records, assigns their roles and runs local OCR. It starts with **zero model candidates** in a separate saved workspace. Choose **Extract with Nemotron** for a fresh NVIDIA run.
+- Review the returned sources and select the supported values. A missing or disputed field has a **Record a sourced value** action for its original excerpt.
+- Enter a **reviewer name or role**, approve the evidence snapshot, and download the complete original-file packet. The review records the supplied name or role and its date.
+- **Use my own documents** opens a blank claim with the same live extraction, source review, calculation and export features.
+
+The access code opens this evaluation service. Nebius credentials stay server-side. Original files and saved workspaces stay in the browser; the explicit extraction action sends extracted document text to the server and Nebius. Keep the stable evaluation-entry bookmark when returning to the service.
 
 ## Try the PDF document path
 
@@ -54,8 +65,8 @@ Try the full scanning path with the [synthetic scan + photo set](https://blucca.
 - PNG/JPEG photos stay as original visual evidence. Choose **Read photo text · English** for printed labels or photographed documents; an image with zero recognized characters stays attached. OCR text is marked as derived and links to the original page or image for comparison.
 - Original PDF / photo / text bytes stay in **IndexedDB**; extracted text, selections, and review state stay in browser-local storage. Reload restores both. Downloads check original-file SHA-256 against the imported record.
 - Limits: **12 records**, **10 MB per file**, **25 MB combined**, **40 pages per PDF**, **24 MP per photo**, and **80,000 extracted text characters per case**. OCR uses one CPU worker, a 4 MP rendered-page ceiling, and a two-minute page timeout; the worker is released after the document.
-- OCR assets are self-hosted and load on demand (about 6 MB). Original images and OCR stay in the browser; model extraction sends the derived text through the configured local server.
-- The hosted application supports importing, manual review, calculation, and export. **Extract with Nemotron** sends the selected case's document text through your local server to your Nebius account.
+- OCR assets are self-hosted and load on demand (about 6 MB). Original images and OCR stay in the browser; model extraction sends the derived text through the connected Node server.
+- The public page supports importing, manual review, calculation, and export. The full evaluation build adds live NVIDIA extraction. A local installation uses your own configured Nebius account.
 
 ## Run locally
 
@@ -96,6 +107,14 @@ curl http://127.0.0.1:4318/api/extract \
   --data '{"documents":[{"id":"weight","name":"Warehouse weight sheet","text":"Crate B4 actual gross weight: 150 lb."}]}'
 ```
 
+### Host an evaluation build
+
+The same server works behind an HTTPS reverse proxy. Set `DOCKPROOF_ACCESS_TOKEN` to a private random access code and `DOCKPROOF_ORIGIN` to the HTTPS origin. Give the code to your evaluators separately. Keep `NEBIUS_API_KEY`, the private budget and access code outside the public repository.
+
+The Node-served page detects its same-origin API, offers the evaluation-code form and sends the code only in the Authorization header. An optional `#access=…` entry fragment is moved into tab-local session storage and removed from the address bar. The static Pages build keeps its recorded examples and links to the stable live entry.
+
+`GET /api/health` exposes product availability. `GET /api/status` exposes live-extraction readiness for the supplied access code. `POST /api/extract` uses that code, same-origin requests, one active extraction and the persistent credit budget. `web/judge/endpoint.json` points the stable entry at the current HTTPS deployment.
+
 ## Rule scope
 
 The calculation covers **XPO US interstate LTL**, **new ordinary goods**, **one visibly damaged shipping piece**, a documented actual freight class, direct shipper terms, and a standard-tariff or spot-quote basis. The selected rule version is **CNWY 199-AK.3, effective August 17, 2026**.
@@ -120,7 +139,8 @@ web/core/zip.mjs              UTF-8 and binary ZIP writer
 web/intake-ui.mjs             Import, source selection, candidate review
 web/app.mjs                   Isolated workspaces, evidence desk, export
 src/nebius.mjs                NVIDIA structured extraction and source validation
-src/server.mjs                Local static server and extraction endpoint
+web/judge/                   Stable live-evaluation gateway
+src/server.mjs                Same-origin web/API server and evaluation access
 ```
 
 ```sh

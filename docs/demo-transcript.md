@@ -1,6 +1,6 @@
 # DockProof — every claim dollar, traced
 
-[2:44 narrated demo](https://blucca.github.io/dockproof/demo/) · [Try the scan case](https://blucca.github.io/dockproof/?case=scan-example)
+[2:44 narrated demo](https://youtu.be/PxcxiehxLzY) · [Try the scan case](https://blucca.github.io/dockproof/?case=scan-example)
 
 A damaged shipment leaves a small shipping team with scattered records and a costly question: how much should we claim? This worksheet uses all six hundred pounds and asks for three thousand dollars. DockProof traces the amount for one damaged crate, B4.
 

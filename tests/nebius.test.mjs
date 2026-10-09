@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FACT_FIELDS, MAX_OUTPUT_TOKENS, extractFacts, validateDocuments, validateExtraction } from '../src/nebius.mjs';
+import { EXTRACTION_SCHEMA, FACT_FIELDS, MAX_OUTPUT_TOKENS, extractFacts, validateDocuments, validateExtraction } from '../src/nebius.mjs';
 import { FIELD_DEFINITIONS, selectCandidate, addDocuments, createEmptyCase } from '../web/core/fact-review.mjs';
+import { SUPPORTED_CLASSES } from '../web/core/case-engine.mjs';
 
 const documents = [{ id:'weight', text:'Crate C3 actual gross weight: 200 lb.' }];
 const response = { facts:[{ field:'affectedWeightLb', value:'200', document_id:'weight', quote:'Crate C3 actual gross weight: 200 lb.' }], questions:[] };
@@ -87,4 +88,40 @@ test('carrier claim receipt candidates require an explicit receipt acknowledgeme
   const acknowledgement = validateExtraction({ facts:[{ ...fact, value:'2026-10-09', document_id:'ack', quote:docs[1].text }], questions:[] }, docs);
   assert.equal(acknowledgement.facts[0].value, '2026-10-09');
   assert.equal(acknowledgement.questions.length, 0);
+});
+
+test('freight-class extraction retains supported quoted numbers and preserves other facts', () => {
+  assert.deepEqual(EXTRACTION_SCHEMA.properties.fields.properties.freightClass.properties.candidates.items.properties.value,
+    { type:'string', enum:SUPPORTED_CLASSES });
+  const cases = [
+    { value:', no quotes found, maybe missing', quote:'Freight class: 70', valid:false },
+    { value:'70', quote:'Freight class: 70.', valid:true },
+    { value:'77.5', quote:'Freight class: 77.5.', valid:true },
+    { value:'60', quote:'Freight class: 70', valid:false },
+    { value:'70', quote:'Freight class: 170', valid:false },
+    { value:'70', quote:'Freight class: 70.5', valid:false },
+  ];
+  for (const { value, quote, valid } of cases) {
+    const docs = [...documents, { id:'class', text:quote }];
+    const fact = { field:'freightClass', value, document_id:'class', quote };
+    const result = validateExtraction({ facts:[fact, response.facts[0]], questions:[] }, docs);
+    assert.equal(result.facts.some(candidate => candidate.field === 'freightClass'), valid, value + ' / ' + quote);
+    assert.equal(result.facts.find(candidate => candidate.field === 'affectedWeightLb').value, 200);
+    if (valid) {
+      assert.equal(result.facts.find(candidate => candidate.field === 'freightClass').value, value);
+      assert.equal(result.omitted, undefined);
+      assert.deepEqual(result.questions, []);
+    } else {
+      assert.equal(result.omitted[0].field, 'freightClass');
+      assert.equal(result.omitted[0].value, value);
+      assert.deepEqual(result.questions.map(question => question.field), ['freightClass']);
+      assert.match(result.questions[0].question, /original.*Record a sourced value/);
+    }
+  }
+  const docs = [...documents, { id:'class', text:'Freight class: 70' }];
+  const invalidClass = { field:'freightClass', value:'missing', document_id:'class', quote:docs[1].text };
+  assert.throws(() => validateExtraction({ facts:[invalidClass, { ...response.facts[0], quote:'Weight: 999 lb.' }], questions:[] }, docs),
+    { code:'citation_mismatch' });
+  assert.throws(() => validateExtraction({ facts:[{ ...invalidClass, document_id:'absent' }], questions:[] }, docs),
+    { code:'document_missing' });
 });

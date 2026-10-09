@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="same-origin">
+  <meta name="description" content="Run the complete DockProof freight-claim workflow with live NVIDIA Nemotron extraction.">
+  <title>DockProof · Live evaluation</title>
+  <link rel="icon" href="../mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../styles.css">
+  <script type="module" src="./entry.mjs"></script>
+</head>
+<body>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="../"><img src="../mark.svg" width="32" height="32" alt=""><span>DockProof<span class="brand-dot">.</span></span></a><a class="source-link" href="https://github.com/blucca/dockproof">Source ↗</a></div></header>
+  <main class="evaluation-entry">
+    <div class="eyebrow"><span class="live-dot"></span> FULL LIVE EVALUATION</div>
+    <h1>Run the evidence.<br><em>Review the result.</em></h1>
+    <p class="intro-copy">Eight original records. Local scan OCR.<br>A fresh NVIDIA Nemotron run, ready for your review.</p>
+    <div class="evaluation-card">
+      <h2>Your complete evaluation workspace</h2>
+      <p>Open the synthetic B4 case with its original files and an empty candidate list. Choose <strong>Extract with Nemotron</strong> to run the model live, select the evidence, review the amount, and download the original-file packet.</p>
+      <form id="entry-form">
+        <label for="access-code">Evaluation access code</label>
+        <input id="access-code" type="password" autocomplete="off" spellcheck="false" placeholder="From the Devpost testing instructions">
+        <p class="data-note">Free full-workflow access for the sponsor, administrator and judges through December 15, 2026, 12:00 PM Pacific. Use the access code supplied with the submission.</p>
+        <div class="intro-actions"><button class="button primary" id="open-live" type="submit" disabled>Open the live scan case →</button><button class="button secondary" id="open-own" type="button" disabled>Use my own documents</button></div>
+      </form>
+      <p id="entry-status" class="inline-status" role="status">Loading the current evaluation endpoint…</p>
+      <p class="data-note">PDFs, images, OCR and saved workspaces stay in your browser. The extraction button sends document text through the evaluation server to Nebius-hosted NVIDIA Nemotron. Each source selection and the final review remains yours.</p>
+    </div>
+    <p><a class="text-link" href="../?case=scan-example">Explore the public recorded example ↗</a> · <a class="text-link" href="../demo/">Watch the 2:44 demo ↗</a></p>
+  </main>
+</body>
+</html>

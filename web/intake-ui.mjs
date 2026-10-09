@@ -49,6 +49,17 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
   let busy = false;
   let modelReady = false;
   let manualField;
+  const api = document.querySelector('meta[name="dockproof-api"]')?.content;
+  let accessCode = '';
+  try { accessCode = sessionStorage.getItem('dockproof-evaluation-access') || ''; } catch {}
+  const fragment = new URLSearchParams(location.hash.slice(1));
+  if (fragment.has('access')) {
+    accessCode = fragment.get('access');
+    try { sessionStorage.setItem('dockproof-evaluation-access', accessCode); } catch {}
+    fragment.delete('access');
+    history.replaceState(null, '', location.pathname + location.search + (fragment.size ? '#' + fragment.toString() : ''));
+  }
+  const accessHeaders = () => accessCode ? { Authorization:`Bearer ${accessCode}` } : {};
 
   const setStatus = message => { $('#import-status').textContent = message; };
   function setBusy(value) {
@@ -153,7 +164,7 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
     } finally { setBusy(false); $('#document-files').value = ''; render(); }
   }
 
-  async function loadExample(example = 'import-example') {
+  async function loadExample(example = 'import-example', {live = false} = {}) {
     if (busy) throw new Error('Finish the current document operation first.');
     setBusy(true);
     try {
@@ -177,6 +188,11 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
         documents.push(doc);
       }
       state = addDocuments(state, documents);
+      if (live) {
+        state.intake = {candidates:[],questions:[],runs:[],method:'live_pending',liveExample:true,exampleRevision:manifest.revision};
+        setStatus(`${documents.length} original example records parsed here. Select Extract with Nemotron for a fresh NVIDIA run on these records.`);
+        return state;
+      }
       const candidateResponse = await fetch(new URL(manifest.candidates, base));
       if (!candidateResponse.ok) throw new Error('The example candidate selections failed to load.');
       const supplied = await candidateResponse.json();
@@ -190,17 +206,22 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
   }
 
   async function connect() {
-    if (!['localhost', '127.0.0.1', '::1', '[::1]'].includes(location.hostname)) {
-      $('#model-status').innerHTML = 'Use source-linked manual selection here. For model extraction, <a class="text-link" href="https://github.com/blucca/dockproof#run-locally" target="_blank" rel="noreferrer">start the local DockProof server with your Nebius key ↗</a>.';
+    if (!api) {
+      $('#model-status').innerHTML = 'The scan case includes recorded NVIDIA candidates. For a fresh model run, <a class="text-link" href="https://blucca.github.io/dockproof/judge/">open live evaluation ↗</a> with the supplied access code, or <a class="text-link" href="https://github.com/blucca/dockproof#run-locally" target="_blank" rel="noreferrer">connect your own Nebius account ↗</a>. Source-linked manual selection is ready here.';
       return;
     }
     try {
-      const response = await fetch('/api/status');
+      const response = await fetch(`${api}/status`, {headers:accessHeaders(),cache:'no-store'});
       if (!response.ok) throw new Error('server');
       const status = await response.json();
       modelReady = Boolean(status.extractionReady);
-      $('#model-status').textContent = modelReady ? `${status.model} · local server connected · credit budget active.` : `${status.budget?.message || 'Configure a private credit budget.'} Set NEBIUS_API_KEY and NEBIUS_BUDGET_FILE in the local server environment. Source-linked manual selection is ready.`;
-    } catch { $('#model-status').textContent = 'Start npm start locally to connect NVIDIA Nemotron. Source-linked manual selection is ready here.'; }
+      $('#evaluation-access').hidden = !status.access?.required || status.access?.authorized;
+      $('#model-status').textContent = modelReady
+        ? `${status.model} · live server connected${status.access?.required ? ' · free evaluation' : ''}. Select Extract with Nemotron to run your current document set.`
+        : status.access?.required
+          ? (accessCode && !status.access.authorized ? 'Access code rejected. Enter the code from the testing instructions.' : status.budget?.message || 'Enter your evaluation access code.')
+          : `${status.budget?.message || 'Configure a private credit budget.'} Set NEBIUS_API_KEY and NEBIUS_BUDGET_FILE in the server environment. Source-linked manual selection is ready.`;
+    } catch { modelReady = false; $('#model-status').textContent = 'Live connection interrupted. Reopen the evaluation entry to reconnect. Source-linked manual selection is ready here.'; }
     setBusy(busy);
   }
 
@@ -210,8 +231,8 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
     $('#extraction-results').textContent = 'Reading the document set and matching exact source excerpts…';
     try {
       const state = getState();
-      const response = await fetch('/api/extract', {
-        method:'POST', headers:{ 'Content-Type':'application/json' },
+      const response = await fetch(`${api}/extract`, {
+        method:'POST', headers:{ 'Content-Type':'application/json', ...accessHeaders() },
         body:JSON.stringify({ documents:state.documents.map(({ id, name, text, pages, kind, roles, sha256, synthetic, mimeType, byteLength, extraction }) => ({ id, name, text, kind, roles, sha256, synthetic, mimeType, byteLength, extraction, pages:pages?.map(({ page, start, end, extraction }) => ({ page, start, end, extraction })) })) }),
       });
       const result = await response.json();
@@ -438,6 +459,13 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
       const nextRoles = selectedRoles.size ? [...selectedRoles] : ['supporting'];
       commit(addDocuments(getState(), [{ id, kind:nextRoles[0], roles:nextRoles }]));
     }
+  });
+  $('#evaluation-access').addEventListener('submit', event => {
+    event.preventDefault();
+    accessCode = $('#evaluation-code').value.trim();
+    try { sessionStorage.setItem('dockproof-evaluation-access', accessCode); } catch {}
+    $('#evaluation-code').value = '';
+    connect();
   });
   connect();
   return { render, addFiles, loadExample, openOriginal, displayOriginalImage, preparePacket, forgetOriginals:ids => ids.forEach(id => originals.delete(id)), get busy() { return busy; } };

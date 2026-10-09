@@ -16,3 +16,12 @@
 .example-instructions{margin:0;padding:14px 24px;background:#f5f7ee;border-bottom:1px solid var(--line);font-size:12px;line-height:1.7;color:var(--green)}
 .case-switcher{flex-wrap:wrap}.intro-actions a.button{text-decoration:none;display:inline-flex;align-items:center}
 @media(max-width:760px){.example-instructions{padding:13px 16px;font-size:11px}.case-switcher button{padding:8px;font-size:10px}}
+/* Evaluation entry reuses the evidence desk's visual language. */
+.evaluation-entry{max-width:900px;margin:66px auto;padding:0 24px}
+.evaluation-card{background:var(--paper,#fff);border:1px solid #dce3da;border-radius:14px;padding:30px;margin:34px 0 24px}
+.evaluation-card h2{margin-top:0}.evaluation-card p{line-height:1.65}
+.evaluation-card label,#evaluation-access label{display:block;font-size:13px;font-weight:600;margin:20px 0 8px}
+.evaluation-card input,#evaluation-access input{display:block;width:100%;box-sizing:border-box;padding:12px;border:1px solid #b8c8be;border-radius:6px;background:#fff;font:inherit}
+#evaluation-access .button{margin:12px 0 18px}
+#reviewer-name{box-sizing:border-box;width:100%;padding:9px;border:1px solid #b8c8be;border-radius:5px;font:inherit}
+@media(max-width:600px){.evaluation-entry{margin-top:35px;padding:0 18px}.evaluation-entry h1{font-size:42px}.evaluation-card{padding:20px}}
