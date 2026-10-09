@@ -1,0 +1,162 @@
+{
+  "id": "dockproof-c3-example",
+  "title": "One damaged crate. Five crates on the bill.",
+  "synthetic": true,
+  "shipment": {
+    "carrier": "XPO",
+    "mode": "LTL",
+    "originCountry": "US",
+    "destinationCountry": "US",
+    "origin": "Newark, NJ",
+    "destination": "Allentown, PA",
+    "shipper": "Harborlight Wholesale (synthetic)",
+    "consignee": "Lumen Works Supply (synthetic)",
+    "pro": "SYN-XPO-0930-048",
+    "bol": "SYN-BOL-0930-17",
+    "invoiceNumber": "SYN-INV-9260",
+    "pickupDate": "2026-09-28",
+    "deliveryDate": "2026-09-30",
+    "totalPieces": 5,
+    "totalWeightLb": 1000,
+    "originState": "NJ",
+    "destinationState": "PA"
+  },
+  "documents": [
+    {
+      "id": "bill_of_lading",
+      "name": "Bill of lading \u00b7 5 crates",
+      "kind": "bill_of_lading",
+      "received": true,
+      "synthetic": true,
+      "text": "L01 SYNTHETIC TRAINING RECORD \u2014 DockProof curated example\nL02 Bill of lading: SYN-BOL-0930-17 | PRO: SYN-XPO-0930-048\nL03 Carrier: XPO | Origin: Newark, NJ, US | Destination: Allentown, PA, US\nL04 Shipper: Harborlight Wholesale (synthetic) | Consignee: Lumen Works Supply (synthetic)\nL05 Pickup: 2026-09-28 | Shipment: 5 crates of new LED lighting fixtures\nL06 Crate IDs: C1, C2, C3, C4, C5 | Total shipment weight: 1,000 lb\nL07 Freight class: 70 | Condition: new goods | Service: US domestic LTL\nL08 Weight shown here covers the complete five-crate shipment."
+    },
+    {
+      "id": "delivery_receipt",
+      "name": "Delivery receipt \u00b7 C3 visibly damaged",
+      "kind": "delivery_receipt",
+      "received": true,
+      "synthetic": true,
+      "text": "L01 SYNTHETIC TRAINING RECORD \u2014 DockProof curated example\nL02 Delivery receipt | PRO: SYN-XPO-0930-048 | Date: 2026-09-30\nL03 Received by: Alex Rivera, warehouse receiver (synthetic)\nL04 Five crates received. Crate C3 has a crushed outer corner and broken fixtures visible through the split packaging.\nL05 Driver and receiver recorded the C3 damage at delivery.\nL06 Crates C1, C2, C4, and C5 appeared intact."
+    },
+    {
+      "id": "commercial_invoice",
+      "name": "Commercial invoice \u00b7 discount applies",
+      "kind": "commercial_invoice",
+      "received": true,
+      "synthetic": true,
+      "text": "L01 SYNTHETIC TRAINING RECORD \u2014 DockProof curated example\nL02 Invoice: SYN-INV-9260 | Invoice date: 2026-09-27\nL03 Seller: Harborlight Wholesale (synthetic) | Buyer: Lumen Works Supply (synthetic)\nL04 Crate C3: 40 new LED lighting fixtures \u00d7 $30.00 = $1,200.00 gross invoice value.\nL05 Trade discount: 10% ($120.00) applies to the C3 line.\nL06 C3 net invoice value: $1,080.00.\nL07 C3 additional allowances: $0.00.\nL08 Complete shipment: five crates at $1,200.00 each, gross invoice value $6,000.00.\nL09 Complete shipment after 10% trade discount: $5,400.00."
+    },
+    {
+      "id": "inspection_record",
+      "name": "Warehouse inspection \u00b7 retained salvage",
+      "kind": "inspection_record",
+      "received": true,
+      "synthetic": true,
+      "text": "L01 SYNTHETIC TRAINING RECORD \u2014 DockProof curated example\nL02 Inspection: 2026-10-01 | PRO: SYN-XPO-0930-048 | Affected piece: crate C3\nL03 All 40 C3 fixtures are damaged and unsuitable for sale as new goods.\nL04 Salvage value of retained materials: $200.00.\nL05 The crate, packaging, and damaged fixtures are retained for carrier inspection.\nL06 Receiver's delivery notation and warehouse inspection record identify the same crate C3."
+    },
+    {
+      "id": "claim_worksheet",
+      "name": "Original claim worksheet \u00b7 $5,000",
+      "kind": "claim_worksheet",
+      "received": true,
+      "synthetic": true,
+      "text": "L01 SYNTHETIC TRAINING RECORD \u2014 DockProof curated example\nL02 Original warehouse claim worksheet | Prepared: 2026-10-01\nL03 PRO: SYN-XPO-0930-048 | Damaged piece: crate C3\nL04 Weight entered for C3 claim: 1,000 lb, copied from the total shipment field on the bill of lading.\nL05 Worksheet calculation: 1,000 lb \u00d7 $5.00/lb = $5,000.00.\nL06 Original requested claim amount: $5,000.00.\nL07 DockProof preserves this original worksheet alongside the reviewed valuation."
+    },
+    {
+      "id": "weight_sheet",
+      "name": "Supplement \u00b7 C3 piece weight",
+      "kind": "weight_sheet",
+      "received": false,
+      "synthetic": true,
+      "text": "L01 SYNTHETIC TRAINING RECORD \u2014 DockProof curated example\nL02 Warehouse packing and weight sheet | BOL: SYN-BOL-0930-17\nL03 C1: 200 lb | C2: 200 lb | C3: 200 lb | C4: 200 lb | C5: 200 lb\nL04 Affected piece C3 weighs 200 lb including its crate and packing.\nL05 Total: five crates, 1,000 lb | Packing date: 2026-09-28\nL06 Weight verified by: Jordan Ellis, dispatch clerk (synthetic)."
+    },
+    {
+      "id": "rate_confirmation",
+      "name": "Supplement \u00b7 standard tariff service",
+      "kind": "rate_confirmation",
+      "received": false,
+      "synthetic": true,
+      "text": "L01 SYNTHETIC TRAINING RECORD \u2014 DockProof curated example\nL02 Rate confirmation | PRO: SYN-XPO-0930-048 | BOL: SYN-BOL-0930-17\nL03 Selected example service: standard tariff shipment.\nL04 CNWY 199-AK.3, effective 2026-08-17, applies to this standard US domestic LTL shipment.\nL05 Freight class: 70 | Goods condition: new | Liability reference: Item 25.\nL06 Example scope uses standard tariff liability terms and the documented affected-piece weight."
+    }
+  ],
+  "facts": {
+    "affectedPieceId": "C3",
+    "goodsCondition": "new",
+    "freightClass": "70",
+    "invoiceGrossCents": 120000,
+    "tradeDiscountBps": 1000,
+    "allowanceCents": 0,
+    "salvageCents": 20000,
+    "worksheetWeightLb": 1000,
+    "worksheetDemandCents": 500000,
+    "affectedWeightLb": null,
+    "serviceType": "standard_tariff",
+    "claimReceivedDate": null,
+    "provenance": {
+      "affectedPieceId": {
+        "documentId": "delivery_receipt",
+        "line": 4,
+        "quote": "Crate C3 has a crushed outer corner and broken fixtures visible through the split packaging."
+      },
+      "goodsCondition": {
+        "documentId": "bill_of_lading",
+        "line": 7,
+        "quote": "Condition: new goods"
+      },
+      "freightClass": {
+        "documentId": "bill_of_lading",
+        "line": 7,
+        "quote": "Freight class: 70"
+      },
+      "invoiceGrossCents": {
+        "documentId": "commercial_invoice",
+        "line": 4,
+        "quote": "$1,200.00 gross invoice value."
+      },
+      "tradeDiscountBps": {
+        "documentId": "commercial_invoice",
+        "line": 5,
+        "quote": "Trade discount: 10% ($120.00)"
+      },
+      "allowanceCents": {
+        "documentId": "commercial_invoice",
+        "line": 7,
+        "quote": "C3 additional allowances: $0.00."
+      },
+      "salvageCents": {
+        "documentId": "inspection_record",
+        "line": 4,
+        "quote": "Salvage value of retained materials: $200.00."
+      },
+      "worksheetWeightLb": {
+        "documentId": "claim_worksheet",
+        "line": 4,
+        "quote": "1,000 lb, copied from the total shipment field"
+      },
+      "worksheetDemandCents": {
+        "documentId": "claim_worksheet",
+        "line": 6,
+        "quote": "Original requested claim amount: $5,000.00."
+      },
+      "affectedWeightLb": {
+        "documentId": "weight_sheet",
+        "line": 4,
+        "quote": "Affected piece C3 weighs 200 lb including its crate and packing."
+      },
+      "serviceType": {
+        "documentId": "rate_confirmation",
+        "line": 3,
+        "quote": "Selected example service: standard tariff shipment."
+      }
+    },
+    "commodityScope": "ordinary",
+    "arrangedBy": "shipper",
+    "excessValueAgreement": false,
+    "deliveryDamage": "visible_noted"
+  },
+  "decisions": {
+    "demandCents": null,
+    "review": null
+  },
+  "events": []
+}

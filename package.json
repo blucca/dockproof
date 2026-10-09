@@ -1,0 +1,13 @@
+{
+  "name": "dockproof",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "An evidence-linked freight claim desk for small shipping teams.",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
