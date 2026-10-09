@@ -16,7 +16,7 @@ The successful request used the bounded, typed per-field schema, temperature 0.6
 
 ## Scanned pages and photos
 
-A subsequent live browser run imported eight originals: a mixed PDF with an OCR delivery page, invoice/supporting records, a printed PNG label and a zero-text JPEG. Seven text-bearing records reached the provider. The result contained 31 source-matched candidates, covered all 27 required fields, and led through reviewer selection to a $750, 22-file packet. The delivery-date citation resolved to the OCR page; every exported original matched its imported SHA-256.
+A subsequent live browser run imported [eight downloadable synthetic originals](https://blucca.github.io/dockproof/data/scans/dockproof-scan-example.zip): a mixed PDF with an OCR delivery page, invoice/supporting records, a printed PNG label and a zero-text JPEG. Seven text-bearing records reached the provider. The result contained 31 source-matched candidates, covered all 27 required fields, and led through reviewer selection to a $750, 22-file packet. The delivery-date citation resolved to the OCR page; every exported original matched its imported SHA-256.
 
 
 Browser-local PDF.js and Tesseract produce the canonical text before the model request. Each page records selectable text or English OCR; photos retain their original bytes and optionally add OCR text. Quotes point into that exact transcript, with the original scan available alongside it. Printed `lb.` was observed as `Ib.` in one OCR label; original-image comparison is part of selecting that value.

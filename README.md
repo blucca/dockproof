@@ -35,6 +35,8 @@ Open **My claim** on the hosted page or your local server:
 
 Every required identity, valuation, and scope field needs a source-linked selection. A changed fact, document, or role opens a fresh review. Earlier selections retain their values, source excerpts, and reasons.
 
+Try the full scanning path with the [synthetic scan + photo set](https://blucca.github.io/dockproof/data/scans/dockproof-scan-example.zip): extract the archive and add its eight evidence files to **My claim**. Its README maps record roles and the expected $750 review.
+
 ### Documents and storage
 
 - PDF text extraction runs locally using self-hosted **PDF.js 6.4.299**. Empty-text pages use **Tesseract.js 6.0.1** English OCR. A mixed PDF retains the extraction method for each page. Pages and lines retain exact UTF-16 positions in the extracted text.
