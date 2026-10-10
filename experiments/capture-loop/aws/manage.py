@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('action', choices=('deploy', 'cleanup'))
+parser.add_argument('action', choices=('deploy', 'update', 'cleanup'))
 parser.add_argument('--zip', type=Path)
 parser.add_argument('--state', type=Path, required=True, help='Local resource ownership record')
 parser.add_argument('--function', default='dockproof-capture-measure')
@@ -43,6 +43,22 @@ def remove_staging():
         save()
 
 
+def upload_package():
+    location = [] if args.region == 'us-east-1' else [
+        '--create-bucket-configuration', 'LocationConstraint=' + args.region]
+    aws('s3api', 'create-bucket', '--bucket', state['bucket'], *location)
+    state['stagingBucket'] = True
+    save()
+    aws('s3api', 'put-public-access-block', '--bucket', state['bucket'],
+        '--public-access-block-configuration', json.dumps({
+            'BlockPublicAcls': True, 'IgnorePublicAcls': True,
+            'BlockPublicPolicy': True, 'RestrictPublicBuckets': True}))
+    aws('s3api', 'put-object', '--bucket', state['bucket'], '--key', state['key'],
+        '--body', str(args.zip.resolve()), '--server-side-encryption', 'AES256')
+    state['stagingObject'] = True
+    save()
+
+
 if args.action == 'cleanup':
     state = json.loads(args.state.read_text())
     args.region = state['region']
@@ -64,7 +80,29 @@ if args.action == 'cleanup':
     raise SystemExit(0)
 
 if args.zip is None or not args.zip.is_file():
-    parser.error('deploy requires --zip pointing to the built deployment package.')
+    parser.error(f'{args.action} requires --zip pointing to the built deployment package.')
+if args.action == 'update':
+    state = json.loads(args.state.read_text())
+    args.region = state['region']
+    if not state.get('functionCreated'):
+        parser.error('update requires a deployment record with an existing function.')
+    remove_staging()
+    try:
+        upload_package()
+        function = aws('lambda', 'update-function-code', '--function-name', state['function'],
+                       '--s3-bucket', state['bucket'], '--s3-key', state['key'])
+        state.update(status='Updating', codeSha256=function['CodeSha256'],
+                     lastModified=function['LastModified'])
+        save()
+        aws('lambda', 'wait', 'function-updated-v2', '--function-name', state['function'])
+        state['status'] = 'Active'
+        save()
+    finally:
+        remove_staging()
+    print(json.dumps({'function': state['function'], 'region': state['region'],
+                      'status': state['status'], 'lastModified': state['lastModified'],
+                      'stagingRemoved': True}))
+    raise SystemExit(0)
 if args.state.exists():
     parser.error('Choose a fresh --state file; use cleanup with the existing resource record.')
 account = aws('sts', 'get-caller-identity')['Account']
@@ -91,19 +129,7 @@ state['logGroupCreated'] = True
 save()
 aws('logs', 'put-retention-policy', '--log-group-name', state['logGroup'], '--retention-in-days', '1')
 try:
-    location = [] if args.region == 'us-east-1' else [
-        '--create-bucket-configuration', 'LocationConstraint=' + args.region]
-    aws('s3api', 'create-bucket', '--bucket', state['bucket'], *location)
-    state['stagingBucket'] = True
-    save()
-    aws('s3api', 'put-public-access-block', '--bucket', state['bucket'],
-        '--public-access-block-configuration', json.dumps({
-            'BlockPublicAcls': True, 'IgnorePublicAcls': True,
-            'BlockPublicPolicy': True, 'RestrictPublicBuckets': True}))
-    aws('s3api', 'put-object', '--bucket', state['bucket'], '--key', state['key'],
-        '--body', str(args.zip.resolve()), '--server-side-encryption', 'AES256')
-    state['stagingObject'] = True
-    save()
+    upload_package()
     for attempt in range(4):
         try:
             function = aws('lambda', 'create-function', '--function-name', state['function'],

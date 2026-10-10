@@ -20,6 +20,24 @@ MAX_BYTES = 8 * 1024 * 1024
 LOCK = threading.Lock()
 
 
+def sample_catalog():
+    """Present licensed examples and map their public URLs to retained assets."""
+    fixture_manifest = ROOT / 'fixtures' / 'manifest.json'
+    catalog = json.loads(fixture_manifest.read_text()) if fixture_manifest.exists() else {'samples': []}
+    files = {sample['url']: ROOT / 'fixtures' / sample['url'].rsplit('/', 1)[-1]
+             for sample in catalog['samples']}
+    catalog['parcelSamples'] = []
+    domain_manifest = ROOT / 'domain' / 'manifest.json'
+    if domain_manifest.exists():
+        for sample in json.loads(domain_manifest.read_text())['samples']:
+            if sample['file'] in ('small-parcel.jpg', 'package-label-reuse.jpg'):
+                url = '/samples/domain/' + sample['file']
+                catalog['parcelSamples'].append({**sample, 'id': Path(sample['file']).stem,
+                                                  'url': url, 'kind': 'natural_parcel_photo'})
+                files[url] = ROOT / 'domain' / 'images' / sample['file']
+    return catalog, files
+
+
 def now():
     return datetime.now(timezone.utc).isoformat()
 
@@ -44,6 +62,7 @@ def main():
         state['execution'] = 'AWS_Lambda_OpenCV5_with_native_model_tools'
     max_bytes = 4_000_000 if state['execution'].startswith('AWS_Lambda') else MAX_BYTES
     state['maxImageBytes'] = max_bytes
+    samples, sample_files = sample_catalog()
 
     def persist():
         pending = args.state / 'session.pending.json'
@@ -71,8 +90,7 @@ def main():
                 with LOCK:
                     return self.respond(state)
             if route == '/api/samples':
-                manifest = ROOT / 'fixtures' / 'manifest.json'
-                return self.respond(json.loads(manifest.read_text()) if manifest.exists() else {'samples': []})
+                return self.respond(samples)
             if route.startswith('/files/'):
                 with LOCK:
                     allowed = {c['source']['file'] for c in state['captures']}
@@ -80,9 +98,7 @@ def main():
                 filename = route.removeprefix('/files/')
                 target = artifacts / filename if filename in allowed else None
             elif route.startswith('/samples/'):
-                manifest = ROOT / 'fixtures' / 'manifest.json'
-                allowed = {s['url'] for s in json.loads(manifest.read_text())['samples']} if manifest.exists() else set()
-                target = ROOT / 'fixtures' / route.rsplit('/', 1)[-1] if route in allowed else None
+                target = sample_files.get(route)
             else:
                 target = ROOT / 'web' / (route.lstrip('/') or 'index.html')
                 if not target.resolve().is_relative_to((ROOT / 'web').resolve()):

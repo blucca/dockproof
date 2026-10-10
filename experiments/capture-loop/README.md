@@ -1,14 +1,29 @@
 # Capture Loop · OpenCV 5 + a tool-using capture agent
 
-**Get a readable original before reviewing a printed value.** A photograph starts an evidence trail. Image measurements select a concrete capture request; a fresh photo continues the trail; the reviewer compares the retained original and a perspective-corrected view before recording a field.
+**Get a readable original before reviewing a document field.** A photograph starts an evidence trail. Image measurements select a concrete capture request; a fresh photo continues the trail; the reviewer compares the retained original and a perspective-corrected view before recording a field.
 
-![Actual agent-selected field review after AWS OpenCV measurement of an attributed SmartDoc camera frame](evidence/agent-review.png)
+![Capture station with real parcel samples and the AWS-measured GLS field review](evidence/parcel-gls-desktop.png)
 
 This research branch adds a capture stage to DockProof. The production claim-review application continues its existing workflow. The workstation supports the original **OpenCV 5 rule baseline** and a **live native-tool-calling model**, with optional AWS Lambda image measurement.
 
 ## Independent parcel photographs
 
-[Four licensed shipping-label examples](domain/README.md) now extend the SmartDoc checks. A real GLS parcel exposed a five-corner paper-edge failure; a bounded convex-hull candidate recovers the label and leads to a readable-date review. The original failure, integrated local results, attribution and a reproducible check are public. The GLS case is a repair-development example; the remaining photos cover cropped, masked and blank-label controls. The AWS function currently runs the prior measurement build; the domain repair is local pending its next explicit deployment.
+[Four licensed shipping-label examples](domain/README.md) now extend the SmartDoc checks. A real GLS parcel exposed a five-corner paper-edge failure; a bounded convex-hull candidate recovers the label and leads to a readable-date review. The original failure, integrated local results, attribution and a reproducible check are public. The GLS case is a repair-development example; the remaining photos cover cropped, masked and blank-label controls. The private AWS Lambda now runs that same repair. The visible **Load GLS parcel** and **Load cropped label** buttons send the bundled source photos through the configured measurement and controller path.
+
+## Recorded parcel workflow · AWS + live model tools
+
+On **2026-10-11 (UTC+08)**, the rebuilt Lambda processed both visible parcel samples from real browser clicks:
+
+| Independent source photo | AWS OpenCV observation | Executed next step |
+| --- | --- | --- |
+| GLS parcel | Four interior corners; normalized-page focus **340.928**; frame clearance **307 px** | `prepare_field_review`; a separate scripted browser review saved **Date: 12.08.2010** |
+| Cropped shipping label | Document outline missing; whole-frame focus **528.019** | `request_recapture`; include the entire document and all four corners |
+
+The run contains **four successful native model requests** and **two AWS image invocations**. The GLS measurement took **650.15 ms**. Its form began empty with its confirmation box clear; the saved date survived reload. Selecting the second, independent parcel retained the earlier original and review while clearing the active confirmation. Both 1440 px and 390 px layouts had zero horizontal overflow, with zero page errors in the GLS browser run.
+
+[Complete native-tool session](evidence/parcel-cloud-loop.json) · [Deployment and browser record](evidence/parcel-acceptance.json) · [Mobile comparison](evidence/parcel-gls-mobile.png) · [GLS original](domain/images/small-parcel.jpg) · [Rectified view](domain/views/small-parcel-rectified.jpg).
+
+These are selected development examples. The GLS source was used to repair the contour failure; the browser uploads and review were scripted. The two photos show separate parcels. The SmartDoc sequence below exercises a later capture of the same document.
 
 ## Capture station interface
 
@@ -54,10 +69,13 @@ uv run --no-project --with numpy==2.5.3 --with opencv-python-headless==5.0.0.93 
 
 Open **http://127.0.0.1:18627/**. The server uses one local research case, stores its original files and review records in the chosen state directory, and uses two OpenCV CPU threads. JPEG and PNG uploads support images up to 8 MB / 24 megapixels.
 
-1. Expand **Try recorded camera frames** and use **Frame 10**. The natural blur produces a request to steady the camera, focus on the printed text, and take a new complete photo.
-2. Use **Frame 22**, a later natural view of the same sheet. The page boundary and focus measurements lead to field review.
-3. Compare the full original and straightened view. For the sample, review `Power Dissipation` and `300 mW`, enter the reviewer role, and save the confirmation.
-4. Export the session JSON. The state directory retains every original and derived image. New captures clear the active confirmation and preserve earlier reviews in the history.
+1. Choose **Load GLS parcel** in the visible sample cards. The source photo is uploaded through the same `/api/capture` endpoint as your own files; the configured OpenCV/controller path chooses its next action.
+2. At field review, compare the handwritten date in the retained original and perspective view. Enter the field, the value you read and your reviewer ID, then select the comparison checkbox and save. The form starts empty.
+3. Choose **Load cropped label** to see the separate framing example: its shipping label runs beyond the right edge. A fresh photo should step back, center the label and include all four edges. These two Commons photos show different packages.
+4. For a same-document recovery sequence, expand **Try the blur → clear camera sequence** and use **Frame 10**, then **Frame 22**. The natural blur leads to a sharper-capture request; the later view of that sheet opens field review. Its example field is `Power Dissipation`, with visible value `300 mW`.
+5. Export the session JSON. The state directory retains every original and derived image, with each new capture linked to its predecessor. New captures clear the active confirmation and preserve earlier reviews in the history.
+
+The two parcel cards link directly to each Commons source page and its **CC BY-SA 3.0** license, naming photographer **Klaus Mueller**. They use the already bundled official 1280-pixel thumbnails from [`domain/manifest.json`](domain/manifest.json); the perspective images retain the same license. GLS recipient fields are masked in the published source. The active sample guide carries the source links alongside the image comparison.
 
 Your own files use **Take / upload a photo**. The supported subject is one flat page or label with a visible boundary against a contrasting surface. The four-edge, focus and source-comparison steps form this experiment's review contract.
 
@@ -83,7 +101,7 @@ Here the model's `inspect_capture` call uploads the original to the configured L
 
 The original brightness-only probe selected the patterned background in all four selected natural frames, producing an incorrect edge request. The revised pipeline first searches for closed Canny quadrilaterals and measures Lab color contrast across each boundary. This selects the physical page on the textured background.
 
-Strong blur can also erase the page outline. A whole-frame, fixed-width focus measurement handles that path and asks for focus recovery. A detected page receives perspective normalization and an interior focus measurement. The reviewer checks the needed printed value and intended document before confirmation.
+Strong blur can also erase the page outline. A whole-frame, fixed-width focus measurement handles that path and asks for focus recovery. A detected page receives perspective normalization and an interior focus measurement. The reviewer checks the needed visible value and intended document before confirmation.
 
 | Selected natural observation | Measurement | Action | Recorded time |
 | --- | --- | --- | --- |
@@ -92,7 +110,7 @@ Strong blur can also erase the page outline. A whole-frame, fixed-width focus me
 | Frame 110 · natural blur | Whole-frame variance 12.574 | Request sharper capture | 54.71 ms |
 | Frame 154 · natural blur | Whole-frame variance 5.405 | Request sharper capture | 49.99 ms |
 
-The times are individual local observations; the first also includes initialization. Thresholds are **25** for the whole-frame fallback and **50** for the normalized page interior. Geometry development used frames 0 and 22, with frame 10 used for focus recovery; frames 110 and 154 are same-video checks. Frame selection covers this single printed sheet, camera recording, lighting and background. Shipping-label checks use the separately generated synthetic cases.
+The times are individual local observations; the first also includes initialization. Thresholds are **25** for the whole-frame fallback and **50** for the normalized page interior. Geometry development used frames 0 and 22, with frame 10 used for focus recovery; frames 110 and 154 are same-video checks. Frame selection covers this single printed sheet, camera recording, lighting and background. The original synthetic shipping-label checks remain in that report; the independent parcel photographs have their own domain and cloud records above.
 
 [evaluation.json](evaluation.json) contains the baseline failures, all four natural-frame measurements and three synthetic-label outcomes. [The recorded loop](evidence/recorded-loop.json) preserves the actual capture lineage, hashes and scripted `300 mW` confirmation. [Browser acceptance](evidence/browser-acceptance.json) covers upload → request → new photo → review, reload, stale-capture rejection, original bytes, current-review reset and 390 px layout. The uploader and reviewer in that run are explicitly scripted.
 
@@ -107,6 +125,6 @@ The earlier three-case synthetic probe remains available as `probe.py`, with its
 
 ## Source and license
 
-Code and the original synthetic shipping label: repository MIT license. Natural SmartDoc camera frames: **CC BY 4.0**, with [full author attribution, source and transformation notes](fixtures/ATTRIBUTION.md). The screenshot above includes that attributed dataset. OpenCV: Apache-2.0; the Python wheel includes its third-party license files.
+Code and the original synthetic shipping label: repository MIT license. Natural SmartDoc camera frames: **CC BY 4.0**, with [full author attribution, source and transformation notes](fixtures/ATTRIBUTION.md). The earlier SmartDoc screenshots include that attributed dataset. Parcel photos and their perspective views use the source-specific CC BY-SA licenses in [domain attribution](domain/ATTRIBUTION.md). The new `parcel-gls-*.png` screenshots are CC BY-SA 3.0 and include the GLS and cropped-label photographs by Klaus Mueller. OpenCV: Apache-2.0; the Python wheel includes its third-party license files.
 
-The candidate's next evaluation scope is independent shipping-label photography, including different phones, lighting, print sizes and backgrounds. The current natural-image observations cover the selected SmartDoc recording described above. The live agent and AWS execution are tracked separately from human use and confirmed fields.
+The next evaluation scope is fresh shipping-label photography from external users, covering their phones, lighting, print sizes and backgrounds. Current image observations cover the selected SmartDoc recording and the four Commons examples. Live agent/AWS execution, scripted field confirmations and external use are recorded separately.

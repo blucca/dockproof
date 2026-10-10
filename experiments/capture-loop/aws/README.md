@@ -13,7 +13,7 @@ original and the derived view together.
   shared [`requirements.txt`](../requirements.txt).
 - **Wheel compatibility:** NumPy `cp313-cp313-manylinux_2_27/2_28_x86_64`;
   OpenCV `cp37-abi3-manylinux_2_28_x86_64`. Amazon Linux 2023 uses glibc 2.34.
-- **Measured package:** 77,899,299 compressed bytes; 215,862,822 uncompressed bytes,
+- **Measured package:** 77,899,382 compressed bytes; 215,863,150 uncompressed bytes,
   including the two complete wheels, license files, handler, and capture module.
   AWS reports a 262,144,000-byte uncompressed quota. The package uses private S3
   staging because its compressed size exceeds the 52,428,800-byte direct upload
@@ -55,6 +55,19 @@ function's log group. The temporary S3 bucket blocks public access; its ZIP uses
 S3-managed AES-256 encryption. After the function becomes active, deployment
 removes the ZIP object and the staging bucket. `deployment.json` records owned
 resources and supports cleanup after a partial deployment.
+
+### Update an existing measurement function
+
+Rebuild the package after editing `capture.py`, then update through the same ownership record:
+
+```bash
+python3 -B aws/build.py --output "$WORK/build"
+python3 -B aws/manage.py update \
+  --zip "$WORK/build/capture-measure.zip" \
+  --state "$WORK/deployment.json"
+```
+
+`update` reuses the recorded function, execution role and log group. It records the code update, waits for `function-updated-v2`, then removes its temporary S3 ZIP and bucket. The record remains usable by `cleanup`.
 
 The recorded account's initial Lambda quota is 10 shared concurrent executions.
 The client performs synchronous, sequential invocations through IAM-authenticated
@@ -99,6 +112,12 @@ It returned four interior corners, normalized-page focus **105.891**,
 The OpenCV measurement took **760.01 ms**. The response includes the AWS request
 ID and runtime; [`recorded-invocation.json`](recorded-invocation.json) preserves
 the measurement, package metadata, and existing invocation report.
+
+### Parcel repair deployed
+
+The **2026-10-11 (UTC+08)** update deployed the bounded-convex-hull repair, with Lambda `LastModified` **2026-10-10T18:03:12Z**. Both temporary staging resources were removed. The GLS photo produced four interior corners, normalized-page focus **340.928**, measured frame clearance **307 px**, and a **650.15 ms** OpenCV measurement. The live model opened field review, and a separate scripted browser review saved the handwritten date **12.08.2010**. A second independent cropped-label photo led to a recapture request.
+
+[The parcel session](../evidence/parcel-cloud-loop.json) contains both AWS request IDs, all four native model requests and their actual tool results. [The acceptance record](../evidence/parcel-acceptance.json) includes updated package metadata and the browser checks.
 
 ## Cleanup
 

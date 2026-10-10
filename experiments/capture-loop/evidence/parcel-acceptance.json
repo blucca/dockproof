@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-11 (UTC+08)",
+  "scope": "Two independent Commons parcel photographs selected in one local workstation; real native model tools and private AWS Lambda measurements. Uploads and field confirmation are scripted.",
+  "deployment": {
+    "function": "dockproof-capture-measure",
+    "region": "ap-southeast-2",
+    "status": "Active",
+    "lastModified": "2026-10-10T18:03:12.000+0000",
+    "stagingRemoved": true
+  },
+  "package": {
+    "runtime": "python3.13",
+    "architecture": "x86_64",
+    "zipBytes": 77899382,
+    "uncompressedBytes": 215863150,
+    "files": 996,
+    "sourceSha256": {
+      "capture.py": "c24f9166b1769be89edc007d20f5600d164a72ea60e09c454642fece238fc441",
+      "handler.py": "a065011c98c3ffbd0d20a119de2758992f708c7fa65f23152b4213771de33401"
+    }
+  },
+  "glsBrowser": {
+    "date": "2026-10-11",
+    "actor": "scripted_browser_upload_and_review",
+    "controller": "live_native_model_tools",
+    "measurementBackend": "AWS_Lambda",
+    "sample": "small-parcel.jpg",
+    "initialField": "",
+    "initialValue": "",
+    "initialConfirmation": false,
+    "captureId": "c386250a142c47a8977de79435ec7ba0",
+    "action": "prepare_document_review",
+    "execution": {
+      "service": "aws-lambda",
+      "region": "ap-southeast-2",
+      "runtime": "3.13.15",
+      "architecture": "x86_64",
+      "requestId": "61b9b5da-2afd-4986-a9ff-1aa1ad2ccd33"
+    },
+    "nativeModelRequests": 2,
+    "statusBeforeReview": "awaiting_reviewer",
+    "reviewSurvivedReload": true,
+    "desktopOverflow": 0,
+    "desktopScreenshot": "gls-desktop.png",
+    "mobileOverflow": 0,
+    "mobileScreenshot": "gls-review-mobile.png",
+    "pageErrors": []
+  },
+  "secondParcel": {
+    "sampleRelationship": "Two independent Commons parcel photographs selected in sequence; each retains its own original.",
+    "actor": "scripted_browser",
+    "cloudCaptures": 2,
+    "nativeModelRequests": 4,
+    "action": "request_document_view",
+    "request": "Adjust camera so the entire document is visible with all four corners inside the frame and clear of the edges.",
+    "reviewHidden": true,
+    "priorReviewRetained": true,
+    "activeReviewCleared": true
+  },
+  "sampleInterfaceBaseline": {
+    "status": "passed",
+    "controller": "local_OpenCV5_with_rule_based_requests",
+    "samples": {
+      "parcel": 2,
+      "smartdoc": 4
+    },
+    "gls": {
+      "action": "prepare_document_review",
+      "retainedOriginal": true,
+      "perspectiveAvailable": true
+    },
+    "scriptedReview": {
+      "field": "Date",
+      "value": "12.08.2010",
+      "reviewer": "Scripted API acceptance",
+      "captureId": "6d407eecb57c475cbcfc89bc60d008b1",
+      "sourceSha256": "2b2866a6ed76b66c42085dae16f30fa7dfa69e48f0cfbee5155c33087ce8de09",
+      "derivedSha256": "e2e15686095a3bbabe1409eeddade0dafbd9200e3da13c069ba7e2522394494a",
+      "confirmed": true,
+      "reviewedAt": "2026-10-10T18:00:34.576786+00:00"
+    },
+    "croppedLabel": {
+      "action": "request_document_view",
+      "instruction": "Place one page or label flat on a darker, plain surface. Include its four corners and move close enough to read the print, then take a fresh photo."
+    },
+    "replacementChain": true,
+    "priorReviewRetained": true,
+    "activeReviewCleared": true,
+    "sampleAllowlist": true
+  }
+}

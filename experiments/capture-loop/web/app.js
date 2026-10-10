@@ -6,6 +6,19 @@ const titles = {
   prepare_document_review: 'Ready for your field review'
 };
 let state = { captures: [], review: null }, loaded = false, busy = false;
+const parcelGuides = {
+  'small-parcel': {
+    title: 'GLS parcel label', task: '01 / Compare a field', button: 'Load GLS parcel',
+    description: 'Find the handwritten date. Recipient fields are masked in the published source.',
+    guide: 'Sample guide: at field review, compare the handwritten date in the original and perspective view, then enter the value you read. Recipient fields are masked in the published source.'
+  },
+  'package-label-reuse': {
+    title: 'Cropped shipping label', task: '02 / Improve the frame', button: 'Load cropped label',
+    description: 'The shipping label leaves the right edge. Get a request for a complete document view.',
+    guide: 'Sample guide: the shipping label is cropped at the right edge. For a fresh photo, step back, center the label and leave space around all four edges. The GLS sample shows a different parcel.'
+  }
+};
+const parcelSamples = new Map();
 const last = () => state.captures.at(-1);
 const node = (tag, text, className) => {
   const el = document.createElement(tag);
@@ -50,6 +63,22 @@ function view(url, title, detail) {
   const figure = node('figure'), caption = node('figcaption', title);
   caption.append(node('span', detail)); figure.append(imageLink(url, title), caption); return figure;
 }
+function sourceLinks(source) {
+  const credit = node('span', `${source.author} · `, 'source-credit');
+  for (const [label, href] of [[source.license, source.licenseUrl], ['Commons source ↗', source.page]]) {
+    const url = new URL(href);
+    if (!['https:', 'http:'].includes(url.protocol)) continue;
+    const link = node('a', label); link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer';
+    credit.append(link, document.createTextNode(label === source.license ? ' · ' : ''));
+  }
+  return credit;
+}
+function renderSampleContext() {
+  const sample = parcelSamples.get(last()?.source.name), context = $('sample-context');
+  context.hidden = !sample;
+  context.replaceChildren();
+  if (sample) context.append(document.createTextNode(`${parcelGuides[sample.id].guide} `), sourceLinks(sample.source));
+}
 function renderReceipt() {
   const receipt = state.review;
   $('receipt').hidden = !receipt;
@@ -80,6 +109,7 @@ function render() {
     li.append(imageLink(capture.source.url, `Original photo ${index + 1}`), detail); $('history').append(li);
   });
   renderReceipt();
+  renderSampleContext();
   if (!current) return;
   const { analysis, source } = current, ready = analysis.action === 'prepare_document_review';
   $('request-title').textContent = titles[analysis.action] || analysis.action;
@@ -136,6 +166,27 @@ $('review-form').addEventListener('submit', event => {
 async function loadSamples() {
   try {
     const data = await api('/api/samples');
+    const sampleButton = (sample, label) => {
+      const button = node('button', label); button.type = 'button'; button.disabled = busy || !loaded;
+      button.addEventListener('click', () => run('Loading the source photo, measuring it and choosing the next step…', async () => {
+        const response = await fetch(localUrl(sample.url));
+        if (!response.ok) throw new Error(`Loading the sample failed (HTTP ${response.status}).`);
+        const blob = await response.blob(); await upload(blob, `${sample.id}.${blob.type.includes('png') ? 'png' : 'jpg'}`);
+      }));
+      return button;
+    };
+    for (const sample of data.parcelSamples || []) {
+      const guide = parcelGuides[sample.id];
+      if (!guide) continue;
+      parcelSamples.set(`${sample.id}.jpg`, sample);
+      const card = node('article', undefined, 'sample parcel-sample');
+      card.append(node('p', guide.task, 'eyebrow'), imageLink(sample.url, guide.title), node('h4', guide.title), node('p', guide.description, 'small'));
+      card.append(sampleButton(sample, guide.button), sourceLinks(sample.source));
+      $('parcel-list').append(card);
+    }
+    $('parcel-status').hidden = parcelSamples.size > 0;
+    if (!parcelSamples.size) $('parcel-status').textContent = 'Parcel samples are available in the full Capture Loop checkout.';
+    renderSampleContext();
     $('sample-description').textContent = data.description;
     if (data.attributionUrl) {
       const url = new URL(data.attributionUrl);
@@ -145,15 +196,13 @@ async function loadSamples() {
       const card = node('article', undefined, 'sample');
       const kindLabel = { natural_video_frame: 'Recorded camera frame', controlled_synthetic_capture: 'Synthetic capture' }[sample.kind] || sample.kind;
       card.append(imageLink(sample.url, sample.title), node('h3', sample.title), node('p', kindLabel, 'small'));
-      const button = node('button', sample.kind === 'controlled_synthetic_capture' ? 'Use this synthetic capture' : 'Use this camera frame'); button.type = 'button'; button.disabled = busy || !loaded;
-      button.addEventListener('click', () => run('Loading the camera frame, measuring it and choosing the next step…', async () => {
-        const response = await fetch(localUrl(sample.url));
-        if (!response.ok) throw new Error(`Loading the sample failed (HTTP ${response.status}).`);
-        const blob = await response.blob(); await upload(blob, `${sample.id}.${blob.type.includes('png') ? 'png' : 'jpg'}`);
-      }));
+      const button = sampleButton(sample, sample.kind === 'controlled_synthetic_capture' ? 'Use this synthetic capture' : 'Use this camera frame');
       card.append(button); $('sample-list').append(card);
     }
-  } catch (error) { $('sample-description').textContent = `${error.message} Reload this page to load sample frames. Your own photos use the upload button above.`; }
+  } catch (error) {
+    const message = `${error.message} Reload this page to load samples. Your own photos use the upload button above.`;
+    $('sample-description').textContent = message; $('parcel-status').textContent = message; $('parcel-status').hidden = false;
+  }
 }
 run('Loading the saved session…', loadSession);
 loadSamples();

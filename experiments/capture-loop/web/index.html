@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DockProof · Capture Loop</title>
-  <meta name="description" content="Local OpenCV research: follow a capture request, compare the original and perspective view, and confirm a printed field.">
+  <meta name="description" content="Local OpenCV research: follow a capture request, compare the original and perspective view, and confirm a document field.">
   <link rel="stylesheet" href="styles.css"><script type="module" src="app.js"></script>
 </head>
 <body>
@@ -12,7 +12,7 @@
     <section class="intro" aria-labelledby="page-title">
       <p class="eyebrow">A readable photo is where it starts.</p>
       <h1 id="page-title">TAKE A<br>CLEARER<br><span>LOOK.</span></h1>
-      <p class="intro-copy">Four edges. Sharp print. A field you can check.<br>Get the next capture instruction, then compare your original and confirm the value.</p>
+      <p class="intro-copy">Four edges. Sharp detail. A field you can check.<br>Get the next capture instruction, then compare your original and confirm the value.</p>
       <div class="capture-diagram" aria-hidden="true">
         <div class="target-corner tl"></div><div class="target-corner tr"></div><div class="target-corner bl"></div><div class="target-corner br"></div>
         <div class="label-sketch"><span>DOCKPROOF / INTAKE</span><div class="sketch-rules"></div><div class="barcode"></div><b>CAPTURE → REVIEW</b></div>
@@ -22,7 +22,7 @@
     </section>
     <section class="panel intake" aria-labelledby="upload-title">
       <div class="section-head"><div><p class="eyebrow">01 / Photograph</p><h2 id="upload-title">Your next<br> clear shot.</h2></div><span class="pill" id="count">Connecting…</span></div>
-      <p>Keep the printed field and all four document edges in view. Each new photo continues the capture history.</p>
+      <p>Keep the field and all four document edges in view. Each new photo continues the capture history.</p>
       <div class="actions">
         <button class="primary" id="upload" type="button">Take / upload a photo</button>
         <input id="photo" type="file" accept="image/jpeg,image/png" capture="environment" hidden>
@@ -32,21 +32,23 @@
       <p class="small" id="file-hint">JPEG or PNG · The camera opens on supported phones.</p>
       <p id="status" class="status" role="status" aria-live="polite">Loading the saved session…</p>
       <p id="error" class="error" role="alert" hidden></p>
+      <section class="parcel-samples" aria-labelledby="parcel-title"><p class="eyebrow">Two real parcels / Two capture tasks</p><h3 id="parcel-title">Try a label. Follow the request.</h3><p class="small">Choose either independent photo. Each click adds a new capture to this session.</p><p id="parcel-status" class="small" role="status">Loading parcel samples…</p><div id="parcel-list" class="sample-grid"></div></section>
+      <details class="samples"><summary>Try the blur → clear camera sequence</summary><p id="sample-description" class="small">Loading sample details…</p><div id="sample-list" class="sample-grid"></div><a id="attribution" class="small" target="_blank" rel="noopener noreferrer" hidden>Frame source &amp; license ↗</a></details>
       <details class="data-details"><summary>Where your photos go</summary><p class="method" id="method">OpenCV 5 measurements · loading controller</p><p class="small" id="data-note">Photos and review records stay on the server running this experiment. Everyone using this server shares one research session.</p></details>
-      <details class="samples"><summary>Try recorded camera frames</summary><p id="sample-description" class="small">Loading sample details…</p><div id="sample-list" class="sample-grid"></div><a id="attribution" class="small" target="_blank" rel="noopener noreferrer" hidden>Frame source &amp; license ↗</a></details>
     </section>
     <section id="current" class="panel" aria-labelledby="request-title" hidden>
       <div class="section-head"><div><p class="eyebrow">02 / Capture request</p><h2 id="request-title" tabindex="-1"></h2></div><span id="capture-id" class="pill"></span></div>
       <p id="request" class="request"></p>
       <p id="agent-decision" class="small" hidden></p>
+      <p id="sample-context" class="sample-context small" hidden></p>
       <div id="views" class="views"></div>
       <div class="actions"><button id="another" type="button">Take / upload another photo</button></div>
       <details class="measurements"><summary>View the measurements behind this request</summary><dl id="metrics"></dl></details>
       <section id="review-area" class="review" aria-labelledby="review-title" hidden>
         <p class="eyebrow">03 / Field review</p><h2 id="review-title">Read it. Confirm it.</h2>
-        <p>Open either image at full size. Name one printed field and enter the value you can read in the original.</p>
+        <p>Open either image at full size. Name one document field and enter the value you can read in the original.</p>
         <form id="review-form">
-          <div class="form-grid"><label>Printed field<input name="field" required maxlength="120" placeholder="e.g. Shipment number"></label><label>Exact printed value<input name="value" required maxlength="400" placeholder="Copy the value from the document"></label><label>Your name / reviewer ID<input name="reviewer" required maxlength="100" autocomplete="name" placeholder="Who checked this field?"></label></div>
+          <div class="form-grid"><label>Document field<input name="field" required maxlength="120" placeholder="e.g. Date or shipment number"></label><label>Exact visible value<input name="value" required maxlength="400" placeholder="Copy the value from the document"></label><label>Your name / reviewer ID<input name="reviewer" required maxlength="100" autocomplete="name" placeholder="Who checked this field?"></label></div>
           <label class="check"><input name="confirmed" type="checkbox" required><span>I checked the intended document, compared this field in the retained original and the perspective view, and confirmed the value entered above.</span></label>
           <button class="primary" type="submit">Save field confirmation</button>
         </form>
