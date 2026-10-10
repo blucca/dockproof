@@ -1,0 +1,28 @@
+{
+  "browser": "Chromium 153 via Playwright",
+  "viewportDesktop": [
+    1440,
+    1080
+  ],
+  "viewportMobile": [
+    390,
+    844
+  ],
+  "sequence": [
+    "natural frame 10",
+    "request_sharper_capture",
+    "natural frame 22",
+    "prepare_document_review",
+    "scripted field confirmation 300 mW"
+  ],
+  "retainedOriginalHashes": true,
+  "linkedCaptures": true,
+  "reviewRestoredAfterReload": true,
+  "staleCaptureHTTP": 409,
+  "newCaptureClearsCurrentReview": true,
+  "reviewHistoryRetained": true,
+  "mobileHorizontalOverflow": false,
+  "pageErrors": [],
+  "originalRole": "Public benchmark video frames",
+  "reviewerRole": "Scripted browser reviewer"
+}

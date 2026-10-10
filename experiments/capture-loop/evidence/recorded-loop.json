@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "kind": "public_projection_of_recorded_local_session",
+  "sessionId": "022c6b32-6054-4daf-99e2-8642c027e258",
+  "createdAt": "2026-10-10T02:15:09.715236+00:00",
+  "actor": "Scripted browser uploader and reviewer using public SmartDoc benchmark frames",
+  "events": [
+    {
+      "id": "3323bcf63b014ae1a020355195ebb91f",
+      "capturedAt": "2026-10-10T02:48:18.148404+00:00",
+      "previousCaptureId": null,
+      "sourceName": "smartdoc-frame-0010.png",
+      "sourceSha256": "759166d5804ec9545e022d8fe74d4ffd233e3cfe4fb2f47033b98433b3b1dd12",
+      "analysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "759166d5804ec9545e022d8fe74d4ffd233e3cfe4fb2f47033b98433b3b1dd12",
+        "inputPx": [
+          1920,
+          1080
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "controller": "fixed_visual_rules",
+        "metrics": {
+          "boundaryMethod": "brightness_fallback",
+          "fullFrameLaplacianVariance": 3.443,
+          "fullFrameFocusThreshold": 25.0
+        },
+        "action": "request_sharper_capture",
+        "request": "Hold the camera steady, tap the printed text to focus, and wait for the letters to sharpen. Keep the whole page in view, then take a fresh photo.",
+        "elapsedMs": 243.32
+      }
+    },
+    {
+      "id": "4c7eb9620232401fbc4ea42f3f0b3bb4",
+      "capturedAt": "2026-10-10T02:48:18.621120+00:00",
+      "previousCaptureId": "3323bcf63b014ae1a020355195ebb91f",
+      "sourceName": "smartdoc-frame-0022.png",
+      "sourceSha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db",
+      "analysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db",
+        "inputPx": [
+          1920,
+          1080
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "controller": "fixed_visual_rules",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            46.91,
+            52.99,
+            48.28,
+            47.72
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameMarginPx": 8.4,
+          "documentAreaRatio": 0.1409,
+          "laplacianVariance": 105.891,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            726.0,
+            198.0
+          ],
+          [
+            1172.4000244140625,
+            196.8000030517578
+          ],
+          [
+            1244.4000244140625,
+            780.0
+          ],
+          [
+            702.0,
+            792.0
+          ]
+        ],
+        "action": "prepare_document_review",
+        "request": "Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown.",
+        "elapsedMs": 140.48
+      },
+      "derived": {
+        "sha256": "9e84fbaa8cc06f4f3d694f6ae9d5a7d578aaf944772b5def0205df964a2b9bb4",
+        "operations": [
+          "perspective_rectification",
+          "JPEG_encode_quality_95"
+        ],
+        "homography": [
+          [
+            2.319888313282867,
+            0.09373286114274172,
+            -1702.7980219496244
+          ],
+          [
+            0.0063495264125562455,
+            2.3620299616053297,
+            -472.29168857337123
+          ],
+          [
+            -3.3415069460759306e-05,
+            0.00038464466388018933,
+            1.0
+          ]
+        ],
+        "sizePx": [
+          1000,
+          1096
+        ]
+      }
+    }
+  ],
+  "review": {
+    "field": "Power Dissipation",
+    "value": "300 mW",
+    "reviewer": "Scripted browser review \u2014 public SmartDoc datasheet",
+    "captureId": "4c7eb9620232401fbc4ea42f3f0b3bb4",
+    "sourceSha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db",
+    "derivedSha256": "9e84fbaa8cc06f4f3d694f6ae9d5a7d578aaf944772b5def0205df964a2b9bb4",
+    "confirmed": true,
+    "reviewedAt": "2026-10-10T02:48:18.778883+00:00"
+  }
+}

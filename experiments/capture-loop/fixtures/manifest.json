@@ -1,0 +1,39 @@
+{
+  "description": "Four selected frames from a real handheld SmartDoc 2015 video of one printed datasheet. Try frame 10, follow its capture request, then choose frame 22. Public benchmark footage: scripted use in this local demonstration.",
+  "attributionUrl": "https://github.com/blucca/dockproof/blob/research/opencv5-capture-loop/experiments/capture-loop/fixtures/ATTRIBUTION.md",
+  "sampling": "Frames selected from one existing video to show a difficult capture and a readable subsequent view. Geometry development used frames 0 and 22; focus recovery used frame 10. Frames 110 and 154 are same-video checks. These are selected examples, with metrics reported individually.",
+  "samples": [
+    {
+      "id": "smartdoc-frame-0010",
+      "title": "Frame 10 \u00b7 Focus recovery",
+      "url": "/samples/datasheet001-frame-0010.png",
+      "kind": "natural_video_frame",
+      "split": "development",
+      "expectedAction": "request_sharper_capture"
+    },
+    {
+      "id": "smartdoc-frame-0022",
+      "title": "Frame 22 \u00b7 Readable printed field",
+      "url": "/samples/datasheet001-frame-0022.png",
+      "kind": "natural_video_frame",
+      "split": "development",
+      "expectedAction": "prepare_document_review"
+    },
+    {
+      "id": "smartdoc-frame-0110",
+      "title": "Frame 110 \u00b7 Focus recovery",
+      "url": "/samples/datasheet001-frame-0110.png",
+      "kind": "natural_video_frame",
+      "split": "same_video_check",
+      "expectedAction": "request_sharper_capture"
+    },
+    {
+      "id": "smartdoc-frame-0154",
+      "title": "Frame 154 \u00b7 Focus recovery",
+      "url": "/samples/datasheet001-frame-0154.png",
+      "kind": "natural_video_frame",
+      "split": "same_video_check",
+      "expectedAction": "request_sharper_capture"
+    }
+  ]
+}

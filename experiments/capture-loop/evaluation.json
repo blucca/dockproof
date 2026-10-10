@@ -1,0 +1,397 @@
+{
+  "schemaVersion": 2,
+  "kind": "selected_capture_examples",
+  "environment": {
+    "opencv": "5.0.0",
+    "numpy": "2.5.3",
+    "python": "3.14.7"
+  },
+  "scope": "One naturally filmed SmartDoc datasheet, selected frames from one video; three generated captures of one synthetic shipping label.",
+  "controller": "Fixed visual rules; the browser demonstration uses a scripted uploader and reviewer.",
+  "sampling": "Frames selected from one existing video to show a difficult capture and a readable subsequent view. Geometry development used frames 0 and 22; focus recovery used frame 10. Frames 110 and 154 are same-video checks. These are selected examples, with metrics reported individually.",
+  "baseline": {
+    "method": "Original largest Otsu component probe",
+    "records": [
+      {
+        "source": "datasheet001-frame-0010.png",
+        "sourceSha256": "759166d5804ec9545e022d8fe74d4ffd233e3cfe4fb2f47033b98433b3b1dd12",
+        "opencv": "5.0.0",
+        "inputPx": [
+          1920,
+          1080
+        ],
+        "fixtureType": "natural_video_frame",
+        "metrics": {
+          "polygonCorners": 7,
+          "touchesFrame": true,
+          "documentAreaRatio": 0.4378
+        },
+        "action": "request_full_edges",
+        "request": "Move back until all four label edges fit inside the frame.",
+        "elapsedMs": 39.78,
+        "expectedAction": "request_sharper_capture",
+        "matchesExpectedAction": false
+      },
+      {
+        "source": "datasheet001-frame-0022.png",
+        "sourceSha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db",
+        "opencv": "5.0.0",
+        "inputPx": [
+          1920,
+          1080
+        ],
+        "fixtureType": "natural_video_frame",
+        "metrics": {
+          "polygonCorners": 10,
+          "touchesFrame": true,
+          "documentAreaRatio": 0.4404
+        },
+        "action": "request_full_edges",
+        "request": "Move back until all four label edges fit inside the frame.",
+        "elapsedMs": 40.18,
+        "expectedAction": "prepare_document_review",
+        "matchesExpectedAction": false
+      },
+      {
+        "source": "datasheet001-frame-0110.png",
+        "sourceSha256": "9f348edea348b596990d7d24386c5fd7982776af660d7bcdf5a1ccbc6b4ce3fb",
+        "opencv": "5.0.0",
+        "inputPx": [
+          1920,
+          1080
+        ],
+        "fixtureType": "natural_video_frame",
+        "metrics": {
+          "polygonCorners": 8,
+          "touchesFrame": true,
+          "documentAreaRatio": 0.3562
+        },
+        "action": "request_full_edges",
+        "request": "Move back until all four label edges fit inside the frame.",
+        "elapsedMs": 36.1,
+        "expectedAction": "request_sharper_capture",
+        "matchesExpectedAction": false
+      },
+      {
+        "source": "datasheet001-frame-0154.png",
+        "sourceSha256": "4dea91aca9206b40fe46022d0f13a442a74786384ec09fdd88fc726332ae4b36",
+        "opencv": "5.0.0",
+        "inputPx": [
+          1920,
+          1080
+        ],
+        "fixtureType": "natural_video_frame",
+        "metrics": {
+          "polygonCorners": 8,
+          "touchesFrame": true,
+          "documentAreaRatio": 0.4376
+        },
+        "action": "request_full_edges",
+        "request": "Move back until all four label edges fit inside the frame.",
+        "elapsedMs": 39.79,
+        "expectedAction": "request_sharper_capture",
+        "matchesExpectedAction": false
+      }
+    ]
+  },
+  "natural": [
+    {
+      "opencv": "5.0.0",
+      "sourceSha256": "759166d5804ec9545e022d8fe74d4ffd233e3cfe4fb2f47033b98433b3b1dd12",
+      "inputPx": [
+        1920,
+        1080
+      ],
+      "method": "edge_and_brightness_planar_document_v2",
+      "controller": "fixed_visual_rules",
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "fullFrameLaplacianVariance": 3.443,
+        "fullFrameFocusThreshold": 25.0
+      },
+      "action": "request_sharper_capture",
+      "request": "Hold the camera steady, tap the printed text to focus, and wait for the letters to sharpen. Keep the whole page in view, then take a fresh photo.",
+      "elapsedMs": 230.69,
+      "fixture": "datasheet001-frame-0010.png",
+      "split": "development",
+      "expectedAction": "request_sharper_capture",
+      "matchesExpectedAction": true
+    },
+    {
+      "opencv": "5.0.0",
+      "sourceSha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db",
+      "inputPx": [
+        1920,
+        1080
+      ],
+      "method": "edge_and_brightness_planar_document_v2",
+      "controller": "fixed_visual_rules",
+      "metrics": {
+        "boundaryMethod": "closed_edge_quad",
+        "edgeContrastLab": [
+          46.91,
+          52.99,
+          48.28,
+          47.72
+        ],
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "frameMarginPx": 8.4,
+        "documentAreaRatio": 0.1409,
+        "laplacianVariance": 105.891,
+        "focusThreshold": 50.0
+      },
+      "documentQuadPx": [
+        [
+          726.0,
+          198.0
+        ],
+        [
+          1172.4000244140625,
+          196.8000030517578
+        ],
+        [
+          1244.4000244140625,
+          780.0
+        ],
+        [
+          702.0,
+          792.0
+        ]
+      ],
+      "derived": {
+        "file": "datasheet001-frame-0022-rectified.jpg",
+        "sha256": "9e84fbaa8cc06f4f3d694f6ae9d5a7d578aaf944772b5def0205df964a2b9bb4",
+        "operations": [
+          "perspective_rectification",
+          "JPEG_encode_quality_95"
+        ],
+        "homography": [
+          [
+            2.319888313282867,
+            0.09373286114274172,
+            -1702.7980219496244
+          ],
+          [
+            0.0063495264125562455,
+            2.3620299616053297,
+            -472.29168857337123
+          ],
+          [
+            -3.3415069460759306e-05,
+            0.00038464466388018933,
+            1.0
+          ]
+        ],
+        "sizePx": [
+          1000,
+          1096
+        ]
+      },
+      "action": "prepare_document_review",
+      "request": "Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown.",
+      "elapsedMs": 122.88,
+      "fixture": "datasheet001-frame-0022.png",
+      "split": "development",
+      "expectedAction": "prepare_document_review",
+      "matchesExpectedAction": true
+    },
+    {
+      "opencv": "5.0.0",
+      "sourceSha256": "9f348edea348b596990d7d24386c5fd7982776af660d7bcdf5a1ccbc6b4ce3fb",
+      "inputPx": [
+        1920,
+        1080
+      ],
+      "method": "edge_and_brightness_planar_document_v2",
+      "controller": "fixed_visual_rules",
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "fullFrameLaplacianVariance": 12.574,
+        "fullFrameFocusThreshold": 25.0
+      },
+      "action": "request_sharper_capture",
+      "request": "Hold the camera steady, tap the printed text to focus, and wait for the letters to sharpen. Keep the whole page in view, then take a fresh photo.",
+      "elapsedMs": 54.71,
+      "fixture": "datasheet001-frame-0110.png",
+      "split": "same_video_check",
+      "expectedAction": "request_sharper_capture",
+      "matchesExpectedAction": true
+    },
+    {
+      "opencv": "5.0.0",
+      "sourceSha256": "4dea91aca9206b40fe46022d0f13a442a74786384ec09fdd88fc726332ae4b36",
+      "inputPx": [
+        1920,
+        1080
+      ],
+      "method": "edge_and_brightness_planar_document_v2",
+      "controller": "fixed_visual_rules",
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "fullFrameLaplacianVariance": 5.405,
+        "fullFrameFocusThreshold": 25.0
+      },
+      "action": "request_sharper_capture",
+      "request": "Hold the camera steady, tap the printed text to focus, and wait for the letters to sharpen. Keep the whole page in view, then take a fresh photo.",
+      "elapsedMs": 49.99,
+      "fixture": "datasheet001-frame-0154.png",
+      "split": "same_video_check",
+      "expectedAction": "request_sharper_capture",
+      "matchesExpectedAction": true
+    }
+  ],
+  "synthetic": [
+    {
+      "opencv": "5.0.0",
+      "sourceSha256": "a604bdbc650697a7064de3f6e97327420ad2d719aa06190928d4fcd7fc896d65",
+      "inputPx": [
+        1400,
+        1000
+      ],
+      "method": "edge_and_brightness_planar_document_v2",
+      "controller": "fixed_visual_rules",
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "frameMarginPx": 8.0,
+        "documentAreaRatio": 0.4633,
+        "laplacianVariance": 0.453,
+        "focusThreshold": 50.0
+      },
+      "documentQuadPx": [
+        [
+          213.0,
+          183.0
+        ],
+        [
+          1120.0,
+          127.0
+        ],
+        [
+          1223.0,
+          759.0
+        ],
+        [
+          154.0,
+          836.0
+        ]
+      ],
+      "action": "request_sharper_capture",
+      "request": "Rest your elbows or the camera on a steady surface. Tap the printed text to focus, wait for it to settle, then take a fresh photo.",
+      "elapsedMs": 24.65,
+      "fixture": "synthetic-blurred.jpg",
+      "expectedAction": "request_sharper_capture",
+      "matchesExpectedAction": true
+    },
+    {
+      "opencv": "5.0.0",
+      "sourceSha256": "e212ff3775278be6142ff330b0aeefcc00183e40d76f1541f2a2e96abec59e2e",
+      "inputPx": [
+        1400,
+        1000
+      ],
+      "method": "edge_and_brightness_planar_document_v2",
+      "controller": "fixed_visual_rules",
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "polygonCorners": 4,
+        "touchesFrame": true,
+        "frameMarginPx": 8.0,
+        "documentAreaRatio": 0.6872
+      },
+      "action": "request_full_edges",
+      "request": "Step back slightly. Include all four page edges and a narrow strip of the darker surface around them, then take a fresh photo.",
+      "elapsedMs": 15.72,
+      "fixture": "synthetic-clipped.jpg",
+      "expectedAction": "request_full_edges",
+      "matchesExpectedAction": true
+    },
+    {
+      "opencv": "5.0.0",
+      "sourceSha256": "82a76288aa3c69a1ed676a44f5c04605a35452b4f4c3049d0c32135b607db677",
+      "inputPx": [
+        1400,
+        1000
+      ],
+      "method": "edge_and_brightness_planar_document_v2",
+      "controller": "fixed_visual_rules",
+      "metrics": {
+        "boundaryMethod": "closed_edge_quad",
+        "edgeContrastLab": [
+          185.05,
+          185.05,
+          185.05,
+          185.05
+        ],
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "frameMarginPx": 8.0,
+        "documentAreaRatio": 0.464,
+        "laplacianVariance": 673.146,
+        "focusThreshold": 50.0
+      },
+      "documentQuadPx": [
+        [
+          210.0,
+          180.0
+        ],
+        [
+          1120.0,
+          120.0
+        ],
+        [
+          1230.0,
+          760.0
+        ],
+        [
+          150.0,
+          840.0
+        ]
+      ],
+      "derived": {
+        "file": "synthetic-complete-rectified.jpg",
+        "sha256": "d0b0ea0a5e2c519538e4fd930a5c622dffc51a13cec677fe6a6cb03ea2cd119e",
+        "operations": [
+          "perspective_rectification",
+          "JPEG_encode_quality_95"
+        ],
+        "homography": [
+          [
+            1.1528799592227246,
+            0.10480726902024771,
+            -260.9700998604167
+          ],
+          [
+            0.07705220821998718,
+            1.1686251580031397,
+            -226.53349216676244
+          ],
+          [
+            6.8082229450061164e-06,
+            0.00030209161046676605,
+            1.0
+          ]
+        ],
+        "sizePx": [
+          1000,
+          612
+        ]
+      },
+      "action": "prepare_document_review",
+      "request": "Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown.",
+      "elapsedMs": 20.73,
+      "fixture": "synthetic-complete.jpg",
+      "expectedAction": "prepare_document_review",
+      "matchesExpectedAction": true
+    }
+  ],
+  "summary": {
+    "baselineNaturalMatches": 0,
+    "naturalMatches": 4,
+    "naturalCount": 4,
+    "syntheticMatches": 3,
+    "syntheticCount": 3
+  }
+}

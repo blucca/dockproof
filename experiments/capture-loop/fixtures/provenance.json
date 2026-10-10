@@ -1,0 +1,64 @@
+{
+  "dataset": "ICDAR 2015 SmartDoc Challenge 1 original sample dataset",
+  "source_record": "https://zenodo.org/records/1230218",
+  "doi": "10.5281/zenodo.1230218",
+  "source_archive": "sampleDataset.tar.gz",
+  "archive_member": "sampleDataset/input_sample/background00/datasheet001.avi",
+  "source_video_sha256": "a45f09604883d201c4e9691c67e67b3a86ffbf60470f661acf9ceac525aad6b0",
+  "source_video_bytes": 6745554,
+  "license": "CC-BY-4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "author_attribution": "Jean-Christophe Burie, Joseph Chazalon, Micka\u00ebl Coustaty, S\u00e9bastien Eskenazi, Muhammad Muzzamil Luqman, Maroua Mehri, Nibal Nayef, Jean-Marc OGIER, Sophea Prum and Mar\u00e7al Rusinol. ICDAR2015 Competition on Smartphone Document Capture and OCR (SmartDoc). ICDAR, 2015.",
+  "capture_method": "Document model printed on A4 paper and filmed handheld using Google Nexus 7, per original dataset authors. Selected frames show the same physical datasheet under natural capture variation.",
+  "transform": "Native video-frame decode to lossless PNG. This selection retains original frame composition and pixels after decode.",
+  "selection_scope": "Four selected frames from one original video. The recapture workflow replays successive dataset observations using an automated uploader.",
+  "ground_truth_corners": "Original quadrilateral annotations are distributed in the official full archive.",
+  "stream_fps": 22,
+  "frames": [
+    {
+      "file": "datasheet001-frame-0010.png",
+      "zero_based_frame_index": 10,
+      "nominal_timestamp_seconds": 0.45454545454545453,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 532431,
+      "sha256": "759166d5804ec9545e022d8fe74d4ffd233e3cfe4fb2f47033b98433b3b1dd12",
+      "decode": "Sequential cv2.VideoCapture.read starting at frame 0; original resolution; PNG lossless encoding",
+      "selection_role": "Main loop input; visible natural blur selected during this session"
+    },
+    {
+      "file": "datasheet001-frame-0022.png",
+      "zero_based_frame_index": 22,
+      "nominal_timestamp_seconds": 1.0,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 635060,
+      "sha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db",
+      "decode": "Sequential cv2.VideoCapture.read starting at frame 0; original resolution; PNG lossless encoding",
+      "selection_role": "Main loop recapture candidate; readable title and table value"
+    },
+    {
+      "file": "datasheet001-frame-0110.png",
+      "zero_based_frame_index": 110,
+      "nominal_timestamp_seconds": 5.0,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 388844,
+      "sha256": "9f348edea348b596990d7d24386c5fd7982776af660d7bcdf5a1ccbc6b4ce3fb",
+      "decode": "Sequential cv2.VideoCapture.read starting at frame 0; original resolution; PNG lossless encoding",
+      "selection_role": "Additional same-video native frame"
+    },
+    {
+      "file": "datasheet001-frame-0154.png",
+      "zero_based_frame_index": 154,
+      "nominal_timestamp_seconds": 7.0,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 616483,
+      "sha256": "4dea91aca9206b40fe46022d0f13a442a74786384ec09fdd88fc726332ae4b36",
+      "decode": "Sequential cv2.VideoCapture.read starting at frame 0; original resolution; PNG lossless encoding",
+      "selection_role": "Additional same-video native frame"
+    }
+  ],
+  "published_subset": "Four PNG frames and provenance metadata; source video is available in the linked official archive."
+}
