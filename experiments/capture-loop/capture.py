@@ -83,6 +83,11 @@ def measure(path, output):
         if area < w * h * .08:
             continue
         polygon = cv2.approxPolyDP(candidate, .025 * cv2.arcLength(candidate, True), True)
+        # Close small paper-edge notches while bounding the inferred area.
+        if len(polygon) != 4 or not cv2.isContourConvex(polygon):
+            hull = cv2.convexHull(candidate)
+            if cv2.contourArea(hull) <= area * 1.08:
+                polygon = cv2.approxPolyDP(hull, .025 * cv2.arcLength(hull, True), True)
         if len(polygon) == 4 and cv2.isContourConvex(polygon):
             contrast = boundary_contrast(lab, polygon)
             if min(contrast) >= 12:

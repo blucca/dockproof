@@ -1,0 +1,218 @@
+{
+  "kind": "selected_domain_development_check",
+  "implementation": "Local capture.py with bounded convex-hull repair.",
+  "cloudDeployment": "Existing AWS Lambda remains on the prior measurement version.",
+  "sampling": "Selected source files: GLS parcel used to diagnose and repair a contour failure; three additional controls with different label content/background or acquisition scope. Expected actions follow source-image inspection. This is a development check.",
+  "records": [
+    {
+      "file": "small-parcel.jpg",
+      "role": "development_failure_and_fix",
+      "expectedAction": "prepare_document_review",
+      "action": "prepare_document_review",
+      "matchesExpectedAction": true,
+      "request": "Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown.",
+      "observation": {
+        "opencv": "5.0.0",
+        "inputPx": [
+          1280,
+          984
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            64.23,
+            62.19,
+            85.83,
+            87.46
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 8.0,
+          "minObservedFrameGapPx": 307.0,
+          "documentAreaRatio": 0.1375,
+          "laplacianVariance": 340.928,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            342.0,
+            311.0
+          ],
+          [
+            833.0,
+            310.0
+          ],
+          [
+            836.0,
+            661.0
+          ],
+          [
+            338.0,
+            659.0
+          ]
+        ],
+        "perspectiveView": {
+          "file": "small-parcel-rectified.jpg",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              2.0912209373869497,
+              0.02403702226881536,
+              -722.6730745119382
+            ],
+            [
+              0.004258535882397134,
+              2.0909411182569473,
+              -651.7391070496905
+            ],
+            [
+              1.780924288930351e-05,
+              4.1800442401306425e-05,
+              1.0
+            ]
+          ],
+          "sizePx": [
+            1000,
+            705
+          ]
+        },
+        "geometry": "four_interior_corners",
+        "elapsedMs": 170.17
+      }
+    },
+    {
+      "file": "package-label-reuse.jpg",
+      "role": "cropped_shipping_label_check",
+      "expectedAction": "request_document_view",
+      "action": "request_document_view",
+      "matchesExpectedAction": true,
+      "request": "Place one page or label flat on a darker, plain surface. Include its four corners and move close enough to read the print, then take a fresh photo.",
+      "observation": {
+        "opencv": "5.0.0",
+        "inputPx": [
+          1280,
+          960
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "brightness_fallback",
+          "fullFrameLaplacianVariance": 528.019,
+          "fullFrameFocusThreshold": 25.0
+        },
+        "geometry": "outline_missing",
+        "elapsedMs": 40.8
+      }
+    },
+    {
+      "file": "bell-mailing-labels.jpg",
+      "role": "blank_mailing_label_geometry_control",
+      "expectedAction": "prepare_document_review",
+      "action": "prepare_document_review",
+      "matchesExpectedAction": true,
+      "request": "Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown.",
+      "observation": {
+        "opencv": "5.0.0",
+        "inputPx": [
+          1280,
+          960
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            126.26,
+            112.03,
+            119.17,
+            120.81
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 8.0,
+          "minObservedFrameGapPx": 93.0,
+          "documentAreaRatio": 0.3776,
+          "laplacianVariance": 717.825,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            217.0,
+            265.0
+          ],
+          [
+            970.0,
+            207.0
+          ],
+          [
+            1070.0,
+            772.0
+          ],
+          [
+            242.0,
+            866.0
+          ]
+        ],
+        "perspectiveView": {
+          "file": "bell-mailing-labels-rectified.jpg",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              1.3113055862960592,
+              -0.054546821393346934,
+              -270.0984045570079
+            ],
+            [
+              0.10588977649109634,
+              1.3747414085826777,
+              -387.28455477297746
+            ],
+            [
+              -4.844817822749796e-05,
+              0.00018629528209145786,
+              1.0
+            ]
+          ],
+          "sizePx": [
+            1000,
+            722
+          ]
+        },
+        "geometry": "four_interior_corners",
+        "elapsedMs": 43.98
+      }
+    },
+    {
+      "file": "korea-parcel-label.jpg",
+      "role": "masked_cropped_label_control",
+      "expectedAction": "request_document_view",
+      "action": "request_document_view",
+      "matchesExpectedAction": true,
+      "request": "Place one page or label flat on a darker, plain surface. Include its four corners and move close enough to read the print, then take a fresh photo.",
+      "observation": {
+        "opencv": "5.0.0",
+        "inputPx": [
+          1280,
+          885
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "brightness_fallback",
+          "fullFrameLaplacianVariance": 3698.893,
+          "fullFrameFocusThreshold": 25.0
+        },
+        "geometry": "outline_missing",
+        "elapsedMs": 22.06
+      }
+    }
+  ],
+  "summary": {
+    "matches": 4,
+    "count": 4
+  }
+}

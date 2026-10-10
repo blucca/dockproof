@@ -1,0 +1,147 @@
+{
+  "kind": "selected_domain_development_check",
+  "measurementVersion": "capture.py before bounded convex-hull repair",
+  "deployment": "Matches the algorithm in the existing AWS Lambda deployment at this check; measured locally.",
+  "records": [
+    {
+      "file": "bell-mailing-labels.jpg",
+      "observation": {
+        "opencv": "5.0.0",
+        "inputPx": [
+          1280,
+          960
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            126.26,
+            112.03,
+            119.17,
+            120.81
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 8.0,
+          "minObservedFrameGapPx": 93.0,
+          "documentAreaRatio": 0.3776,
+          "laplacianVariance": 717.825,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            217.0,
+            265.0
+          ],
+          [
+            970.0,
+            207.0
+          ],
+          [
+            1070.0,
+            772.0
+          ],
+          [
+            242.0,
+            866.0
+          ]
+        ],
+        "perspectiveView": {
+          "file": "bell-mailing-labels-rectified.jpg",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              1.3113055862960592,
+              -0.054546821393346934,
+              -270.0984045570079
+            ],
+            [
+              0.10588977649109634,
+              1.3747414085826777,
+              -387.28455477297746
+            ],
+            [
+              -4.844817822749796e-05,
+              0.00018629528209145786,
+              1.0
+            ]
+          ],
+          "sizePx": [
+            1000,
+            722
+          ]
+        },
+        "geometry": "four_interior_corners",
+        "elapsedMs": 216.96
+      },
+      "action": "prepare_document_review",
+      "request": "Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown."
+    },
+    {
+      "file": "korea-parcel-label.jpg",
+      "observation": {
+        "opencv": "5.0.0",
+        "inputPx": [
+          1280,
+          885
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "brightness_fallback",
+          "fullFrameLaplacianVariance": 3698.893,
+          "fullFrameFocusThreshold": 25.0
+        },
+        "geometry": "outline_missing",
+        "elapsedMs": 45.24
+      },
+      "action": "request_document_view",
+      "request": "Place one page or label flat on a darker, plain surface. Include its four corners and move close enough to read the print, then take a fresh photo."
+    },
+    {
+      "file": "package-label-reuse.jpg",
+      "observation": {
+        "opencv": "5.0.0",
+        "inputPx": [
+          1280,
+          960
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "brightness_fallback",
+          "fullFrameLaplacianVariance": 528.019,
+          "fullFrameFocusThreshold": 25.0
+        },
+        "geometry": "outline_missing",
+        "elapsedMs": 36.18
+      },
+      "action": "request_document_view",
+      "request": "Place one page or label flat on a darker, plain surface. Include its four corners and move close enough to read the print, then take a fresh photo."
+    },
+    {
+      "file": "small-parcel.jpg",
+      "observation": {
+        "opencv": "5.0.0",
+        "inputPx": [
+          1280,
+          984
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "brightness_fallback",
+          "polygonCorners": 4,
+          "touchesFrame": true,
+          "frameContactTolerancePx": 8.0,
+          "minObservedFrameGapPx": 0.0,
+          "documentAreaRatio": 0.9982
+        },
+        "geometry": "boundary_touches_frame",
+        "elapsedMs": 32.12
+      },
+      "action": "request_full_edges",
+      "request": "Step back slightly. Include all four page edges and a narrow strip of the darker surface around them, then take a fresh photo."
+    }
+  ]
+}

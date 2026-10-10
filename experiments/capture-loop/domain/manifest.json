@@ -1,0 +1,119 @@
+{
+  "kind": "independent_domain_photos",
+  "scope": "Three natural package/mailing-label photographs and one masked, nearly front-on label reproduction; selected examples from Wikimedia Commons, independent of SmartDoc.",
+  "samples": [
+    {
+      "file": "small-parcel.jpg",
+      "role": "development_failure_and_fix",
+      "geometryExpected": "interior_shipping_label",
+      "readableField": {
+        "name": "Date",
+        "value": "12.08.2010"
+      },
+      "maskedFields": "Recipient/consignee fields are obscured in the published original.",
+      "url": "images/small-parcel.jpg",
+      "source": {
+        "title": "File:Kleines paket.JPG",
+        "page": "https://commons.wikimedia.org/wiki/File:Kleines_paket.JPG",
+        "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Kleines_paket.JPG",
+        "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Kleines_paket.JPG/1280px-Kleines_paket.JPG",
+        "author": "Klaus Mueller",
+        "date": "2010-08-17",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "originalPx": [
+          2000,
+          1537
+        ],
+        "transformation": "Wikimedia official 1280px thumbnail",
+        "retrieved": "2026-10-10"
+      },
+      "beforeRepairAction": "request_full_edges",
+      "expectedAction": "prepare_document_review"
+    },
+    {
+      "file": "package-label-reuse.jpg",
+      "role": "cropped_shipping_label_check",
+      "geometryExpected": "cropped_shipping_label",
+      "url": "images/package-label-reuse.jpg",
+      "source": {
+        "title": "File:Package label reuse.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Package_label_reuse.jpg",
+        "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/0/00/Package_label_reuse.jpg",
+        "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Package_label_reuse.jpg/1280px-Package_label_reuse.jpg",
+        "author": "Klaus Mueller",
+        "date": "2019-03-25",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "originalPx": [
+          4160,
+          3120
+        ],
+        "transformation": "Wikimedia official 1280px thumbnail",
+        "retrieved": "2026-10-10"
+      },
+      "beforeRepairAction": "request_document_view",
+      "expectedAction": "request_document_view"
+    },
+    {
+      "file": "bell-mailing-labels.jpg",
+      "role": "blank_mailing_label_geometry_control",
+      "geometryExpected": "interior_label_paper",
+      "readableField": {
+        "name": "Printed form code",
+        "value": "E-1242-5 (9-91)"
+      },
+      "shipmentFields": "Blank.",
+      "url": "images/bell-mailing-labels.jpg",
+      "source": {
+        "title": "File:AT&T Bell Laboratories package mailing labels.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:AT&T_Bell_Laboratories_package_mailing_labels.jpg",
+        "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8b/AT%26T_Bell_Laboratories_package_mailing_labels.jpg",
+        "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/AT%26T_Bell_Laboratories_package_mailing_labels.jpg/1280px-AT%26T_Bell_Laboratories_package_mailing_labels.jpg",
+        "author": "Jonathan Schilling",
+        "date": "2020-01-17",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "originalPx": [
+          4032,
+          3024
+        ],
+        "transformation": "Wikimedia official 1280px thumbnail",
+        "retrieved": "2026-10-10"
+      },
+      "beforeRepairAction": "prepare_document_review",
+      "expectedAction": "prepare_document_review"
+    },
+    {
+      "file": "korea-parcel-label.jpg",
+      "role": "masked_cropped_label_control",
+      "acquisition": "Publisher lists own work; acquisition hardware and photograph-vs-scan method unspecified.",
+      "geometryExpected": "nearly_front_on_label_fills_frame",
+      "readableField": {
+        "name": "Visible routing code",
+        "value": "615"
+      },
+      "maskedFields": "Personal recipient fields and shipment-number/barcode parts obscured in source.",
+      "url": "images/korea-parcel-label.jpg",
+      "source": {
+        "title": "File:Korea stamp for parcel(made by contract logistics).jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Korea_stamp_for_parcel(made_by_contract_logistics).jpg",
+        "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/5/52/Korea_stamp_for_parcel%28made_by_contract_logistics%29.jpg",
+        "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/Korea_stamp_for_parcel%28made_by_contract_logistics%29.jpg/1280px-Korea_stamp_for_parcel%28made_by_contract_logistics%29.jpg",
+        "author": "Centrair",
+        "date": "2019-10-08",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "originalPx": [
+          2617,
+          1810
+        ],
+        "transformation": "Wikimedia official 1280px thumbnail",
+        "retrieved": "2026-10-10"
+      },
+      "beforeRepairAction": "request_document_view",
+      "expectedAction": "request_document_view"
+    }
+  ],
+  "sampling": "Selected source files: GLS parcel used to diagnose and repair a contour failure; three additional controls with different label content/background or acquisition scope. Expected actions follow source-image inspection. This is a development check."
+}

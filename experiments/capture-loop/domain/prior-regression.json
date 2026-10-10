@@ -1,0 +1,122 @@
+{
+  "kind": "reused_same_session_local_prototype_check",
+  "scope": "The bounded convex-hull algorithm was checked against four existing SmartDoc frames and three generated captures of the existing synthetic label before integration. These results are reused for this small integration.",
+  "matches": 7,
+  "count": 7,
+  "records": [
+    {
+      "file": "datasheet001-frame-0010.png",
+      "kind": "selected_smartdoc_video_frame",
+      "expectedAction": "request_sharper_capture",
+      "action": "request_sharper_capture",
+      "matchesExpectedAction": true,
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "fullFrameLaplacianVariance": 3.443,
+        "fullFrameFocusThreshold": 25.0
+      }
+    },
+    {
+      "file": "datasheet001-frame-0022.png",
+      "kind": "selected_smartdoc_video_frame",
+      "expectedAction": "prepare_document_review",
+      "action": "prepare_document_review",
+      "matchesExpectedAction": true,
+      "metrics": {
+        "boundaryMethod": "closed_edge_quad",
+        "edgeContrastLab": [
+          46.91,
+          52.99,
+          48.28,
+          47.72
+        ],
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "frameContactTolerancePx": 8.4,
+        "minObservedFrameGapPx": 193.2,
+        "documentAreaRatio": 0.1409,
+        "laplacianVariance": 105.891,
+        "focusThreshold": 50.0
+      }
+    },
+    {
+      "file": "datasheet001-frame-0110.png",
+      "kind": "selected_smartdoc_video_frame",
+      "expectedAction": "request_sharper_capture",
+      "action": "request_sharper_capture",
+      "matchesExpectedAction": true,
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "fullFrameLaplacianVariance": 12.574,
+        "fullFrameFocusThreshold": 25.0
+      }
+    },
+    {
+      "file": "datasheet001-frame-0154.png",
+      "kind": "selected_smartdoc_video_frame",
+      "expectedAction": "request_sharper_capture",
+      "action": "request_sharper_capture",
+      "matchesExpectedAction": true,
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "fullFrameLaplacianVariance": 5.405,
+        "fullFrameFocusThreshold": 25.0
+      }
+    },
+    {
+      "file": "synthetic-blurred.jpg",
+      "kind": "synthetic_label_capture",
+      "expectedAction": "request_sharper_capture",
+      "action": "request_sharper_capture",
+      "matchesExpectedAction": true,
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "frameContactTolerancePx": 8.0,
+        "minObservedFrameGapPx": 121.0,
+        "documentAreaRatio": 0.4633,
+        "laplacianVariance": 0.453,
+        "focusThreshold": 50.0
+      }
+    },
+    {
+      "file": "synthetic-clipped.jpg",
+      "kind": "synthetic_label_capture",
+      "expectedAction": "request_full_edges",
+      "action": "request_full_edges",
+      "matchesExpectedAction": true,
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "polygonCorners": 4,
+        "touchesFrame": true,
+        "frameContactTolerancePx": 8.0,
+        "minObservedFrameGapPx": 0.0,
+        "documentAreaRatio": 0.6872
+      }
+    },
+    {
+      "file": "synthetic-complete.jpg",
+      "kind": "synthetic_label_capture",
+      "expectedAction": "prepare_document_review",
+      "action": "prepare_document_review",
+      "matchesExpectedAction": true,
+      "metrics": {
+        "boundaryMethod": "closed_edge_quad",
+        "edgeContrastLab": [
+          185.05,
+          185.05,
+          185.05,
+          185.05
+        ],
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "frameContactTolerancePx": 8.0,
+        "minObservedFrameGapPx": 120.0,
+        "documentAreaRatio": 0.464,
+        "laplacianVariance": 673.146,
+        "focusThreshold": 50.0
+      }
+    }
+  ]
+}
