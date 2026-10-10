@@ -73,6 +73,39 @@ The recorded account's initial Lambda quota is 10 shared concurrent executions.
 The client performs synchronous, sequential invocations through IAM-authenticated
 `lambda:InvokeFunction`.
 
+### Persistent service identity
+
+For a hosted service that runs beyond an operator's CLI session, create a dedicated
+IAM user from the deployment record. Its single inline policy grants
+`lambda:InvokeFunction` on that exact function ARN. The resource ownership record
+and environment file belong in private storage; temporary files go beneath `WORK`.
+
+```bash
+export PRIVATE=/absolute/path/to/private-storage
+python3 -B aws/runtime_access.py create \
+  --deployment "$WORK/deployment.json" \
+  --state "$PRIVATE/capture-runtime.json" \
+  --env-file "$PRIVATE/capture-runtime.env" \
+  --work "$WORK/runtime-access"
+```
+
+Run this command with the operator's IAM administration session. The script tags
+the owned user, records each resource step, checks the one-function policy and
+active key, and writes private files with mode `0600`. Repeating `create` reuses
+the identity and key. An interrupted key-creation step is recovered through the
+owned user's key list; unusable orphan keys are revoked before a replacement.
+`--work` shares a filesystem with the private files for atomic writes.
+
+The generated file contains the access key, secret key, region, and
+`AWS_EC2_METADATA_DISABLED=true`. A systemd unit can load it with
+`EnvironmentFile=/absolute/path/to/private-storage/capture-runtime.env`.
+Set `CAPTURE_AWS_CLI` to the plain AWS CLI executable for service invocations,
+and set `CAPTURE_MEASURE_FUNCTION` to the deployed function name. The service
+environment uses the dedicated key; administration continues through the
+operator's short-term profile. Keep the generated environment and ownership
+record in private storage and serve the capture application through its existing
+request budget.
+
 ## Invoke from the agent or CLI
 
 ```bash
@@ -119,7 +152,26 @@ The **2026-10-11 (UTC+08)** update deployed the bounded-convex-hull repair, with
 
 [The parcel session](../evidence/parcel-cloud-loop.json) contains both AWS request IDs, all four native model requests and their actual tool results. [The acceptance record](../evidence/parcel-acceptance.json) includes updated package metadata and the browser checks.
 
+On **2026-10-11 (UTC+08)**, the dedicated runtime identity invoked the GLS fixture
+through the private Lambda interface. Its verified policy grants one action on
+one function; the identity has one active key, one inline policy, zero managed
+policies, and zero groups. The call returned four interior corners, focus
+**340.928**, frame clearance **307 px**, and a **674.27 ms** OpenCV measurement.
+
 ## Cleanup
+
+Stop the hosted service, then revoke its runtime key and remove the owned IAM
+policy and user through an operator session:
+
+```bash
+python3 -B aws/runtime_access.py cleanup \
+  --state "$PRIVATE/capture-runtime.json" \
+  --work "$WORK/runtime-access"
+```
+
+This also removes the private environment file. Cleanup supports a partial create
+and repeated runs; the ownership record stays available for the workspace lifecycle.
+The Lambda's separate execution role is managed by the deployment command:
 
 ```bash
 python3 -B aws/manage.py cleanup --state "$WORK/deployment.json"

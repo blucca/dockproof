@@ -41,6 +41,9 @@ async function api(path, options = {}) {
 function setBusy(value) {
   busy = value;
   document.querySelectorAll('button, #photo').forEach(el => { el.disabled = value || (!loaded && el.id !== 'reload'); });
+  if (loaded && state.captureReady === false) {
+    document.querySelectorAll('#upload, #another, #photo, [data-capture]').forEach(el => { el.disabled = true; });
+  }
   $('review-form').setAttribute('aria-busy', String(value));
 }
 async function run(message, work) {
@@ -88,13 +91,31 @@ function renderReceipt() {
 }
 function render() {
   const current = last(), captures = state.captures;
+  const hosted = state.scope?.startsWith('hosted');
   const agentMode = state.execution?.endsWith('_with_native_model_tools');
   const cloudMode = state.execution === 'AWS_Lambda_OpenCV5_with_native_model_tools';
   $('file-hint').textContent = `JPEG or PNG · Up to ${(state.maxImageBytes || 8 * 1024 * 1024).toLocaleString()} bytes · The camera opens on supported phones.`;
   $('method').textContent = agentMode ? `${cloudMode ? 'AWS · ' : ''}OpenCV 5 measurements → live model tools → your next step` : 'OpenCV 5 measurements · rule-based capture requests';
-  $('data-note').textContent = cloudMode
+  $('data-note').textContent = hosted
+    ? `This browser has its own server-side session, accessed with an essential session cookie. Originals, perspective views and review records are automatically deleted after ${state.sessionHours || 24} hours; the button below deletes them now. ${cloudMode ? 'Photos are sent to a private AWS Lambda for OpenCV measurements. Numerical measurements and previous requests are sent to Nebius for model decisions.' : 'OpenCV measurements run on this station.'} Use the supplied samples or photos cleared for this trial. Save images and export your record before the session expires.`
+    : cloudMode
     ? 'Originals and review records are retained here. Photos are sent to the configured private AWS Lambda function for measurement; numerical measurements and previous requests are sent to the model provider. This server shares one research session.'
     : 'Photos and review records stay on this server. Everyone using it shares one research session.' + (agentMode ? ' Numerical image measurements and previous requests are sent to the configured model provider.' : '');
+  $('session-note').hidden = !hosted;
+  $('delete-session').hidden = !hosted;
+  if (hosted) {
+    const allowance = state.captureAllowance;
+    const until = new Date(state.expiresAt).toLocaleString();
+    const trialUntil = new Date(state.trialExpiresAt).toLocaleString();
+    const availability = {
+      busy: 'A photo is being processed. Reload in a moment.',
+      session_limit: 'Your capture allowance is complete. Review and export your saved work below.',
+      trial_closed: 'Live capture has closed. Your saved work remains available until session expiry.',
+      service_limit: 'This trial’s capture allocation is complete. Your saved review and export are available.',
+      session_expired: 'This session has expired. Reload to open a fresh session.'
+    }[state.captureStatus];
+    $('session-note').textContent = `Your own session · ${allowance?.remaining ?? '—'} of ${allowance?.limit ?? 6} capture attempts remaining. Photos auto-delete ${until}. Live trial through ${trialUntil}. ${availability || 'Try the two parcel samples below, or upload a photo cleared for this trial.'}`;
+  }
   $('count').textContent = `${captures.length} photo${captures.length === 1 ? '' : 's'}`;
   $('upload').textContent = current ? 'Take / upload another photo' : 'Take / upload a photo';
   $('empty').hidden = captures.length > 0;
@@ -140,13 +161,17 @@ async function upload(blob, name) {
   const params = new URLSearchParams({ name });
   if (last()) params.set('replaces', last().id);
   const capture = await api(`/api/capture?${params}`, { method: 'POST', headers: { 'Content-Type': blob.type || 'application/octet-stream' }, body: blob });
-  state.captures.push(capture); state.review = null; render();
+  state = await api('/api/session'); render();
   $('status').textContent = 'Photo saved. Its measurements and next step are below.';
   $('request-title').focus({ preventScroll: true }); $('current').scrollIntoView({ block: 'start' });
 }
 $('upload').addEventListener('click', () => $('photo').click());
 $('another').addEventListener('click', () => $('photo').click());
 $('reload').addEventListener('click', () => run('Restoring the saved session…', loadSession));
+$('delete-session').addEventListener('click', () => run('Deleting this session’s saved photos and review…', async () => {
+  state = await api('/api/reset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+  render(); $('status').textContent = 'Your saved photos and review were deleted. The capture-attempt allowance is unchanged.';
+}));
 $('photo').addEventListener('change', () => {
   const file = $('photo').files[0]; $('photo').value = '';
   if (file) run('Saving the original, measuring image quality and choosing the next step…', () => upload(file, file.name));
@@ -168,6 +193,8 @@ async function loadSamples() {
     const data = await api('/api/samples');
     const sampleButton = (sample, label) => {
       const button = node('button', label); button.type = 'button'; button.disabled = busy || !loaded;
+      button.dataset.capture = 'true';
+      if (state.captureReady === false) button.disabled = true;
       button.addEventListener('click', () => run('Loading the source photo, measuring it and choosing the next step…', async () => {
         const response = await fetch(localUrl(sample.url));
         if (!response.ok) throw new Error(`Loading the sample failed (HTTP ${response.status}).`);

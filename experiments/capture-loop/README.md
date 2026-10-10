@@ -2,6 +2,8 @@
 
 **Get a readable original before reviewing a document field.** A photograph starts an evidence trail. Image measurements select a concrete capture request; a fresh photo continues the trail; the reviewer compares the retained original and a perspective-corrected view before recording a field.
 
+**[Open the live capture station →](https://blucca.github.io/research/capture-loop/)** · Free field trial through **October 14, 2026, 12:00 UTC**. Each browser gets its own session and six capture attempts. Try the two supplied parcel photos, or upload a photo cleared for the trial. Session files expire after 24 hours and can be deleted from the page.
+
 ![Capture station with real parcel samples and the AWS-measured GLS field review](evidence/parcel-gls-desktop.png)
 
 This research branch adds a capture stage to DockProof. The production claim-review application continues its existing workflow. The workstation supports the original **OpenCV 5 rule baseline** and a **live native-tool-calling model**, with optional AWS Lambda image measurement.
@@ -79,6 +81,32 @@ The two parcel cards link directly to each Commons source page and its **CC BY-S
 
 Your own files use **Take / upload a photo**. The supported subject is one flat page or label with a visible boundary against a contrasting surface. The four-edge, focus and source-comparison steps form this experiment's review contract.
 
+## Host an isolated field trial
+
+The same workstation supports a same-origin HTTPS trial. Hosted mode assigns an opaque, HTTP-only session cookie; captures, images, reviews and exports belong to that browser's workspace. The default local mode retains its single-case workflow.
+
+```sh
+# Configure the model and AWS environment described below, then expose this
+# loopback service through your HTTPS reverse proxy or development tunnel.
+python experiments/capture-loop/serve.py \
+  --state temp/capture-trial --controller agent --hosted \
+  --public-origin https://capture.example.com \
+  --expires-at 2026-10-14T12:00:00Z \
+  --session-hours 24 --max-session-captures 6 --max-total-captures 40
+```
+
+Use a private state directory on a shared host. Photo attempts are reserved in a persistent ledger before processing, including failed attempts. One photograph runs at a time; the page remains available while it processes. Every live model request also passes the existing shared credit-budget guard. A dedicated AWS runtime identity can grant invocation of the one private image function; its creation and removal are documented in [`aws/README.md`](aws/README.md).
+
+`GET /api/health` reports the trial's availability. `POST /api/reset` deletes that session's images, provider-debug files and review records while preserving its capture-attempt count. Session cleanup runs every minute and on requests. The trial expiry stops new captures; saved reviews and exports remain accessible through each session's own expiry. The page shows the storage period, expiry and remaining attempts. Feedback uses an explicit email link.
+
+The focused hosted checks are in [`tests/test_hosted.py`](tests/test_hosted.py). They exercise separate browsers, image access, capture replacement, reset, persistence and expiry using the rule controller. Actual live AWS/model browser results are recorded separately.
+
+### Public-browser run · October 11
+
+The HTTPS station completed GLS → scripted date confirmation → reload → independent cropped label. The first flow took **13.07 s**, the second **9.74 s**, across four successful model requests and two AWS image invocations. Another browser started with an empty workspace; its request for the first browser's image returned HTTP 404. Reset removed saved originals and review records while retaining the attempt count. [Browser result](evidence/hosted-acceptance.json) · [Native-tool session](evidence/hosted-cloud-loop.json).
+
+A separate GLS rendering check loaded every image successfully, including the retained original and perspective view, at desktop and 390 px widths. The screenshots show that fresh, awaiting-reviewer capture. [Image-render result](evidence/hosted-render-check.json) · [Desktop](evidence/hosted-desktop.png) · [Mobile](evidence/hosted-mobile.png). These three captures are internal scripted checks; field-trial feedback is collected separately.
+
 ## Enable live agent decisions
 
 Use **Node 26+**, the Python dependencies above, and a configured Nebius account. Set `NEBIUS_API_KEY`, `NEBIUS_MODEL` (`nvidia/nemotron-3-super-120b-a12b`) and `NEBIUS_BUDGET_FILE`. Create that private budget from the repository's `budget.example.json`, entering the actual confirmed credits, approved ceiling, model prices and expiry. Its initial zero-credit configuration pauses live requests until configured.
@@ -125,6 +153,6 @@ The earlier three-case synthetic probe remains available as `probe.py`, with its
 
 ## Source and license
 
-Code and the original synthetic shipping label: repository MIT license. Natural SmartDoc camera frames: **CC BY 4.0**, with [full author attribution, source and transformation notes](fixtures/ATTRIBUTION.md). The earlier SmartDoc screenshots include that attributed dataset. Parcel photos and their perspective views use the source-specific CC BY-SA licenses in [domain attribution](domain/ATTRIBUTION.md). The new `parcel-gls-*.png` screenshots are CC BY-SA 3.0 and include the GLS and cropped-label photographs by Klaus Mueller. OpenCV: Apache-2.0; the Python wheel includes its third-party license files.
+Code and the original synthetic shipping label: repository MIT license. Natural SmartDoc camera frames: **CC BY 4.0**, with [full author attribution, source and transformation notes](fixtures/ATTRIBUTION.md). The earlier SmartDoc screenshots include that attributed dataset. Parcel photos and their perspective views use the source-specific CC BY-SA licenses in [domain attribution](domain/ATTRIBUTION.md). The `parcel-gls-*.png` and `hosted-*.png` screenshots are CC BY-SA 3.0 and include the GLS and cropped-label photographs by Klaus Mueller. OpenCV: Apache-2.0; the Python wheel includes its third-party license files.
 
 The next evaluation scope is fresh shipping-label photography from external users, covering their phones, lighting, print sizes and backgrounds. Current image observations cover the selected SmartDoc recording and the four Commons examples. Live agent/AWS execution, scripted field confirmations and external use are recorded separately.

@@ -1,0 +1,95 @@
+{
+  "scope": "scripted_public_browser_image_render_check",
+  "allImagesDecoded": true,
+  "images": [
+    {
+      "src": "https://streets-role-francis-warranties.trycloudflare.com/samples/domain/small-parcel.jpg",
+      "width": 1280,
+      "height": 984
+    },
+    {
+      "src": "https://streets-role-francis-warranties.trycloudflare.com/samples/domain/package-label-reuse.jpg",
+      "width": 1280,
+      "height": 960
+    },
+    {
+      "src": "https://streets-role-francis-warranties.trycloudflare.com/samples/datasheet001-frame-0010.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "src": "https://streets-role-francis-warranties.trycloudflare.com/samples/datasheet001-frame-0022.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "src": "https://streets-role-francis-warranties.trycloudflare.com/samples/datasheet001-frame-0110.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "src": "https://streets-role-francis-warranties.trycloudflare.com/samples/datasheet001-frame-0154.png",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "src": "https://streets-role-francis-warranties.trycloudflare.com/files/a11f06cfc8ce438b90c7609725afccd5.jpg",
+      "width": 1280,
+      "height": 984
+    },
+    {
+      "src": "https://streets-role-francis-warranties.trycloudflare.com/files/a11f06cfc8ce438b90c7609725afccd5-rectified.jpg",
+      "width": 1000,
+      "height": 705
+    },
+    {
+      "src": "https://streets-role-francis-warranties.trycloudflare.com/files/a11f06cfc8ce438b90c7609725afccd5.jpg",
+      "width": 1280,
+      "height": 984
+    }
+  ],
+  "mediaResponses": [
+    {
+      "url": "https://streets-role-francis-warranties.trycloudflare.com/samples/domain/package-label-reuse.jpg",
+      "status": 200
+    },
+    {
+      "url": "https://streets-role-francis-warranties.trycloudflare.com/samples/domain/small-parcel.jpg",
+      "status": 200
+    },
+    {
+      "url": "https://streets-role-francis-warranties.trycloudflare.com/samples/domain/small-parcel.jpg",
+      "status": 200
+    },
+    {
+      "url": "https://streets-role-francis-warranties.trycloudflare.com/files/a11f06cfc8ce438b90c7609725afccd5.jpg",
+      "status": 200
+    },
+    {
+      "url": "https://streets-role-francis-warranties.trycloudflare.com/files/a11f06cfc8ce438b90c7609725afccd5-rectified.jpg",
+      "status": 200
+    },
+    {
+      "url": "https://streets-role-francis-warranties.trycloudflare.com/samples/datasheet001-frame-0022.png",
+      "status": 200
+    },
+    {
+      "url": "https://streets-role-francis-warranties.trycloudflare.com/samples/datasheet001-frame-0010.png",
+      "status": 200
+    },
+    {
+      "url": "https://streets-role-francis-warranties.trycloudflare.com/samples/datasheet001-frame-0110.png",
+      "status": 200
+    },
+    {
+      "url": "https://streets-role-francis-warranties.trycloudflare.com/samples/datasheet001-frame-0154.png",
+      "status": 200
+    }
+  ],
+  "action": "prepare_document_review",
+  "awsRequestId": "1c36d210-030b-4fae-a74f-a441e291f8b2",
+  "modelHttpStatuses": [
+    200,
+    200
+  ]
+}

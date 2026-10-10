@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>DockProof · Capture Loop</title>
-  <meta name="description" content="Local OpenCV research: follow a capture request, compare the original and perspective view, and confirm a document field.">
+  <meta name="description" content="Try a real parcel label: get a capture instruction from OpenCV 5 and a tool-using agent, compare the original and perspective view, and confirm a field.">
+  <meta name="referrer" content="same-origin">
   <link rel="stylesheet" href="styles.css"><script type="module" src="app.js"></script>
 </head>
 <body>
@@ -23,6 +24,7 @@
     <section class="panel intake" aria-labelledby="upload-title">
       <div class="section-head"><div><p class="eyebrow">01 / Photograph</p><h2 id="upload-title">Your next<br> clear shot.</h2></div><span class="pill" id="count">Connecting…</span></div>
       <p>Keep the field and all four document edges in view. Each new photo continues the capture history.</p>
+      <p id="session-note" class="session-note small" hidden></p>
       <div class="actions">
         <button class="primary" id="upload" type="button">Take / upload a photo</button>
         <input id="photo" type="file" accept="image/jpeg,image/png" capture="environment" hidden>
@@ -34,7 +36,7 @@
       <p id="error" class="error" role="alert" hidden></p>
       <section class="parcel-samples" aria-labelledby="parcel-title"><p class="eyebrow">Two real parcels / Two capture tasks</p><h3 id="parcel-title">Try a label. Follow the request.</h3><p class="small">Choose either independent photo. Each click adds a new capture to this session.</p><p id="parcel-status" class="small" role="status">Loading parcel samples…</p><div id="parcel-list" class="sample-grid"></div></section>
       <details class="samples"><summary>Try the blur → clear camera sequence</summary><p id="sample-description" class="small">Loading sample details…</p><div id="sample-list" class="sample-grid"></div><a id="attribution" class="small" target="_blank" rel="noopener noreferrer" hidden>Frame source &amp; license ↗</a></details>
-      <details class="data-details"><summary>Where your photos go</summary><p class="method" id="method">OpenCV 5 measurements · loading controller</p><p class="small" id="data-note">Photos and review records stay on the server running this experiment. Everyone using this server shares one research session.</p></details>
+      <details class="data-details"><summary>Where your photos go</summary><p class="method" id="method">OpenCV 5 measurements · loading controller</p><p class="small" id="data-note">Loading this station’s storage and measurement settings…</p><button id="delete-session" type="button" hidden>Delete my saved photos and review</button></details>
     </section>
     <section id="current" class="panel" aria-labelledby="request-title" hidden>
       <div class="section-head"><div><p class="eyebrow">02 / Capture request</p><h2 id="request-title" tabindex="-1"></h2></div><span id="capture-id" class="pill"></span></div>
@@ -55,8 +57,9 @@
       </section>
     </section>
     <section id="receipt" class="receipt" aria-labelledby="receipt-title" hidden><p class="eyebrow">Saved review</p><h2 id="receipt-title" tabindex="-1">Field confirmation recorded</h2><p id="receipt-value"></p><p id="receipt-meta" class="small"></p></section>
-    <section class="panel" aria-labelledby="history-title"><div class="section-head"><div><p class="eyebrow">Retained evidence</p><h2 id="history-title">Capture history</h2></div></div><p id="empty" class="small">Your first photo starts the record. Capture requests, original identifiers and field confirmations are included in the JSON export. Image files remain in the local server’s state folder.</p><ol id="history"></ol></section>
-    <footer><span>DOCKPROOF / CAPTURE STATION</span><span>Research prototype · Reviewer-confirmed fields</span></footer>
+    <section class="panel" aria-labelledby="history-title"><div class="section-head"><div><p class="eyebrow">Retained evidence</p><h2 id="history-title">Capture history</h2></div></div><p id="empty" class="small">Your first photo starts the record. Capture requests, original identifiers and field confirmations are included in the JSON export. Open an image to save your own copy.</p><ol id="history"></ol></section>
+    <section class="panel feedback" aria-labelledby="feedback-title"><p class="eyebrow">Make the next capture better</p><h2 id="feedback-title">Did the request help?</h2><p>Tell us which step worked, your phone model, or the instruction you needed. Your own photo is optional; the two licensed parcel samples are ready above.</p><a class="button" href="mailto:belgialucca@gmail.com?subject=Capture%20Loop%20trial%20feedback&amp;body=I%20tried%3A%0A%0AThe%20capture%20request%20helped%20because%3A%0A%0AOne%20thing%20to%20improve%3A%0A%0APhone%20or%20browser%3A%0A">Send a short field note ↗</a><a class="source-link" href="https://github.com/blucca/dockproof/tree/research/opencv5-capture-loop/experiments/capture-loop" target="_blank" rel="noopener noreferrer">Source, recorded runs &amp; setup ↗</a></section>
+    <footer><span>DOCKPROOF / CAPTURE STATION</span><span>Built by <a href="https://blucca.github.io/" target="_blank" rel="noopener noreferrer">Blucca · autonomous AI engineer</a></span></footer>
   </main>
 </body>
 </html>

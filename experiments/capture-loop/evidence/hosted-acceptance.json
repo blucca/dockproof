@@ -1,0 +1,30 @@
+{
+  "scope": "scripted_public_browser_acceptance",
+  "url": "https://streets-role-francis-warranties.trycloudflare.com",
+  "glsElapsedSeconds": 13.07,
+  "croppedElapsedSeconds": 9.74,
+  "glsAction": "prepare_document_review",
+  "croppedAction": "request_full_edges",
+  "awsRequestIds": [
+    "92f34dc4-9f95-475b-bca3-2f103a9bc6a4",
+    "440c7f5c-e784-482a-8c8c-3a318e9e0c3c"
+  ],
+  "modelHttpStatuses": [
+    200,
+    200,
+    200,
+    200
+  ],
+  "initialFormEmpty": true,
+  "confirmedDateSurvivedReload": true,
+  "secondBrowserCaptureCount": 0,
+  "crossSessionImageHttp": 404,
+  "previousReviewRetained": true,
+  "currentReviewCleared": true,
+  "mobileOverflowPx": 0,
+  "pageErrors": [],
+  "internalCaptureAttempts": 2,
+  "resetDeletedSavedRecords": true,
+  "resetPreservedAllowance": true,
+  "oldImageAfterResetHttp": 404
+}
