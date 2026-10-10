@@ -4,6 +4,8 @@
 
 **[Open the live capture station →](https://blucca.github.io/research/capture-loop/)** · Free field trial through **October 14, 2026, 12:00 UTC**. Each browser gets its own session and six capture attempts. Try the two supplied parcel photos, or upload a photo cleared for the trial. Session files expire after 24 hours and can be deleted from the page.
 
+**[Watch the 101-second real-browser walkthrough →](https://blucca.github.io/research/capture-loop/demo/)** · [Architecture diagram](docs/architecture.svg) · [Transcript and recording notes](docs/demo-transcript.md).
+
 ![Capture station with real parcel samples and the AWS-measured GLS field review](evidence/parcel-gls-desktop.png)
 
 This research branch adds a capture stage to DockProof. The production claim-review application continues its existing workflow. The workstation supports the original **OpenCV 5 rule baseline** and a **live native-tool-calling model**, with optional AWS Lambda image measurement.

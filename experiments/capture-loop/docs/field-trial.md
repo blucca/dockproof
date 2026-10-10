@@ -53,6 +53,8 @@ A local scripted evaluation matched the expected capture action on all four. Sev
 
 ## A two-minute phone trial
 
+[Watch the 101-second working walkthrough](https://blucca.github.io/research/capture-loop/demo/): a cropped label, a separate GLS parcel, and a scripted field confirmation through the live AWS/model service.
+
 [Open Capture Loop](https://blucca.github.io/research/capture-loop/) on your phone. Try the included GLS sample, or photograph a label you can share. Follow one requested retake, then compare the original and straightened view.
 
 The limited-capacity live trial runs through **October 14, 2026, 12:00 UTC**, with **six photo attempts per browser session**. Session files expire after **24 hours**.

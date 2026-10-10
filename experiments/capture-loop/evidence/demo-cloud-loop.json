@@ -1,0 +1,540 @@
+{
+  "scope": "Scripted real HTTPS browser demonstration; two independent licensed parcel photographs; live native model tools and AWS OpenCV 5; field supplied by the script.",
+  "recordedAt": "2026-10-10T21:33:34.002550+00:00",
+  "execution": "AWS_Lambda_OpenCV5_with_native_model_tools",
+  "captures": [
+    {
+      "id": "24bf8cc2270b4e7c83e8858fb2dedd7d",
+      "capturedAt": "2026-10-10T21:33:52.134689+00:00",
+      "previousCaptureId": null,
+      "source": {
+        "file": "24bf8cc2270b4e7c83e8858fb2dedd7d.jpg",
+        "name": "package-label-reuse.jpg",
+        "sha256": "9be0000a42c20b7609ad1f9028d0f351abd215731bcf59a09b10f3abffcee87e",
+        "width": 1280,
+        "height": 960,
+        "url": "/files/24bf8cc2270b4e7c83e8858fb2dedd7d.jpg"
+      },
+      "analysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "9be0000a42c20b7609ad1f9028d0f351abd215731bcf59a09b10f3abffcee87e",
+        "inputPx": [
+          1280,
+          960
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "brightness_fallback",
+          "fullFrameLaplacianVariance": 528.019,
+          "fullFrameFocusThreshold": 25
+        },
+        "geometry": "outline_missing",
+        "elapsedMs": 547.92,
+        "execution": {
+          "service": "aws-lambda",
+          "region": "ap-southeast-2",
+          "runtime": "3.13.15",
+          "architecture": "x86_64",
+          "requestId": "bdcb6891-384e-4553-966d-7dac55582e3b"
+        },
+        "controller": "live_native_model_tools",
+        "action": "request_full_edges",
+        "request": "Position the document so all four corners are fully visible inside the frame and the document lies flat.",
+        "agent": {
+          "model": "nvidia/nemotron-3-super-120b-a12b",
+          "tool": "request_recapture",
+          "rationale": "Geometry measurement shows outline missing, indicating the document is not fully captured or touching frame edges.",
+          "status": "awaiting_new_capture",
+          "calls": 2,
+          "traceFile": "24bf8cc2270b4e7c83e8858fb2dedd7d-agent.json"
+        }
+      },
+      "agentTrace": {
+        "schemaVersion": 1,
+        "controller": "live_native_model_tools",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
+        "measurementBackend": "AWS_Lambda",
+        "startedAt": "2026-10-10T21:33:44.609Z",
+        "captureId": "24bf8cc2270b4e7c83e8858fb2dedd7d",
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "inspect_capture",
+              "description": "Measure the current original using OpenCV 5. Returns geometry, focus and an available perspective view.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "captureId": {
+                    "type": "string",
+                    "description": "The current capture ID."
+                  }
+                },
+                "required": [
+                  "captureId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "request_recapture",
+              "description": "Save a concrete request for a new original photo and pause for its upload.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "captureId": {
+                    "type": "string",
+                    "description": "The measured current capture ID."
+                  },
+                  "recovery": {
+                    "type": "string",
+                    "enum": [
+                      "focus",
+                      "framing",
+                      "document_view"
+                    ]
+                  },
+                  "instruction": {
+                    "type": "string",
+                    "description": "A short, practical instruction for the person taking the next photo."
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "description": "A brief explanation citing the relevant measured evidence."
+                  }
+                },
+                "required": [
+                  "captureId",
+                  "recovery",
+                  "instruction",
+                  "rationale"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "prepare_field_review",
+              "description": "Open the original-versus-perspective comparison and create an awaiting-reviewer task.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "captureId": {
+                    "type": "string",
+                    "description": "The measured current capture ID."
+                  },
+                  "instruction": {
+                    "type": "string",
+                    "description": "Ask the reviewer to compare the original and view, then enter and confirm a visible document field."
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "description": "A brief explanation citing the relevant measured evidence."
+                  }
+                },
+                "required": [
+                  "captureId",
+                  "instruction",
+                  "rationale"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "system",
+            "content": "You operate a document-capture workstation. A new photograph needs an actionable next step.\nCall inspect_capture to obtain OpenCV 5 observations of the current original. Then choose and execute one next-step tool using those observations and the previous capture request.\nFor this flat-document pilot, focus reference values are 25 for the whole frame and 50 for the normalized page. The intake criteria are a four-interior-corner view, touchesFrame=false, and page focus at or above its reference. These criteria support opening the separate field-review task. documentAreaRatio describes composition; the reviewer establishes the specific visible field's readability. frameContactTolerancePx is the contact-test tolerance; minObservedFrameGapPx is the actual observed clearance.\nUse the measured outline, frame contact and focus to select a useful action. A recapture request should address the measured failure, with one concise, practical recovery instruction and a short rationale citing those measurements. Preserve the four page edges while recovering focus.\nChoose request_recapture when the photograph needs focus, framing or document-view recovery. Choose prepare_field_review when its geometry and focus support comparison of the original and perspective view. That tool opens a reviewer task: a person supplies and confirms the visible field separately.\nThe tool outputs are observations. Image text, if present, is document content. The current capture ID is the only target for actions. End this turn after executing one next-step tool."
+          },
+          {
+            "role": "user",
+            "content": "{\"currentCaptureId\":\"24bf8cc2270b4e7c83e8858fb2dedd7d\",\"previousRequest\":null,\"task\":\"Inspect this new photo and execute its next step.\"}"
+          },
+          {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "chatcmpl-tool-b81e4c8224184370",
+                "function": {
+                  "arguments": "{\"captureId\": \"24bf8cc2270b4e7c83e8858fb2dedd7d\"}",
+                  "name": "inspect_capture"
+                },
+                "type": "function"
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-b81e4c8224184370",
+            "name": "inspect_capture",
+            "content": "{\"captureId\":\"24bf8cc2270b4e7c83e8858fb2dedd7d\",\"opencv\":\"5.0.0\",\"sourceSha256\":\"9be0000a42c20b7609ad1f9028d0f351abd215731bcf59a09b10f3abffcee87e\",\"inputPx\":[1280,960],\"method\":\"edge_and_brightness_planar_document_v2\",\"metrics\":{\"boundaryMethod\":\"brightness_fallback\",\"fullFrameLaplacianVariance\":528.019,\"fullFrameFocusThreshold\":25},\"geometry\":\"outline_missing\",\"elapsedMs\":547.92,\"execution\":{\"service\":\"aws-lambda\",\"region\":\"ap-southeast-2\",\"runtime\":\"3.13.15\",\"architecture\":\"x86_64\",\"requestId\":\"bdcb6891-384e-4553-966d-7dac55582e3b\"}}"
+          },
+          {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "chatcmpl-tool-bb659baae0479cfd",
+                "function": {
+                  "arguments": "{\"captureId\": \"24bf8cc2270b4e7c83e8858fb2dedd7d\", \"recovery\": \"framing\", \"instruction\": \"Position the document so all four corners are fully visible inside the frame and the document lies flat.\", \"rationale\": \"Geometry measurement shows outline missing, indicating the document is not fully captured or touching frame edges.\"}",
+                  "name": "request_recapture"
+                },
+                "type": "function"
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-bb659baae0479cfd",
+            "name": "request_recapture",
+            "content": "{\"saved\":true,\"captureId\":\"24bf8cc2270b4e7c83e8858fb2dedd7d\",\"action\":\"request_full_edges\",\"tool\":\"request_recapture\",\"instruction\":\"Position the document so all four corners are fully visible inside the frame and the document lies flat.\",\"rationale\":\"Geometry measurement shows outline missing, indicating the document is not fully captured or touching frame edges.\",\"status\":\"awaiting_new_capture\",\"review\":null}"
+          }
+        ],
+        "calls": [
+          {
+            "round": 1,
+            "httpStatus": 200,
+            "finishReason": "tool_calls",
+            "elapsedMs": 1343,
+            "toolNames": [
+              "inspect_capture"
+            ]
+          },
+          {
+            "round": 2,
+            "httpStatus": 200,
+            "finishReason": "tool_calls",
+            "elapsedMs": 1923,
+            "toolNames": [
+              "request_recapture"
+            ]
+          }
+        ],
+        "status": "awaiting_new_capture",
+        "completedAt": "2026-10-10T21:33:52.127Z",
+        "action": {
+          "action": "request_full_edges",
+          "tool": "request_recapture",
+          "instruction": "Position the document so all four corners are fully visible inside the frame and the document lies flat.",
+          "rationale": "Geometry measurement shows outline missing, indicating the document is not fully captured or touching frame edges.",
+          "status": "awaiting_new_capture",
+          "review": null
+        }
+      }
+    },
+    {
+      "id": "64383fe462ea40c287bb5620e8908a76",
+      "capturedAt": "2026-10-10T21:34:07.727928+00:00",
+      "previousCaptureId": "24bf8cc2270b4e7c83e8858fb2dedd7d",
+      "source": {
+        "file": "64383fe462ea40c287bb5620e8908a76.jpg",
+        "name": "small-parcel.jpg",
+        "sha256": "2b2866a6ed76b66c42085dae16f30fa7dfa69e48f0cfbee5155c33087ce8de09",
+        "width": 1280,
+        "height": 984,
+        "url": "/files/64383fe462ea40c287bb5620e8908a76.jpg"
+      },
+      "analysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "2b2866a6ed76b66c42085dae16f30fa7dfa69e48f0cfbee5155c33087ce8de09",
+        "inputPx": [
+          1280,
+          984
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            64.23,
+            62.19,
+            85.83,
+            87.46
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 8,
+          "minObservedFrameGapPx": 307,
+          "documentAreaRatio": 0.1375,
+          "laplacianVariance": 340.928,
+          "focusThreshold": 50
+        },
+        "documentQuadPx": [
+          [
+            342,
+            311
+          ],
+          [
+            833,
+            310
+          ],
+          [
+            836,
+            661
+          ],
+          [
+            338,
+            659
+          ]
+        ],
+        "geometry": "four_interior_corners",
+        "elapsedMs": 218.02,
+        "execution": {
+          "service": "aws-lambda",
+          "region": "ap-southeast-2",
+          "runtime": "3.13.15",
+          "architecture": "x86_64",
+          "requestId": "603adfe8-a5af-4231-aa05-2737b9a50bee"
+        },
+        "controller": "live_native_model_tools",
+        "action": "prepare_document_review",
+        "request": "Compare the original and perspective view, then enter and confirm the visible document field.",
+        "agent": {
+          "model": "nvidia/nemotron-3-super-120b-a12b",
+          "tool": "prepare_field_review",
+          "rationale": "Four interior corners detected, touchesFrame=false, minObservedFrameGapPx=307, laplacianVariance=340.9 (> focusThreshold 50), meeting geometry and focus criteria for field review.",
+          "status": "awaiting_reviewer",
+          "calls": 2,
+          "traceFile": "64383fe462ea40c287bb5620e8908a76-agent.json"
+        },
+        "derived": {
+          "file": "64383fe462ea40c287bb5620e8908a76-rectified.jpg",
+          "sha256": "e2e15686095a3bbabe1409eeddade0dafbd9200e3da13c069ba7e2522394494a",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              2.0912209373869497,
+              0.02403702226881536,
+              -722.6730745119382
+            ],
+            [
+              0.004258535882397134,
+              2.0909411182569473,
+              -651.7391070496905
+            ],
+            [
+              1.780924288930351e-05,
+              4.1800442401306425e-05,
+              1
+            ]
+          ],
+          "sizePx": [
+            1000,
+            705
+          ],
+          "url": "/files/64383fe462ea40c287bb5620e8908a76-rectified.jpg"
+        }
+      },
+      "agentTrace": {
+        "schemaVersion": 1,
+        "controller": "live_native_model_tools",
+        "model": "nvidia/nemotron-3-super-120b-a12b",
+        "measurementBackend": "AWS_Lambda",
+        "startedAt": "2026-10-10T21:34:01.801Z",
+        "captureId": "64383fe462ea40c287bb5620e8908a76",
+        "tools": [
+          {
+            "type": "function",
+            "function": {
+              "name": "inspect_capture",
+              "description": "Measure the current original using OpenCV 5. Returns geometry, focus and an available perspective view.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "captureId": {
+                    "type": "string",
+                    "description": "The current capture ID."
+                  }
+                },
+                "required": [
+                  "captureId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "request_recapture",
+              "description": "Save a concrete request for a new original photo and pause for its upload.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "captureId": {
+                    "type": "string",
+                    "description": "The measured current capture ID."
+                  },
+                  "recovery": {
+                    "type": "string",
+                    "enum": [
+                      "focus",
+                      "framing",
+                      "document_view"
+                    ]
+                  },
+                  "instruction": {
+                    "type": "string",
+                    "description": "A short, practical instruction for the person taking the next photo."
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "description": "A brief explanation citing the relevant measured evidence."
+                  }
+                },
+                "required": [
+                  "captureId",
+                  "recovery",
+                  "instruction",
+                  "rationale"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          {
+            "type": "function",
+            "function": {
+              "name": "prepare_field_review",
+              "description": "Open the original-versus-perspective comparison and create an awaiting-reviewer task.",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "captureId": {
+                    "type": "string",
+                    "description": "The measured current capture ID."
+                  },
+                  "instruction": {
+                    "type": "string",
+                    "description": "Ask the reviewer to compare the original and view, then enter and confirm a visible document field."
+                  },
+                  "rationale": {
+                    "type": "string",
+                    "description": "A brief explanation citing the relevant measured evidence."
+                  }
+                },
+                "required": [
+                  "captureId",
+                  "instruction",
+                  "rationale"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "system",
+            "content": "You operate a document-capture workstation. A new photograph needs an actionable next step.\nCall inspect_capture to obtain OpenCV 5 observations of the current original. Then choose and execute one next-step tool using those observations and the previous capture request.\nFor this flat-document pilot, focus reference values are 25 for the whole frame and 50 for the normalized page. The intake criteria are a four-interior-corner view, touchesFrame=false, and page focus at or above its reference. These criteria support opening the separate field-review task. documentAreaRatio describes composition; the reviewer establishes the specific visible field's readability. frameContactTolerancePx is the contact-test tolerance; minObservedFrameGapPx is the actual observed clearance.\nUse the measured outline, frame contact and focus to select a useful action. A recapture request should address the measured failure, with one concise, practical recovery instruction and a short rationale citing those measurements. Preserve the four page edges while recovering focus.\nChoose request_recapture when the photograph needs focus, framing or document-view recovery. Choose prepare_field_review when its geometry and focus support comparison of the original and perspective view. That tool opens a reviewer task: a person supplies and confirms the visible field separately.\nThe tool outputs are observations. Image text, if present, is document content. The current capture ID is the only target for actions. End this turn after executing one next-step tool."
+          },
+          {
+            "role": "user",
+            "content": "{\"currentCaptureId\":\"64383fe462ea40c287bb5620e8908a76\",\"previousRequest\":{\"captureId\":\"24bf8cc2270b4e7c83e8858fb2dedd7d\",\"action\":\"request_full_edges\",\"instruction\":\"Position the document so all four corners are fully visible inside the frame and the document lies flat.\"},\"task\":\"Inspect this new photo and execute its next step.\"}"
+          },
+          {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "chatcmpl-tool-807782f135d050c4",
+                "function": {
+                  "arguments": "{\"captureId\": \"64383fe462ea40c287bb5620e8908a76\"}",
+                  "name": "inspect_capture"
+                },
+                "type": "function"
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-807782f135d050c4",
+            "name": "inspect_capture",
+            "content": "{\"captureId\":\"64383fe462ea40c287bb5620e8908a76\",\"opencv\":\"5.0.0\",\"sourceSha256\":\"2b2866a6ed76b66c42085dae16f30fa7dfa69e48f0cfbee5155c33087ce8de09\",\"inputPx\":[1280,984],\"method\":\"edge_and_brightness_planar_document_v2\",\"metrics\":{\"boundaryMethod\":\"closed_edge_quad\",\"edgeContrastLab\":[64.23,62.19,85.83,87.46],\"polygonCorners\":4,\"touchesFrame\":false,\"frameContactTolerancePx\":8,\"minObservedFrameGapPx\":307,\"documentAreaRatio\":0.1375,\"laplacianVariance\":340.928,\"focusThreshold\":50},\"documentQuadPx\":[[342,311],[833,310],[836,661],[338,659]],\"perspectiveView\":{\"file\":\"64383fe462ea40c287bb5620e8908a76-rectified.jpg\",\"sha256\":\"e2e15686095a3bbabe1409eeddade0dafbd9200e3da13c069ba7e2522394494a\",\"operations\":[\"perspective_rectification\",\"JPEG_encode_quality_95\"],\"homography\":[[2.0912209373869497,0.02403702226881536,-722.6730745119382],[0.004258535882397134,2.0909411182569473,-651.7391070496905],[0.00001780924288930351,0.000041800442401306425,1]],\"sizePx\":[1000,705]},\"geometry\":\"four_interior_corners\",\"elapsedMs\":218.02,\"execution\":{\"service\":\"aws-lambda\",\"region\":\"ap-southeast-2\",\"runtime\":\"3.13.15\",\"architecture\":\"x86_64\",\"requestId\":\"603adfe8-a5af-4231-aa05-2737b9a50bee\"}}"
+          },
+          {
+            "role": "assistant",
+            "content": null,
+            "tool_calls": [
+              {
+                "id": "chatcmpl-tool-9a3c52a6c78ac84d",
+                "function": {
+                  "arguments": "{\"captureId\": \"64383fe462ea40c287bb5620e8908a76\", \"instruction\": \"Compare the original and perspective view, then enter and confirm the visible document field.\", \"rationale\": \"Four interior corners detected, touchesFrame=false, minObservedFrameGapPx=307, laplacianVariance=340.9 (> focusThreshold 50), meeting geometry and focus criteria for field review.\"}",
+                  "name": "prepare_field_review"
+                },
+                "type": "function"
+              }
+            ]
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-9a3c52a6c78ac84d",
+            "name": "prepare_field_review",
+            "content": "{\"saved\":true,\"captureId\":\"64383fe462ea40c287bb5620e8908a76\",\"action\":\"prepare_document_review\",\"tool\":\"prepare_field_review\",\"instruction\":\"Compare the original and perspective view, then enter and confirm the visible document field.\",\"rationale\":\"Four interior corners detected, touchesFrame=false, minObservedFrameGapPx=307, laplacianVariance=340.9 (> focusThreshold 50), meeting geometry and focus criteria for field review.\",\"status\":\"awaiting_reviewer\",\"review\":null,\"sourceSha256\":\"2b2866a6ed76b66c42085dae16f30fa7dfa69e48f0cfbee5155c33087ce8de09\",\"perspectiveView\":{\"file\":\"64383fe462ea40c287bb5620e8908a76-rectified.jpg\",\"sha256\":\"e2e15686095a3bbabe1409eeddade0dafbd9200e3da13c069ba7e2522394494a\",\"operations\":[\"perspective_rectification\",\"JPEG_encode_quality_95\"],\"homography\":[[2.0912209373869497,0.02403702226881536,-722.6730745119382],[0.004258535882397134,2.0909411182569473,-651.7391070496905],[0.00001780924288930351,0.000041800442401306425,1]],\"sizePx\":[1000,705]}}"
+          }
+        ],
+        "calls": [
+          {
+            "round": 1,
+            "httpStatus": 200,
+            "finishReason": "tool_calls",
+            "elapsedMs": 1258,
+            "toolNames": [
+              "inspect_capture"
+            ]
+          },
+          {
+            "round": 2,
+            "httpStatus": 200,
+            "finishReason": "tool_calls",
+            "elapsedMs": 1594,
+            "toolNames": [
+              "prepare_field_review"
+            ]
+          }
+        ],
+        "status": "awaiting_reviewer",
+        "completedAt": "2026-10-10T21:34:07.720Z",
+        "action": {
+          "action": "prepare_document_review",
+          "tool": "prepare_field_review",
+          "instruction": "Compare the original and perspective view, then enter and confirm the visible document field.",
+          "rationale": "Four interior corners detected, touchesFrame=false, minObservedFrameGapPx=307, laplacianVariance=340.9 (> focusThreshold 50), meeting geometry and focus criteria for field review.",
+          "status": "awaiting_reviewer",
+          "review": null
+        }
+      }
+    }
+  ],
+  "review": {
+    "field": "Date",
+    "value": "12.08.2010",
+    "reviewer": "Scripted demo reviewer",
+    "captureId": "64383fe462ea40c287bb5620e8908a76",
+    "sourceSha256": "2b2866a6ed76b66c42085dae16f30fa7dfa69e48f0cfbee5155c33087ce8de09",
+    "derivedSha256": "e2e15686095a3bbabe1409eeddade0dafbd9200e3da13c069ba7e2522394494a",
+    "confirmed": true,
+    "reviewedAt": "2026-10-10T21:34:24.571914+00:00"
+  },
+  "reviews": [
+    {
+      "field": "Date",
+      "value": "12.08.2010",
+      "reviewer": "Scripted demo reviewer",
+      "captureId": "64383fe462ea40c287bb5620e8908a76",
+      "sourceSha256": "2b2866a6ed76b66c42085dae16f30fa7dfa69e48f0cfbee5155c33087ce8de09",
+      "derivedSha256": "e2e15686095a3bbabe1409eeddade0dafbd9200e3da13c069ba7e2522394494a",
+      "confirmed": true,
+      "reviewedAt": "2026-10-10T21:34:24.571914+00:00"
+    }
+  ]
+}

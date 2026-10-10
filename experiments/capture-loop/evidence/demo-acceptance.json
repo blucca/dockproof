@@ -1,0 +1,46 @@
+{
+  "scope": "Scripted real HTTPS browser demonstration; two independent licensed parcel photographs; live native model tools and AWS OpenCV 5; field supplied by the script.",
+  "captureResults": [
+    {
+      "name": "cropped-ready",
+      "time": 26.986,
+      "elapsedSeconds": 14.79,
+      "action": "Include all four edges",
+      "request": "Position the document so all four corners are fully visible inside the frame and the document lies flat."
+    },
+    {
+      "name": "gls-ready",
+      "time": 42.579,
+      "elapsedSeconds": 8.605,
+      "action": "Ready for your field review",
+      "request": "Compare the original and perspective view, then enter and confirm the visible document field."
+    }
+  ],
+  "reviewSaved": "Date: 12.08.2010",
+  "modelHttp200Requests": 4,
+  "awsImageInvocations": 2,
+  "demoSessionDeletedViaUI": true,
+  "pageErrors": [],
+  "video": {
+    "durationSeconds": 101.141328,
+    "width": 1920,
+    "height": 1080,
+    "captionCues": 18,
+    "fullPlaybackAt1x": true,
+    "mediaError": null,
+    "keyFramesReviewed": [
+      22,
+      43,
+      76
+    ]
+  },
+  "mobileWatchPage": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "horizontalOverflow": 0,
+    "measure": "scrollWidth - clientWidth"
+  },
+  "validationNote": "Full-film assertions passed before the original mobile test subtracted the scrollbar-inclusive innerWidth. The mobile check was corrected to clientWidth and passed; the final media was retained."
+}
