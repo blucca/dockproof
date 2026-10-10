@@ -6,6 +6,18 @@
 
 This research branch adds a capture stage to DockProof. The production claim-review application continues its existing workflow. The workstation supports the original **OpenCV 5 rule baseline** and a **live native-tool-calling model**, with optional AWS Lambda image measurement.
 
+## Independent parcel photographs
+
+[Four licensed shipping-label examples](domain/README.md) now extend the SmartDoc checks. A real GLS parcel exposed a five-corner paper-edge failure; a bounded convex-hull candidate recovers the label and leads to a readable-date review. The original failure, integrated local results, attribution and a reproducible check are public. The GLS case is a repair-development example; the remaining photos cover cropped, masked and blank-label controls. The AWS function currently runs the prior measurement build; the domain repair is local pending its next explicit deployment.
+
+## Capture station interface
+
+![Capture station desktop interface with a signal-yellow capture poster and the photo controls](evidence/station-desktop.png)
+
+The station uses a warehouse-signage direction: condensed lettering, signal yellow, cobalt annotations, square controls, and a label-framing diagram. The mobile layout gives the photograph action its own full-width control. Original identifiers remain in the exported record; image captions focus on the source and the next review action. The locally bundled Barlow Condensed font is SIL Open Font License 1.1; see [`web/fonts/OFL.txt`](web/fonts/OFL.txt).
+
+The updated interface completed the recorded SmartDoc frame 10 → frame 22 → scripted `Power Dissipation: 300 mW` confirmation. The saved review survived reload, the 390 px and 320 px layouts had no horizontal overflow, and no page errors occurred. [Mobile view](evidence/station-mobile.png) · [Field comparison](evidence/station-review-mobile.png) · [Acceptance record](evidence/station-acceptance.json). This interface run uses the local rule controller; the earlier AWS/model execution is recorded separately below.
+
 ## The agent's actual job
 
 The model calls `inspect_capture`, receives numerical OpenCV observations, and chooses a next-step tool. `request_recapture` saves a concrete request and waits for a new original. `prepare_field_review` opens the source-versus-perspective comparison and waits for a reviewer. Field entry and confirmation use the separate review form.

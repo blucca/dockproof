@@ -7,7 +7,6 @@ const titles = {
 };
 let state = { captures: [], review: null }, loaded = false, busy = false;
 const last = () => state.captures.at(-1);
-const shortHash = hash => String(hash || '').slice(0, 16);
 const node = (tag, text, className) => {
   const el = document.createElement(tag);
   if (text !== undefined) el.textContent = text;
@@ -56,7 +55,7 @@ function renderReceipt() {
   $('receipt').hidden = !receipt;
   if (!receipt) return;
   $('receipt-value').textContent = `${receipt.field}: ${receipt.value}`;
-  $('receipt-meta').textContent = `Checked by ${receipt.reviewer} · ${new Date(receipt.reviewedAt).toLocaleString()} · Capture ${receipt.captureId} · Source SHA-256 ${receipt.sourceSha256}`;
+  $('receipt-meta').textContent = `Checked by ${receipt.reviewer} · ${new Date(receipt.reviewedAt).toLocaleString()} · Capture ${receipt.captureId}`;
 }
 function render() {
   const current = last(), captures = state.captures;
@@ -76,7 +75,7 @@ function render() {
     const li = node('li'), detail = node('div');
     detail.append(node('strong', `${index + 1}. ${titles[capture.analysis.action] || capture.analysis.action}`));
     detail.append(node('p', capture.source.name));
-    detail.append(node('p', `SHA-256 ${shortHash(capture.source.sha256)}… · ${capture.source.width} × ${capture.source.height} px`));
+    detail.append(node('p', `${capture.source.width} × ${capture.source.height} px · Original retained`));
     if (capture.previousCaptureId) detail.append(node('p', `Follows capture ${capture.previousCaptureId}`));
     li.append(imageLink(capture.source.url, `Original photo ${index + 1}`), detail); $('history').append(li);
   });
@@ -88,10 +87,10 @@ function render() {
   $('request').textContent = analysis.request;
   $('agent-decision').hidden = !analysis.agent;
   $('agent-decision').textContent = analysis.agent ? `Agent executed ${analysis.agent.tool} · ${analysis.agent.rationale} Full tool calls are included in the session export.` : '';
-  $('views').replaceChildren(view(source.url, 'Retained original ↗', `${source.name} · ${source.width} × ${source.height} px · SHA-256 ${shortHash(source.sha256)}…`));
+  $('views').replaceChildren(view(source.url, 'Retained original ↗', `${source.name} · ${source.width} × ${source.height} px · Original retained`));
   if (analysis.derived) {
     const derived = analysis.derived;
-    $('views').append(view(derived.url, 'Perspective-corrected view ↗', `${(derived.sizePx || []).join(' × ')} px · SHA-256 ${shortHash(derived.sha256)}… · Derived from this original`));
+    $('views').append(view(derived.url, 'Perspective-corrected view ↗', `${(derived.sizePx || []).join(' × ')} px · Derived from this original`));
   }
   $('metrics').replaceChildren();
   for (const [key, value] of Object.entries(analysis.metrics || {})) {
@@ -130,7 +129,7 @@ $('review-form').addEventListener('submit', event => {
     if (!payload.field || !payload.value || !payload.reviewer || !payload.confirmed) throw new Error('Enter the field, value and reviewer, then check the comparison box.');
     state.review = await api('/api/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     renderReceipt(); $('review-form').elements.confirmed.checked = false;
-    $('status').textContent = 'Field confirmation saved with its original source hash.';
+    $('status').textContent = 'Field confirmation saved with its retained original.';
     $('receipt-title').focus({ preventScroll: true }); $('receipt').scrollIntoView({ block: 'center' });
   });
 });

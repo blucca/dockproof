@@ -1,0 +1,9 @@
+{
+  "mode": "local rule baseline; scripted upload and reviewer",
+  "flow": "natural frame10 -> sharper request -> frame22 -> field confirmation",
+  "value": "Power Dissipation: 300 mW",
+  "mobileOverflow": false,
+  "errors": [],
+  "narrowOverflow": false,
+  "persistedAfterReload": "Power Dissipation: 300 mW"
+}

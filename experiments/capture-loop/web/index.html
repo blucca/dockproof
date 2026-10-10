@@ -7,17 +7,21 @@
   <link rel="stylesheet" href="styles.css"><script type="module" src="app.js"></script>
 </head>
 <body>
-  <header><a class="brand" href="./">DockProof<span> / Capture Loop</span></a><span class="pill">Local research</span></header>
+  <header><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">D/</span> DockProof <span class="brand-sub">Capture station</span></a><span class="station-id">OPENCV 5 <span aria-hidden="true">↗</span> INTAKE / 01</span></header>
   <main>
-    <section class="intro">
-      <p class="eyebrow">Document intake · OpenCV 5</p>
-      <h1>A clearer photo.<br>A traceable review.</h1>
-      <p>Follow a specific capture request, compare the original with its perspective view, then confirm the printed field you need.</p>
-      <p class="method" id="method">OpenCV 5 measurements · loading controller</p>
-      <p class="small" id="data-note">Photos and review records stay on the server running this local experiment. Everyone using this server shares one research session.</p>
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">A readable photo is where it starts.</p>
+      <h1 id="page-title">TAKE A<br>CLEARER<br><span>LOOK.</span></h1>
+      <p class="intro-copy">Four edges. Sharp print. A field you can check.<br>Get the next capture instruction, then compare your original and confirm the value.</p>
+      <div class="capture-diagram" aria-hidden="true">
+        <div class="target-corner tl"></div><div class="target-corner tr"></div><div class="target-corner bl"></div><div class="target-corner br"></div>
+        <div class="label-sketch"><span>DOCKPROOF / INTAKE</span><div class="sketch-rules"></div><div class="barcode"></div><b>CAPTURE → REVIEW</b></div>
+        <span class="diagram-note">KEEP THE WHOLE LABEL IN FRAME</span>
+      </div>
+      <ol class="flow-strip" aria-label="Capture workflow"><li><b>01</b> Photograph</li><li><b>02</b> Compare</li><li><b>03</b> Confirm</li></ol>
     </section>
-    <section class="panel" aria-labelledby="upload-title">
-      <div class="section-head"><div><p class="eyebrow">01 / Photograph</p><h2 id="upload-title">Start with the document</h2></div><span class="pill" id="count">Connecting…</span></div>
+    <section class="panel intake" aria-labelledby="upload-title">
+      <div class="section-head"><div><p class="eyebrow">01 / Photograph</p><h2 id="upload-title">Your next<br> clear shot.</h2></div><span class="pill" id="count">Connecting…</span></div>
       <p>Keep the printed field and all four document edges in view. Each new photo continues the capture history.</p>
       <div class="actions">
         <button class="primary" id="upload" type="button">Take / upload a photo</button>
@@ -28,6 +32,7 @@
       <p class="small" id="file-hint">JPEG or PNG · The camera opens on supported phones.</p>
       <p id="status" class="status" role="status" aria-live="polite">Loading the saved session…</p>
       <p id="error" class="error" role="alert" hidden></p>
+      <details class="data-details"><summary>Where your photos go</summary><p class="method" id="method">OpenCV 5 measurements · loading controller</p><p class="small" id="data-note">Photos and review records stay on the server running this experiment. Everyone using this server shares one research session.</p></details>
       <details class="samples"><summary>Try recorded camera frames</summary><p id="sample-description" class="small">Loading sample details…</p><div id="sample-list" class="sample-grid"></div><a id="attribution" class="small" target="_blank" rel="noopener noreferrer" hidden>Frame source &amp; license ↗</a></details>
     </section>
     <section id="current" class="panel" aria-labelledby="request-title" hidden>
@@ -48,8 +53,8 @@
       </section>
     </section>
     <section id="receipt" class="receipt" aria-labelledby="receipt-title" hidden><p class="eyebrow">Saved review</p><h2 id="receipt-title" tabindex="-1">Field confirmation recorded</h2><p id="receipt-value"></p><p id="receipt-meta" class="small"></p></section>
-    <section class="panel" aria-labelledby="history-title"><div class="section-head"><div><p class="eyebrow">Retained evidence</p><h2 id="history-title">Capture history</h2></div></div><p id="empty" class="small">Your first photo starts the record. Original fingerprints, capture requests and field confirmations are included in the JSON export. Image files remain in the local server’s state folder.</p><ol id="history"></ol></section>
-    <footer>DockProof Capture Loop · Research thresholds · Reviewer-confirmed fields</footer>
+    <section class="panel" aria-labelledby="history-title"><div class="section-head"><div><p class="eyebrow">Retained evidence</p><h2 id="history-title">Capture history</h2></div></div><p id="empty" class="small">Your first photo starts the record. Capture requests, original identifiers and field confirmations are included in the JSON export. Image files remain in the local server’s state folder.</p><ol id="history"></ol></section>
+    <footer><span>DOCKPROOF / CAPTURE STATION</span><span>Research prototype · Reviewer-confirmed fields</span></footer>
   </main>
 </body>
 </html>
