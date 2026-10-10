@@ -7,6 +7,7 @@ import { randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import { reserveBudget } from '../../src/budget.mjs';
+import { assertFieldReviewEligible } from './agent-contract.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SYSTEM = `You operate a document-capture workstation. A new photograph needs an actionable next step.
@@ -88,9 +89,7 @@ async function main() {
       return { saved: true, captureId, ...action };
     }
     if (name === 'prepare_field_review') {
-      if (!observation.perspectiveView || observation.geometry !== 'four_interior_corners') {
-        throw new Error('A field-review task requires a measured four-corner perspective view.');
-      }
+      assertFieldReviewEligible(observation);
       action = { action: 'prepare_document_review', tool: name, instruction, rationale,
         status: 'awaiting_reviewer', review: null };
       return { saved: true, captureId, ...action, sourceSha256: observation.sourceSha256,

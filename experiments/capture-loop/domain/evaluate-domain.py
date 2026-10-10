@@ -32,7 +32,11 @@ def main():
     result = {
         'kind': 'selected_domain_development_check',
         'implementation': 'Local capture.py with bounded convex-hull repair.',
-        'cloudDeployment': 'Existing AWS Lambda remains on the prior measurement version.',
+        'executionScope': 'This command measures the current local capture.py implementation.',
+        'recordedCloudEvidence': {
+            'pathBase': 'experiments/capture-loop/domain/',
+            'session': '../evidence/parcel-cloud-loop.json',
+            'deploymentAndBrowser': '../evidence/parcel-acceptance.json'},
         'sampling': manifest['sampling'], 'records': records,
         'summary': {'matches': sum(r['matchesExpectedAction'] for r in records),
                     'count': len(records)}}

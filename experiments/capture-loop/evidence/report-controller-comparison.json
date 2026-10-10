@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "kind": "recorded_controller_comparison",
+  "scope": "Four scripted sessions reuse four source images. The comparison covers saved actions on these selected observations.",
+  "method": "Apply the current capture.rule_policy to each recorded AWS observation; compare its action with the native action saved in that capture.",
+  "sourcePathBase": "experiments/capture-loop/evidence/",
+  "categoryDefinition": {
+    "prepare_document_review": "review",
+    "request_sharper_capture": "recapture",
+    "request_full_edges": "recapture",
+    "request_document_view": "recapture"
+  },
+  "summary": {
+    "sessions": 4,
+    "photoExecutions": 8,
+    "distinctSourceImages": 4,
+    "actionCategoryMatches": 8,
+    "exactActionMatches": 6
+  },
+  "records": [
+    {
+      "session": "agent-loop.json",
+      "captureIndex": 0,
+      "sourceName": "SmartDoc natural frame 0010.png",
+      "sourceSha256": "759166d5804ec9545e022d8fe74d4ffd233e3cfe4fb2f47033b98433b3b1dd12",
+      "geometry": "outline_missing",
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "fullFrameLaplacianVariance": 3.443,
+        "fullFrameFocusThreshold": 25
+      },
+      "currentRuleAction": "request_sharper_capture",
+      "nativeTool": "request_recapture",
+      "nativeAction": "request_sharper_capture",
+      "exactActionMatch": true,
+      "actionCategoryMatch": true
+    },
+    {
+      "session": "agent-loop.json",
+      "captureIndex": 1,
+      "sourceName": "SmartDoc natural frame 0022.png",
+      "sourceSha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db",
+      "geometry": "four_interior_corners",
+      "metrics": {
+        "boundaryMethod": "closed_edge_quad",
+        "edgeContrastLab": [
+          46.91,
+          52.99,
+          48.28,
+          47.72
+        ],
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "frameContactTolerancePx": 8.4,
+        "minObservedFrameGapPx": 193.2,
+        "documentAreaRatio": 0.1409,
+        "laplacianVariance": 105.891,
+        "focusThreshold": 50
+      },
+      "currentRuleAction": "prepare_document_review",
+      "nativeTool": "prepare_field_review",
+      "nativeAction": "prepare_document_review",
+      "exactActionMatch": true,
+      "actionCategoryMatch": true
+    },
+    {
+      "session": "parcel-cloud-loop.json",
+      "captureIndex": 0,
+      "sourceName": "small-parcel.jpg",
+      "sourceSha256": "2b2866a6ed76b66c42085dae16f30fa7dfa69e48f0cfbee5155c33087ce8de09",
+      "geometry": "four_interior_corners",
+      "metrics": {
+        "boundaryMethod": "closed_edge_quad",
+        "edgeContrastLab": [
+          64.23,
+          62.19,
+          85.83,
+          87.46
+        ],
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "frameContactTolerancePx": 8,
+        "minObservedFrameGapPx": 307,
+        "documentAreaRatio": 0.1375,
+        "laplacianVariance": 340.928,
+        "focusThreshold": 50
+      },
+      "currentRuleAction": "prepare_document_review",
+      "nativeTool": "prepare_field_review",
+      "nativeAction": "prepare_document_review",
+      "exactActionMatch": true,
+      "actionCategoryMatch": true
+    },
+    {
+      "session": "parcel-cloud-loop.json",
+      "captureIndex": 1,
+      "sourceName": "package-label-reuse.jpg",
+      "sourceSha256": "9be0000a42c20b7609ad1f9028d0f351abd215731bcf59a09b10f3abffcee87e",
+      "geometry": "outline_missing",
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "fullFrameLaplacianVariance": 528.019,
+        "fullFrameFocusThreshold": 25
+      },
+      "currentRuleAction": "request_document_view",
+      "nativeTool": "request_recapture",
+      "nativeAction": "request_document_view",
+      "exactActionMatch": true,
+      "actionCategoryMatch": true
+    },
+    {
+      "session": "hosted-cloud-loop.json",
+      "captureIndex": 0,
+      "sourceName": "small-parcel.jpg",
+      "sourceSha256": "2b2866a6ed76b66c42085dae16f30fa7dfa69e48f0cfbee5155c33087ce8de09",
+      "geometry": "four_interior_corners",
+      "metrics": {
+        "boundaryMethod": "closed_edge_quad",
+        "edgeContrastLab": [
+          64.23,
+          62.19,
+          85.83,
+          87.46
+        ],
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "frameContactTolerancePx": 8,
+        "minObservedFrameGapPx": 307,
+        "documentAreaRatio": 0.1375,
+        "laplacianVariance": 340.928,
+        "focusThreshold": 50
+      },
+      "currentRuleAction": "prepare_document_review",
+      "nativeTool": "prepare_field_review",
+      "nativeAction": "prepare_document_review",
+      "exactActionMatch": true,
+      "actionCategoryMatch": true
+    },
+    {
+      "session": "hosted-cloud-loop.json",
+      "captureIndex": 1,
+      "sourceName": "package-label-reuse.jpg",
+      "sourceSha256": "9be0000a42c20b7609ad1f9028d0f351abd215731bcf59a09b10f3abffcee87e",
+      "geometry": "outline_missing",
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "fullFrameLaplacianVariance": 528.019,
+        "fullFrameFocusThreshold": 25
+      },
+      "currentRuleAction": "request_document_view",
+      "nativeTool": "request_recapture",
+      "nativeAction": "request_full_edges",
+      "exactActionMatch": false,
+      "actionCategoryMatch": true
+    },
+    {
+      "session": "demo-cloud-loop.json",
+      "captureIndex": 0,
+      "sourceName": "package-label-reuse.jpg",
+      "sourceSha256": "9be0000a42c20b7609ad1f9028d0f351abd215731bcf59a09b10f3abffcee87e",
+      "geometry": "outline_missing",
+      "metrics": {
+        "boundaryMethod": "brightness_fallback",
+        "fullFrameLaplacianVariance": 528.019,
+        "fullFrameFocusThreshold": 25
+      },
+      "currentRuleAction": "request_document_view",
+      "nativeTool": "request_recapture",
+      "nativeAction": "request_full_edges",
+      "exactActionMatch": false,
+      "actionCategoryMatch": true
+    },
+    {
+      "session": "demo-cloud-loop.json",
+      "captureIndex": 1,
+      "sourceName": "small-parcel.jpg",
+      "sourceSha256": "2b2866a6ed76b66c42085dae16f30fa7dfa69e48f0cfbee5155c33087ce8de09",
+      "geometry": "four_interior_corners",
+      "metrics": {
+        "boundaryMethod": "closed_edge_quad",
+        "edgeContrastLab": [
+          64.23,
+          62.19,
+          85.83,
+          87.46
+        ],
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "frameContactTolerancePx": 8,
+        "minObservedFrameGapPx": 307,
+        "documentAreaRatio": 0.1375,
+        "laplacianVariance": 340.928,
+        "focusThreshold": 50
+      },
+      "currentRuleAction": "prepare_document_review",
+      "nativeTool": "prepare_field_review",
+      "nativeAction": "prepare_document_review",
+      "exactActionMatch": true,
+      "actionCategoryMatch": true
+    }
+  ]
+}
