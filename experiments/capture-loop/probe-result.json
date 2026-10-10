@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "kind": "controlled_capture_feasibility_probe",
+  "source": "web/data/scans/synthetic-piece-label.png",
+  "sourceSha256": "c9336ebfcc51d6b12646bf047c0cfe709b46e546c8eb329f30540a3938988f76",
+  "role": "Scripted uploader following image-quality requests",
+  "scope": "One synthetic label, contrasted flat background, three generated captures",
+  "thresholdBasis": "Fixed feasibility threshold; field calibration is a product work item",
+  "records": [
+    {
+      "source": "01-blurred.jpg",
+      "sourceSha256": "a604bdbc650697a7064de3f6e97327420ad2d719aa06190928d4fcd7fc896d65",
+      "opencv": "5.0.0",
+      "inputPx": [
+        1400,
+        1000
+      ],
+      "fixtureType": "controlled_synthetic_capture",
+      "metrics": {
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "documentAreaRatio": 0.4633,
+        "laplacianVariance": 0.453,
+        "focusThreshold": 50.0
+      },
+      "documentQuadPx": [
+        [
+          213.0,
+          183.0
+        ],
+        [
+          1120.0,
+          127.0
+        ],
+        [
+          1223.0,
+          759.0
+        ],
+        [
+          154.0,
+          836.0
+        ]
+      ],
+      "action": "request_sharper_capture",
+      "request": "Hold the camera steady and focus on the printed weight and shipment number.",
+      "elapsedMs": 25.3,
+      "expectedProbeAction": "request_sharper_capture",
+      "matchesProbeExpectation": true
+    },
+    {
+      "source": "02-clipped.jpg",
+      "sourceSha256": "e212ff3775278be6142ff330b0aeefcc00183e40d76f1541f2a2e96abec59e2e",
+      "opencv": "5.0.0",
+      "inputPx": [
+        1400,
+        1000
+      ],
+      "fixtureType": "controlled_synthetic_capture",
+      "metrics": {
+        "polygonCorners": 4,
+        "touchesFrame": true,
+        "documentAreaRatio": 0.6872
+      },
+      "action": "request_full_edges",
+      "request": "Move back until all four label edges fit inside the frame.",
+      "elapsedMs": 7.2,
+      "expectedProbeAction": "request_full_edges",
+      "matchesProbeExpectation": true
+    },
+    {
+      "source": "03-complete.jpg",
+      "sourceSha256": "82a76288aa3c69a1ed676a44f5c04605a35452b4f4c3049d0c32135b607db677",
+      "opencv": "5.0.0",
+      "inputPx": [
+        1400,
+        1000
+      ],
+      "fixtureType": "controlled_synthetic_capture",
+      "metrics": {
+        "polygonCorners": 4,
+        "touchesFrame": false,
+        "documentAreaRatio": 0.4629,
+        "laplacianVariance": 668.548,
+        "focusThreshold": 50.0
+      },
+      "documentQuadPx": [
+        [
+          211.0,
+          180.0
+        ],
+        [
+          1120.0,
+          121.0
+        ],
+        [
+          1229.0,
+          760.0
+        ],
+        [
+          150.0,
+          839.0
+        ]
+      ],
+      "action": "prepare_document_review",
+      "request": "Compare the printed weight and shipment number with the retained original.",
+      "derived": {
+        "file": "03-complete-rectified.jpg",
+        "sha256": "a4fe4de8916a9ca89bbc5907372d85bf676e0271b5e1659598b94182b01ee6eb",
+        "operations": [
+          "perspective_rectification",
+          "JPEG_encode_quality_95"
+        ],
+        "homography": [
+          [
+            1.153919400244872,
+            0.1068119626933797,
+            -262.70314673647636
+          ],
+          [
+            0.07598443619312517,
+            1.1706754660940821,
+            -226.75429993368422
+          ],
+          [
+            6.2549936006604315e-06,
+            0.00030288339400369257,
+            1.0
+          ]
+        ],
+        "sizePx": [
+          1000,
+          612
+        ]
+      },
+      "elapsedMs": 18.65,
+      "expectedProbeAction": "prepare_document_review",
+      "matchesProbeExpectation": true
+    }
+  ],
+  "allProbeActionsMatch": true
+}
