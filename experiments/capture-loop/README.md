@@ -6,6 +6,8 @@
 
 **[Watch the 101-second real-browser walkthrough →](https://blucca.github.io/research/capture-loop/demo/)** · [Architecture diagram](docs/architecture.svg) · [Transcript and recording notes](docs/demo-transcript.md).
 
+**[Read the technical report →](https://blucca.github.io/research/capture-loop/report/)** · [Download the eight-page PDF](https://blucca.github.io/research/capture-loop/report/capture-loop-report.pdf). Problem, OpenCV implementation, selected-case results, fixed/native controller comparison, AWS delivery, reproduction, and field-study plan. [Report source](docs/technical-report.html).
+
 ![Capture station with real parcel samples and the AWS-measured GLS field review](evidence/parcel-gls-desktop.png)
 
 This research branch adds a capture stage to DockProof. The production claim-review application continues its existing workflow. The workstation supports the original **OpenCV 5 rule baseline** and a **live native-tool-calling model**, with optional AWS Lambda image measurement.
@@ -49,7 +51,7 @@ New original → model calls inspect_capture → OpenCV 5 (local or AWS Lambda)
                           saved next step + native tool trace
 ```
 
-`capture.measure()` returns observations. `capture.rule_policy()` serves the baseline. The agent receives geometry, numeric measurements and the available view; its selected function is executed and persisted by the workstation. The next photo carries the earlier request into the next model turn. Every model request passes the repository's persistent credit-budget guard.
+`capture.measure()` returns observations. `capture.rule_policy()` serves the baseline. The agent receives geometry, numeric measurements and the available view; its selected function is executed and persisted by the workstation. The next photo carries the earlier request into the next model turn. The review executor enforces four interior corners, a perspective view, clear frame contact, and finite page focus meeting its returned threshold; the reviewer supplies the field separately. Every model request passes the repository's persistent credit-budget guard.
 
 The [initial live-agent failure](evidence/agent-initial-failure.json) exposed a useful interface error: the model read the old `frameMarginPx` tolerance as measured clearance and asked for another framing change on frame 22. The tool now distinguishes `frameContactTolerancePx` from `minObservedFrameGapPx`, and describes page area as composition context. The intake contract uses page geometry and focus to open the separate field-legibility review.
 
@@ -152,6 +154,8 @@ uv run --no-project --with numpy==2.5.3 --with opencv-python-headless==5.0.0.93 
 ```
 
 The earlier three-case synthetic probe remains available as `probe.py`, with its original recorded run in `probe-result.json`. The new evaluation reports natural and synthetic observations separately.
+
+The report’s current image reruns are [`evidence/report-selected.json`](evidence/report-selected.json) and [`evidence/report-domain.json`](evidence/report-domain.json). [`compare-controllers.py`](compare-controllers.py) applies the current rule policy to the observations in four recorded native sessions: eight photo executions reuse four source images; broad recapture/review actions agree in 8/8, exact action names in 6/8. Run it with the same pinned Python environment and `--output temp/controller-comparison.json`. The focused review-gate checks use `node --test experiments/capture-loop/tests/agent-contract.test.mjs`.
 
 ## Source and license
 

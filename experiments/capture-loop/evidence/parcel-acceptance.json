@@ -41,9 +41,9 @@
     "statusBeforeReview": "awaiting_reviewer",
     "reviewSurvivedReload": true,
     "desktopOverflow": 0,
-    "desktopScreenshot": "gls-desktop.png",
+    "desktopScreenshot": "parcel-gls-desktop.png",
     "mobileOverflow": 0,
-    "mobileScreenshot": "gls-review-mobile.png",
+    "mobileScreenshot": "parcel-gls-mobile.png",
     "pageErrors": []
   },
   "secondParcel": {
