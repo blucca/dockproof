@@ -1,0 +1,107 @@
+{
+  "recordedAt": "2026-10-10",
+  "fixture": "fixtures/datasheet001-frame-0022.png",
+  "package": {
+    "runtime": "python3.13",
+    "architecture": "x86_64",
+    "zipBytes": 77899299,
+    "uncompressedBytes": 215862822,
+    "uncompressedLimitBytes": 262144000,
+    "files": 996,
+    "wheelMetadata": {
+      "numpy-2.5.3.dist-info": "Wheel-Version: 1.0\nGenerator: meson\nRoot-Is-Purelib: false\nTag: cp313-cp313-manylinux_2_27_x86_64\nTag: cp313-cp313-manylinux_2_28_x86_64\n\n",
+      "opencv_python_headless-5.0.0.93.dist-info": "Wheel-Version: 1.0\nGenerator: skbuild 0.19.1\nRoot-Is-Purelib: false\nTag: cp37-abi3-manylinux_2_28_x86_64\n\n"
+    }
+  },
+  "configuration": {
+    "memoryMiB": 1024,
+    "timeoutSeconds": 30,
+    "temporaryDiskMiB": 512,
+    "entry": "IAM-authenticated synchronous Lambda Invoke",
+    "region": "ap-southeast-2"
+  },
+  "observation": {
+    "opencv": "5.0.0",
+    "sourceSha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db",
+    "inputPx": [
+      1920,
+      1080
+    ],
+    "method": "edge_and_brightness_planar_document_v2",
+    "metrics": {
+      "boundaryMethod": "closed_edge_quad",
+      "edgeContrastLab": [
+        46.91,
+        52.99,
+        48.28,
+        47.72
+      ],
+      "polygonCorners": 4,
+      "touchesFrame": false,
+      "frameContactTolerancePx": 8.4,
+      "minObservedFrameGapPx": 193.2,
+      "documentAreaRatio": 0.1409,
+      "laplacianVariance": 105.891,
+      "focusThreshold": 50.0
+    },
+    "documentQuadPx": [
+      [
+        726.0,
+        198.0
+      ],
+      [
+        1172.4000244140625,
+        196.8000030517578
+      ],
+      [
+        1244.4000244140625,
+        780.0
+      ],
+      [
+        702.0,
+        792.0
+      ]
+    ],
+    "perspectiveView": {
+      "file": "datasheet001-frame-0022-rectified.jpg",
+      "sha256": "9e84fbaa8cc06f4f3d694f6ae9d5a7d578aaf944772b5def0205df964a2b9bb4",
+      "operations": [
+        "perspective_rectification",
+        "JPEG_encode_quality_95"
+      ],
+      "homography": [
+        [
+          2.319888313282867,
+          0.09373286114274172,
+          -1702.7980219496244
+        ],
+        [
+          0.0063495264125562455,
+          2.3620299616053297,
+          -472.29168857337123
+        ],
+        [
+          -3.3415069460759306e-05,
+          0.00038464466388018933,
+          1.0
+        ]
+      ],
+      "sizePx": [
+        1000,
+        1096
+      ]
+    },
+    "geometry": "four_interior_corners",
+    "elapsedMs": 760.01,
+    "execution": {
+      "service": "aws-lambda",
+      "region": "ap-southeast-2",
+      "runtime": "3.13.15",
+      "architecture": "x86_64",
+      "requestId": "04d295b2-0cff-4349-a46b-ef9ffbeb8352"
+    }
+  },
+  "perspectiveJpegBytes": 183517,
+  "cloudWatchReport": "REPORT RequestId: 04d295b2-0cff-4349-a46b-ef9ffbeb8352\tDuration: 777.81 ms\tBilled Duration: 1414 ms\tMemory Size: 1024 MB\tMax Memory Used: 176 MB\tInit Duration: 635.35 ms",
+  "temporaryDeploymentStorage": "S3 object and bucket deleted after activation"
+}

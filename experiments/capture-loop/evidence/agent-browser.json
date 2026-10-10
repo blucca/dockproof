@@ -1,0 +1,9 @@
+{
+  "width": 390,
+  "documentWidth": 375,
+  "method": "AWS \u00b7 OpenCV 5 measurements \u2192 live model tools \u2192 your next step",
+  "agentDecision": "Agent executed prepare_field_review \u00b7 The image shows a four\u2011interior\u2011corner view (touchesFrame=false, minObservedFrameGapPx=193.2) and sufficient focus (laplacianVariance=105.891\u202f\u2265\u202ffocusThreshold\u202f50), meeting intake criteria for field review. Full tool calls are included in the session export.",
+  "reviewOpen": true,
+  "receipt": "Power Dissipation: 300 mW",
+  "pageErrors": []
+}

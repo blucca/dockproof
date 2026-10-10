@@ -60,6 +60,13 @@ function renderReceipt() {
 }
 function render() {
   const current = last(), captures = state.captures;
+  const agentMode = state.execution?.endsWith('_with_native_model_tools');
+  const cloudMode = state.execution === 'AWS_Lambda_OpenCV5_with_native_model_tools';
+  $('file-hint').textContent = `JPEG or PNG · Up to ${(state.maxImageBytes || 8 * 1024 * 1024).toLocaleString()} bytes · The camera opens on supported phones.`;
+  $('method').textContent = agentMode ? `${cloudMode ? 'AWS · ' : ''}OpenCV 5 measurements → live model tools → your next step` : 'OpenCV 5 measurements · rule-based capture requests';
+  $('data-note').textContent = cloudMode
+    ? 'Originals and review records are retained here. Photos are sent to the configured private AWS Lambda function for measurement; numerical measurements and previous requests are sent to the model provider. This server shares one research session.'
+    : 'Photos and review records stay on this server. Everyone using it shares one research session.' + (agentMode ? ' Numerical image measurements and previous requests are sent to the configured model provider.' : '');
   $('count').textContent = `${captures.length} photo${captures.length === 1 ? '' : 's'}`;
   $('upload').textContent = current ? 'Take / upload another photo' : 'Take / upload a photo';
   $('empty').hidden = captures.length > 0;
@@ -79,6 +86,8 @@ function render() {
   $('request-title').textContent = titles[analysis.action] || analysis.action;
   $('capture-id').textContent = `Photo ${captures.length}`;
   $('request').textContent = analysis.request;
+  $('agent-decision').hidden = !analysis.agent;
+  $('agent-decision').textContent = analysis.agent ? `Agent executed ${analysis.agent.tool} · ${analysis.agent.rationale} Full tool calls are included in the session export.` : '';
   $('views').replaceChildren(view(source.url, 'Retained original ↗', `${source.name} · ${source.width} × ${source.height} px · SHA-256 ${shortHash(source.sha256)}…`));
   if (analysis.derived) {
     const derived = analysis.derived;
@@ -111,7 +120,7 @@ $('another').addEventListener('click', () => $('photo').click());
 $('reload').addEventListener('click', () => run('Restoring the saved session…', loadSession));
 $('photo').addEventListener('change', () => {
   const file = $('photo').files[0]; $('photo').value = '';
-  if (file) run('Saving the original and measuring image quality…', () => upload(file, file.name));
+  if (file) run('Saving the original, measuring image quality and choosing the next step…', () => upload(file, file.name));
 });
 $('review-form').addEventListener('submit', event => {
   event.preventDefault();
@@ -138,7 +147,7 @@ async function loadSamples() {
       const kindLabel = { natural_video_frame: 'Recorded camera frame', controlled_synthetic_capture: 'Synthetic capture' }[sample.kind] || sample.kind;
       card.append(imageLink(sample.url, sample.title), node('h3', sample.title), node('p', kindLabel, 'small'));
       const button = node('button', sample.kind === 'controlled_synthetic_capture' ? 'Use this synthetic capture' : 'Use this camera frame'); button.type = 'button'; button.disabled = busy || !loaded;
-      button.addEventListener('click', () => run('Loading the camera frame and measuring image quality…', async () => {
+      button.addEventListener('click', () => run('Loading the camera frame, measuring it and choosing the next step…', async () => {
         const response = await fetch(localUrl(sample.url));
         if (!response.ok) throw new Error(`Loading the sample failed (HTTP ${response.status}).`);
         const blob = await response.blob(); await upload(blob, `${sample.id}.${blob.type.includes('png') ? 'png' : 'jpg'}`);

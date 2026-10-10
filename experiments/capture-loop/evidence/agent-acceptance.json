@@ -1,0 +1,39 @@
+{
+  "execution": "live_native_model_tools_with_scripted_upload_and_review",
+  "sampleScope": "SmartDoc frames 10 and 22 from one existing natural camera video",
+  "nativeModelRequests": 4,
+  "actions": [
+    "request_sharper_capture",
+    "prepare_document_review"
+  ],
+  "reviewCreatedBy": "scripted_separate_review_POST",
+  "pendingReviewBeforeConfirmation": null,
+  "confirmedField": "Power Dissipation",
+  "confirmedValue": "300 mW",
+  "lineageRetained": true,
+  "observationsContainMeasurementsOnly": true,
+  "publicTrace": "agent-loop.json",
+  "measurementBackend": "AWS Lambda",
+  "cloudMeasurements": [
+    {
+      "service": "aws-lambda",
+      "region": "ap-southeast-2",
+      "runtime": "3.13.15",
+      "architecture": "x86_64",
+      "requestId": "ec04aa43-f84e-4f2e-9372-3692e6340c46"
+    },
+    {
+      "service": "aws-lambda",
+      "region": "ap-southeast-2",
+      "runtime": "3.13.15",
+      "architecture": "x86_64",
+      "requestId": "3efc918d-e690-4b37-9a61-540ff2285908"
+    }
+  ],
+  "localRuleRegression": {
+    "naturalSelectedFrames": 4,
+    "naturalExpectedActionsMatched": 4,
+    "syntheticCases": 3,
+    "syntheticExpectedActionsMatched": 3
+  }
+}

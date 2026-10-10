@@ -1,10 +1,35 @@
-# Capture Loop · OpenCV 5
+# Capture Loop · OpenCV 5 + a tool-using capture agent
 
 **Get a readable original before reviewing a printed value.** A photograph starts an evidence trail. Image measurements select a concrete capture request; a fresh photo continues the trail; the reviewer compares the retained original and a perspective-corrected view before recording a field.
 
-![Actual local field-review screen with an attributed SmartDoc camera frame](evidence/review.png)
+![Actual agent-selected field review after AWS OpenCV measurement of an attributed SmartDoc camera frame](evidence/agent-review.png)
 
-This research branch adds a capture stage to DockProof. The production claim-review application continues its existing workflow. Execution here uses **OpenCV 5 and a rule-based controller**, with a local browser interface.
+This research branch adds a capture stage to DockProof. The production claim-review application continues its existing workflow. The workstation supports the original **OpenCV 5 rule baseline** and a **live native-tool-calling model**, with optional AWS Lambda image measurement.
+
+## The agent's actual job
+
+The model calls `inspect_capture`, receives numerical OpenCV observations, and chooses a next-step tool. `request_recapture` saves a concrete request and waits for a new original. `prepare_field_review` opens the source-versus-perspective comparison and waits for a reviewer. Field entry and confirmation use the separate review form.
+
+```text
+New original → model calls inspect_capture → OpenCV 5 (local or AWS Lambda)
+                                           ↓ geometry, focus, available view
+               model chooses request_recapture or prepare_field_review
+                                           ↓
+                          saved next step + native tool trace
+```
+
+`capture.measure()` returns observations. `capture.rule_policy()` serves the baseline. The agent receives geometry, numeric measurements and the available view; its selected function is executed and persisted by the workstation. The next photo carries the earlier request into the next model turn. Every model request passes the repository's persistent credit-budget guard.
+
+The [initial live-agent failure](evidence/agent-initial-failure.json) exposed a useful interface error: the model read the old `frameMarginPx` tolerance as measured clearance and asked for another framing change on frame 22. The tool now distinguishes `frameContactTolerancePx` from `minObservedFrameGapPx`, and describes page area as composition context. The intake contract uses page geometry and focus to open the separate field-legibility review.
+
+### Recorded AWS + model run
+
+| New original | Actual cloud observation | Model-selected and executed tool |
+| --- | --- | --- |
+| SmartDoc frame 10 | Whole-frame focus **3.443**; outline missing | `request_recapture` → wait for a sharper original |
+| Subsequent frame 22 | Four interior corners; focus **105.891**; measured edge clearance **193.2 px** | `prepare_field_review` → wait for the reviewer |
+
+The [complete recorded session](evidence/agent-loop.json) contains **four successful native model requests**, the two AWS Lambda request IDs and each tool result. Both image measurements ran in **AWS Lambda, Python 3.13.15, x86_64, OpenCV 5.0.0**. A separate scripted reviewer then recorded `Power Dissipation: 300 mW`; model actions and that scripted confirmation have separate records. [Acceptance](evidence/agent-acceptance.json) and the [390 px interface check](evidence/agent-browser.json) describe the performed checks. These observations use two selected frames from the existing SmartDoc recording; the uploads and reviewer were scripted.
 
 ## Run the complete local workflow
 
@@ -23,6 +48,24 @@ Open **http://127.0.0.1:18627/**. The server uses one local research case, store
 4. Export the session JSON. The state directory retains every original and derived image. New captures clear the active confirmation and preserve earlier reviews in the history.
 
 Your own files use **Take / upload a photo**. The supported subject is one flat page or label with a visible boundary against a contrasting surface. The four-edge, focus and source-comparison steps form this experiment's review contract.
+
+## Enable live agent decisions
+
+Use **Node 26+**, the Python dependencies above, and a configured Nebius account. Set `NEBIUS_API_KEY`, `NEBIUS_MODEL` (`nvidia/nemotron-3-super-120b-a12b`) and `NEBIUS_BUDGET_FILE`. Create that private budget from the repository's `budget.example.json`, entering the actual confirmed credits, approved ceiling, model prices and expiry. Its initial zero-credit configuration pauses live requests until configured.
+
+```sh
+# Environment variables contain your own private provider and budget settings.
+uv run --no-project --with numpy==2.5.3 --with opencv-python-headless==5.0.0.93 \
+  python experiments/capture-loop/serve.py --state temp/capture-agent --controller agent
+```
+
+Use the same frame 10 → new frame 22 workflow. The interface shows the executed tool and its measurement-based explanation. The JSON export includes the native assistant tool calls, corresponding observation/action results and pending review state. Up to four model turns are available per photograph; provider failures pause that capture. For a standalone photograph, run `node experiments/capture-loop/agent.mjs --source IMAGE --output temp/capture-agent` with `CAPTURE_PYTHON` pointing to the Python environment containing OpenCV.
+
+### Run the image tool on AWS
+
+The [AWS package and deployment instructions](aws/README.md) provide a private synchronous Lambda measurement function. Set `CAPTURE_MEASURE_FUNCTION` to the deployed function name, `CAPTURE_AWS_CLI` to your AWS CLI executable or executable wrapper, and the normal AWS profile/region environment. Start the same workstation with `--controller agent`.
+
+Here the model's `inspect_capture` call uploads the original to the configured Lambda function, executes OpenCV there, and returns measurements and the perspective image to the workstation. The model receives the numerical result; originals, derived views and reviewer confirmations remain in the workstation's evidence record. The cloud path accepts the image size supported by the synchronous Lambda payload; its connector reports the applicable limit before upload.
 
 ## What changed after natural-image testing
 
@@ -54,4 +97,4 @@ The earlier three-case synthetic probe remains available as `probe.py`, with its
 
 Code and the original synthetic shipping label: repository MIT license. Natural SmartDoc camera frames: **CC BY 4.0**, with [full author attribution, source and transformation notes](fixtures/ATTRIBUTION.md). The screenshot above includes that attributed dataset. OpenCV: Apache-2.0; the Python wheel includes its third-party license files.
 
-The next candidate stage is a tool-using capture agent and cloud execution. This local implementation exposes the image measurements, action trace and review boundary for that integration.
+The candidate's next evaluation scope is independent shipping-label photography, including different phones, lighting, print sizes and backgrounds. The current natural-image observations cover the selected SmartDoc recording described above. The live agent and AWS execution are tracked separately from human use and confirmed fields.

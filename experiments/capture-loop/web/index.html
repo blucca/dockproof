@@ -13,8 +13,8 @@
       <p class="eyebrow">Document intake · OpenCV 5</p>
       <h1>A clearer photo.<br>A traceable review.</h1>
       <p>Follow a specific capture request, compare the original with its perspective view, then confirm the printed field you need.</p>
-      <p class="method">OpenCV 5 measurements · rule-based capture requests</p>
-      <p class="small">Photos and review records stay on the server running this local experiment. Everyone using this server shares one research session.</p>
+      <p class="method" id="method">OpenCV 5 measurements · loading controller</p>
+      <p class="small" id="data-note">Photos and review records stay on the server running this local experiment. Everyone using this server shares one research session.</p>
     </section>
     <section class="panel" aria-labelledby="upload-title">
       <div class="section-head"><div><p class="eyebrow">01 / Photograph</p><h2 id="upload-title">Start with the document</h2></div><span class="pill" id="count">Connecting…</span></div>
@@ -25,7 +25,7 @@
         <button id="reload" type="button">Reload saved session</button>
         <a class="button" href="/api/export" download="capture-loop-session.json">Export session JSON ↗</a>
       </div>
-      <p class="small">JPEG or PNG · The camera opens on supported phones.</p>
+      <p class="small" id="file-hint">JPEG or PNG · The camera opens on supported phones.</p>
       <p id="status" class="status" role="status" aria-live="polite">Loading the saved session…</p>
       <p id="error" class="error" role="alert" hidden></p>
       <details class="samples"><summary>Try recorded camera frames</summary><p id="sample-description" class="small">Loading sample details…</p><div id="sample-list" class="sample-grid"></div><a id="attribution" class="small" target="_blank" rel="noopener noreferrer" hidden>Frame source &amp; license ↗</a></details>
@@ -33,6 +33,7 @@
     <section id="current" class="panel" aria-labelledby="request-title" hidden>
       <div class="section-head"><div><p class="eyebrow">02 / Capture request</p><h2 id="request-title" tabindex="-1"></h2></div><span id="capture-id" class="pill"></span></div>
       <p id="request" class="request"></p>
+      <p id="agent-decision" class="small" hidden></p>
       <div id="views" class="views"></div>
       <div class="actions"><button id="another" type="button">Take / upload another photo</button></div>
       <details class="measurements"><summary>View the measurements behind this request</summary><dl id="metrics"></dl></details>

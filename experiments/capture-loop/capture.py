@@ -1,4 +1,4 @@
-"""OpenCV 5 document measurements and an explicit next capture action."""
+"""OpenCV 5 measurements, with a separate rule policy for the local baseline."""
 import hashlib
 import os
 import time
@@ -49,8 +49,8 @@ def boundary_contrast(lab, polygon):
     return scores
 
 
-def inspect(path, output):
-    """Retain the input bytes; write one derived view for an accepted capture."""
+def measure(path, output):
+    """Return visual observations and an available perspective view."""
     started = time.perf_counter()
     img = cv2.imread(str(path))
     if img is None:
@@ -66,10 +66,10 @@ def inspect(path, output):
     smooth = cv2.GaussianBlur(gray, (5, 5), 0)
     result = {'opencv': cv2.__version__, 'sourceSha256': sha(path),
               'inputPx': [width, height], 'method': 'edge_and_brightness_planar_document_v2',
-              'controller': 'fixed_visual_rules', 'metrics': {}}
+              'metrics': {}}
 
-    def finish(action, request):
-        result.update(action=action, request=request,
+    def finish(geometry):
+        result.update(geometry=geometry,
                       elapsedMs=round((time.perf_counter() - started) * 1000, 2))
         return result
 
@@ -104,27 +104,22 @@ def inspect(path, output):
         full_focus = float(cv2.Laplacian(focus_view, cv2.CV_64F).var())
         result['metrics'].update(fullFrameLaplacianVariance=round(full_focus, 3),
                                  fullFrameFocusThreshold=FULL_FRAME_FOCUS_THRESHOLD)
-        if full_focus < FULL_FRAME_FOCUS_THRESHOLD:
-            return finish('request_sharper_capture',
-                          'Hold the camera steady, tap the printed text to focus, and wait for the letters to sharpen. Keep the whole page in view, then take a fresh photo.')
-        return finish('request_document_view',
-                      'Place one page or label flat on a darker, plain surface. Include its four corners and move close enough to read the print, then take a fresh photo.')
+        return finish('outline_missing')
     x, y, bw, bh = cv2.boundingRect(contour)
     margin = max(5, round(min(w, h) * .008))
     touches = x < margin or y < margin or x + bw > w - margin or y + bh > h - margin
     result['metrics'].update(polygonCorners=len(polygon), touchesFrame=touches,
-                             frameMarginPx=round(margin / scale, 2),
+                             frameContactTolerancePx=round(margin / scale, 2),
+                             minObservedFrameGapPx=round(min(x, y, w - x - bw, h - y - bh) / scale, 2),
                              documentAreaRatio=round(cv2.contourArea(contour) / (w * h), 4))
     if touches:
-        return finish('request_full_edges',
-                      'Step back slightly. Include all four page edges and a narrow strip of the darker surface around them, then take a fresh photo.')
+        return finish('boundary_touches_frame')
     quad = ordered_quad(polygon / scale)
     top, right, bottom, left = [np.linalg.norm(quad[(i + 1) % 4] - quad[i]) for i in range(4)]
     ow, oh = 1000, max(1, round(1000 * max(left, right) / max(top, bottom)))
     # Bound extreme geometry for this planar page / label experiment.
     if oh < 250 or oh > 2400 or len(np.unique(quad, axis=0)) < 4:
-        return finish('request_document_view',
-                      'Point the camera more squarely at the page and include its four corners.')
+        return finish('extreme_perspective')
     matrix = cv2.getPerspectiveTransform(quad, np.array(
         [[0, 0], [ow - 1, 0], [ow - 1, oh - 1], [0, oh - 1]], dtype=np.float32))
     rectified = cv2.warpPerspective(img, matrix, (ow, oh))
@@ -134,14 +129,42 @@ def inspect(path, output):
     focus = float(cv2.Laplacian(roi, cv2.CV_64F).var())
     result['metrics'].update(laplacianVariance=round(focus, 3), focusThreshold=FOCUS_THRESHOLD)
     result['documentQuadPx'] = np.round(quad, 3).tolist()
-    if focus < FOCUS_THRESHOLD:
-        return finish('request_sharper_capture',
-                      'Rest your elbows or the camera on a steady surface. Tap the printed text to focus, wait for it to settle, then take a fresh photo.')
     derived = Path(output) / (Path(path).stem + '-rectified.jpg')
     if not cv2.imwrite(str(derived), rectified, [cv2.IMWRITE_JPEG_QUALITY, 95]):
         raise ValueError('Saving the review image failed. Retry the photo.')
-    result['derived'] = {'file': derived.name, 'sha256': sha(derived),
+    result['perspectiveView'] = {'file': derived.name, 'sha256': sha(derived),
                          'operations': ['perspective_rectification', 'JPEG_encode_quality_95'],
                          'homography': matrix.tolist(), 'sizePx': [ow, oh]}
-    return finish('prepare_document_review',
-                  'Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown.')
+    return finish('four_interior_corners')
+
+
+def rule_policy(observation):
+    """The existing baseline policy; the tool-using agent receives measure() only."""
+    metrics, geometry = observation['metrics'], observation['geometry']
+    if geometry == 'outline_missing':
+        if metrics['fullFrameLaplacianVariance'] < FULL_FRAME_FOCUS_THRESHOLD:
+            return ('request_sharper_capture',
+                    'Hold the camera steady, tap the printed text to focus, and wait for the letters to sharpen. Keep the whole page in view, then take a fresh photo.')
+        return ('request_document_view',
+                'Place one page or label flat on a darker, plain surface. Include its four corners and move close enough to read the print, then take a fresh photo.')
+    if geometry == 'boundary_touches_frame':
+        return ('request_full_edges',
+                'Step back slightly. Include all four page edges and a narrow strip of the darker surface around them, then take a fresh photo.')
+    if geometry == 'extreme_perspective':
+        return ('request_document_view',
+                'Point the camera more squarely at the page and include its four corners.')
+    if metrics['laplacianVariance'] < FOCUS_THRESHOLD:
+        return ('request_sharper_capture',
+                'Rest your elbows or the camera on a steady surface. Tap the printed text to focus, wait for it to settle, then take a fresh photo.')
+    return ('prepare_document_review',
+            'Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown.')
+
+
+def inspect(path, output):
+    result = measure(path, output)
+    action, request = rule_policy(result)
+    view = result.pop('perspectiveView', None)
+    if view and action == 'prepare_document_review':
+        result['derived'] = view
+    result.update(controller='fixed_visual_rules', action=action, request=request)
+    return result

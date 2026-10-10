@@ -3,6 +3,9 @@
 import argparse
 import json
 import mimetypes
+import os
+import subprocess
+import sys
 import threading
 import uuid
 from datetime import datetime, timezone
@@ -10,7 +13,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
-from capture import inspect, sha
+from capture import inspect
 
 ROOT = Path(__file__).resolve().parent
 MAX_BYTES = 8 * 1024 * 1024
@@ -25,6 +28,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--port', type=int, default=18627)
     ap.add_argument('--state', type=Path, required=True)
+    ap.add_argument('--controller', choices=['rules', 'agent'], default='rules')
     args = ap.parse_args()
     args.state.mkdir(parents=True, exist_ok=True)
     artifacts = args.state / 'files'
@@ -34,6 +38,12 @@ def main():
         'schemaVersion': 1, 'id': str(uuid.uuid4()), 'createdAt': now(),
         'captures': [], 'review': None, 'reviews': [],
         'execution': 'local_OpenCV5_with_rule_based_requests'}
+    state['execution'] = ('local_OpenCV5_with_native_model_tools' if args.controller == 'agent'
+                          else 'local_OpenCV5_with_rule_based_requests')
+    if args.controller == 'agent' and os.environ.get('CAPTURE_MEASURE_FUNCTION'):
+        state['execution'] = 'AWS_Lambda_OpenCV5_with_native_model_tools'
+    max_bytes = 4_000_000 if state['execution'].startswith('AWS_Lambda') else MAX_BYTES
+    state['maxImageBytes'] = max_bytes
 
     def persist():
         pending = args.state / 'session.pending.json'
@@ -98,8 +108,8 @@ def main():
                 return self.respond({'error': 'Use the local workstation page for this action.'}, 403)
             try:
                 size = int(self.headers.get('Content-Length', '0'))
-                if size < 1 or size > MAX_BYTES:
-                    raise ValueError('Choose a JPEG or PNG up to 8 MB.')
+                if size < 1 or size > max_bytes:
+                    raise ValueError(f'Choose a JPEG or PNG up to {max_bytes:,} bytes.')
                 body = self.rfile.read(size)
                 route = urlparse(self.path)
                 with LOCK:
@@ -116,7 +126,27 @@ def main():
                         original = artifacts / (capture_id + '.' + extension)
                         original.write_bytes(body)
                         try:
-                            analysis = inspect(original, artifacts)
+                            agent_trace = None
+                            if args.controller == 'agent':
+                                command = [os.environ.get('CAPTURE_NODE', 'node'), '--use-env-proxy',
+                                           str(ROOT / 'agent.mjs'), '--source', str(original),
+                                           '--output', str(artifacts), '--capture-id', capture_id]
+                                if state['captures']:
+                                    prior = state['captures'][-1]
+                                    context_file = args.state / 'agent-context.json'
+                                    context_file.write_text(json.dumps({
+                                        'captureId': prior['id'], 'action': prior['analysis']['action'],
+                                        'instruction': prior['analysis']['request']}))
+                                    command += ['--previous', str(context_file)]
+                                env = {**os.environ, 'CAPTURE_PYTHON': sys.executable}
+                                completed = subprocess.run(command, capture_output=True, text=True,
+                                                           check=True, timeout=540, env=env)
+                                result = json.loads(completed.stdout)
+                                analysis, agent_trace = result['analysis'], result['trace']
+                            else:
+                                analysis = inspect(original, artifacts)
+                        except subprocess.CalledProcessError as error:
+                            raise ValueError(error.stderr.strip() or 'Agent execution failed. Check the configured provider and credit budget.') from error
                         except Exception:
                             original.unlink(missing_ok=True)
                             raise
@@ -125,8 +155,10 @@ def main():
                         record = {
                             'id': capture_id, 'capturedAt': now(), 'previousCaptureId': previous,
                             'source': {'file': original.name, 'name': params.get('name', ['photo.' + extension])[0][:160],
-                                       'sha256': sha(original), 'width': analysis['inputPx'][0], 'height': analysis['inputPx'][1],
+                                       'sha256': analysis['sourceSha256'], 'width': analysis['inputPx'][0], 'height': analysis['inputPx'][1],
                                        'url': '/files/' + original.name}, 'analysis': analysis}
+                        if agent_trace:
+                            record['agentTrace'] = agent_trace
                         state['captures'].append(record)
                         state['review'] = None
                         persist()
@@ -157,7 +189,8 @@ def main():
                 return self.respond({'error': 'Photo processing failed. Retry with a smaller JPEG or PNG.'}, 500)
 
     server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
-    print(json.dumps({'url': f'http://127.0.0.1:{args.port}', 'state': str(args.state), 'opencv': '5', 'scope': 'local_single_case'}), flush=True)
+    print(json.dumps({'url': f'http://127.0.0.1:{args.port}', 'state': str(args.state), 'opencv': '5',
+                      'scope': 'local_single_case', 'controller': args.controller}), flush=True)
     server.serve_forever()
 
 
