@@ -24,9 +24,9 @@ The GLS photo is a repair development example. The other three are controls for 
 From the repository root, using the capture loop's pinned OpenCV 5 environment:
 
 ```sh
-python experiments/capture-loop/domain/evaluate-domain.py --output ../domain-check
+python experiments/capture-loop/domain/evaluate-domain.py --output ../../temp/domain-check
 ```
 
-This writes one JSON report and the available perspective views to the supplied scratch directory. It checks the local implementation; output paths refer to filenames within that output directory. The four included images are Wikimedia's official 1280-pixel thumbnails.
+The command assumes a repository checkout two directories below the workspace root and writes to the workspace’s `temp/` directory. For another checkout layout, set `--output` to that workspace’s `temp/` directory. It writes one JSON report and the available perspective views. It checks the local implementation; output paths refer to filenames within that output directory. The four included images are Wikimedia's official 1280-pixel thumbnails.
 
 **Deployment at this check:** local `capture.py` includes the repair. The existing AWS Lambda remains on the prior contour implementation from the previously deployed research version. Updating the local source changes the next deployment build; the cloud function requires an explicit rebuild and deployment before it uses this repair.

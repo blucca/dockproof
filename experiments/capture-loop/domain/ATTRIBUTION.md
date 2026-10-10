@@ -1,6 +1,6 @@
 # Shipping-label image attribution
 
-Images were obtained from Wikimedia Commons on 2026-10-10 as Wikimedia's official 1280-pixel thumbnails. Their descriptions and license declarations are saved in `sources.json`; original URLs, authors and original dimensions are retained there. The four files are independent of the SmartDoc 2015 footage.
+Images were obtained from Wikimedia Commons on 2026-10-10 as Wikimedia's official 1280-pixel thumbnails. Their descriptions and license declarations are saved in `manifest.json`; original URLs, authors and original dimensions are retained there. The four files are independent of the SmartDoc 2015 footage.
 
 - **small-parcel.jpg** — [Kleines paket.JPG](https://commons.wikimedia.org/wiki/File:Kleines_paket.JPG), Klaus Mueller, 2010-08-17, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). An actual GLS parcel photographed on a table. Original dimensions 2000 × 1537; Wikimedia thumbnail 1280 × 984.
 - **package-label-reuse.jpg** — [Package label reuse.jpg](https://commons.wikimedia.org/wiki/File:Package_label_reuse.jpg), Klaus Mueller, 2019-03-25, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). A parcel surface with a reuse sticker and a cropped shipping label. Original dimensions 4160 × 3120; Wikimedia thumbnail 1280 × 960.
