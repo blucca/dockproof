@@ -51,6 +51,10 @@ The domain set contains **four selected examples**: three photographs and one ma
 
 A local scripted evaluation matched the expected capture action on all four. Seven earlier SmartDoc/synthetic examples retained their expected actions. The recorded browser-to-model-to-AWS exercise covers GLS and the cropped-label example. These counts describe the selected development checks; field performance is the next measurement.
 
+## Update: keep the label, move closer to the field
+
+Capture Loop now keeps the full-label context while you add a detail photo of the same item. SIFT feature matches and a RANSAC homography map the selected field into that detail; you then compare both originals and their source-pixel crops, enter the value, and record whether it is easier to read. A controlled scaling-and-cropping example from **one natural photograph** grows the field from **87 × 25 to 171 × 47 pixels**. [Try the two-view sample](https://blucca.github.io/research/capture-loop/) or read the [field-pair research and rerun instructions](https://github.com/blucca/dockproof/tree/research/opencv5-capture-loop/experiments/capture-loop/docs/field-pair). Independent phone-retake feedback is the next measurement; a comment with your device, instruction and field comparison will guide the next repair.
+
 ## A two-minute phone trial
 
 [Watch the 101-second working walkthrough](https://blucca.github.io/research/capture-loop/demo/): a cropped label, a separate GLS parcel, and a scripted field confirmation through the live AWS/model service.
