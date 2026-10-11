@@ -1,0 +1,22 @@
+{
+  "scope": "one scripted hosted detail upload during film preparation",
+  "result": "processing_timeout",
+  "http": 504,
+  "workerDeadlineSeconds": 90,
+  "retainedEarlierContext": true,
+  "newImageAndTraceDeleted": true,
+  "attemptRemainsCounted": true,
+  "before": {
+    "MemoryHighMiB": 256,
+    "MemoryMaxMiB": 512,
+    "memoryHighEvents": 3391,
+    "memoryPressureFullMicroseconds": 83885678,
+    "oomKills": 0
+  },
+  "deploymentChange": {
+    "MemoryHighMiB": 384,
+    "MemoryMaxMiB": 512
+  },
+  "subsequentRecording": "judging-demo-acceptance.json",
+  "imageAndAgentImplementationChanged": false
+}

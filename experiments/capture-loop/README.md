@@ -2,17 +2,24 @@
 
 **Keep the whole label. Get a closer field.** Image measurements select a concrete capture request. A full-label original carries context; a linked detail photo brings more source samples to the exact field. The reviewer compares the originals and confirms the value.
 
-**[Open the live capture station →](https://blucca.github.io/research/capture-loop/)** · Free field trial through **October 14, 2026, 12:00 UTC**. Each browser gets its own session and six photo attempts, shared by full-label and detail photos. Start the controlled two-view sample, try the independent parcel photos, or upload a photo cleared for the trial. Session files expire after 24 hours and can be deleted from the page.
+**[Open the live capture station →](https://blucca.github.io/research/capture-loop/)** · Free field trial through **November 10, 2026, 08:00 UTC**. Each browser gets its own session and six photo attempts, shared by full-label and detail photos. Start the controlled two-view sample, try the independent parcel photos, or upload a photo cleared for the trial. Session files expire after 24 hours and can be deleted from the page.
 
 **New: [full-label context + linked detail](docs/field-pair/).** Select a field, add a detail with shared surrounding print, and let OpenCV 5 map the field between originals. The native agent requests another detail or opens a fresh field review. The clickable controlled example grows the target from **87 × 25 to 171 × 47 source pixels**; natural same-video frames separately exercise registration with a further-detail request.
 
-**[Watch the 101-second real-browser walkthrough →](https://blucca.github.io/research/capture-loop/demo/)** · [YouTube with English captions](https://youtu.be/6ydEKLplXM8) · [Architecture diagram](docs/architecture.svg) · [Transcript and recording notes](docs/demo-transcript.md).
+**[Watch the three-minute two-view walkthrough →](https://blucca.github.io/research/capture-loop/demo/)** · [YouTube with English captions](https://youtu.be/lwkQdlzIMfA) · [Architecture diagram](docs/architecture.svg) · [Transcript and recording notes](docs/demo-transcript.md).
 
-**[Read the technical report →](https://blucca.github.io/research/capture-loop/report/)** · [Download the eight-page PDF](https://blucca.github.io/research/capture-loop/report/capture-loop-report.pdf). Problem, OpenCV implementation, selected-case results, fixed/native controller comparison, AWS delivery, reproduction, and field-study plan. [Report source](docs/technical-report.html).
+**[Read the technical report →](https://blucca.github.io/research/capture-loop/report/)** · [Download the nine-page PDF](https://blucca.github.io/research/capture-loop/report/capture-loop-report.pdf). Problem, OpenCV implementation, selected-case results, fixed/native controller comparison, AWS delivery, reproduction, and field-study plan. [Report source](docs/technical-report.html).
 
 ![Capture station with real parcel samples and the AWS-measured GLS field review](evidence/parcel-gls-desktop.png)
 
 This research branch adds a capture stage to DockProof. The production claim-review application continues its existing workflow. The workstation supports the original **OpenCV 5 rule baseline** and a **live native-tool-calling model**, with optional AWS Lambda image measurement.
+
+### Judging release: one retained label, two detail actions
+
+The [current film](https://blucca.github.io/research/capture-loop/demo/) records the Bell full-context sample, an unrelated-detail recovery request, the paired detail, and a scripted `Printed form code` confirmation. The browser reached the prepared full-label field in **22.463 s**, the wrong-detail request in **7.436 s**, and the matched-detail result in **9.799 s**. Context timing includes automatic field selection. The successful recording used one AWS image invocation, two local OpenCV registrations, and six successful native model requests. [Recorded export](evidence/judging-demo-session.json) · [Run summary](evidence/judging-demo-acceptance.json).
+
+A preceding hosted detail attempt reached the 90-second deadline under a 256 MiB memory-high threshold. The cgroup recorded 83.9 seconds of full memory pressure and zero OOM kills. Raising `MemoryHigh` to **384 MiB**, while retaining the **512 MiB** hard cap, restored the same sample workflow. Earlier material and the attempt counter survived the failed action; its new files were removed. [Deployment recovery record](evidence/hosted-memory-recovery.json).
+
 
 ## Independent parcel photographs
 
@@ -121,8 +128,8 @@ The same workstation supports a same-origin HTTPS trial. Hosted mode assigns an 
 python experiments/capture-loop/serve.py \
   --state temp/capture-trial --controller agent --hosted \
   --public-origin https://capture.example.com \
-  --expires-at 2026-10-14T12:00:00Z \
-  --session-hours 24 --max-session-captures 6 --max-total-captures 40
+  --expires-at 2026-11-10T08:00:00Z \
+  --session-hours 24 --max-session-captures 6 --max-total-captures 200
 ```
 
 Use a private state directory on a shared host. Photo attempts are reserved in a persistent ledger before processing, including failed attempts. One photograph runs at a time; the page remains available while it processes. Every live model request also passes the existing shared credit-budget guard. A dedicated AWS runtime identity can grant invocation of the one private image function; its creation and removal are documented in [`aws/README.md`](aws/README.md).

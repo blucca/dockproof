@@ -1,0 +1,43 @@
+{
+  "scope": "Scripted real HTTPS browser demonstration: controlled same-photograph Bell pair and unrelated GLS control; live AWS page measurement and native model tools; scripted reviewer.",
+  "sourceUnits": {
+    "BellLabs": "one source photograph with controlled downsampling and crop",
+    "GLS": "unrelated-photo rejection control",
+    "independentPhoneOperators": 0
+  },
+  "implementationCommit": "8873e7768f266786c4b5d7b42a9f555c940b3753",
+  "recordedAt": "2026-10-11T21:16:06.237583+00:00",
+  "execution": "AWS_Lambda_OpenCV5_with_native_model_tools",
+  "clickToReadySeconds": {
+    "context-ready": 22.463,
+    "wrong-ready": 7.436,
+    "detail-ready": 9.799
+  },
+  "timingScope": "browser click to completed UI state; context includes automatic field selection",
+  "actions": [
+    "prepare_field_review",
+    "request_detail_recapture",
+    "prepare_detail_review"
+  ],
+  "comparison": {
+    "contextNativeSizePx": [
+      87,
+      25
+    ],
+    "detailNativeSizePx": [
+      171,
+      47
+    ],
+    "fieldAreaRatio": 3.9974,
+    "linearScaleRatio": 1.99935,
+    "scope": "supplied_raster_pixel_footprint"
+  },
+  "modelHttpCalls": 6,
+  "awsImageCalls": 1,
+  "localDetailRegistrations": 2,
+  "reviewBoundToBothOriginals": true,
+  "reviewer": "Scripted film reviewer",
+  "deletedViaUI": true,
+  "pageErrors": [],
+  "photoAttemptsThisSuccessfulRecording": 3
+}

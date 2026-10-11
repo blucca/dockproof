@@ -57,13 +57,13 @@ Capture Loop now keeps the full-label context while you add a detail photo of th
 
 ## A two-minute phone trial
 
-[Watch the 101-second working walkthrough](https://blucca.github.io/research/capture-loop/demo/): a cropped label, a separate GLS parcel, and a scripted field confirmation through the live AWS/model service.
+[Watch the three-minute two-view walkthrough](https://blucca.github.io/research/capture-loop/demo/): one retained full label, an unrelated-detail recovery request, a matched close-up, and a scripted field confirmation through the live AWS/model service. The Bell pair uses controlled views of one source photograph.
 
 [Read the technical report](https://blucca.github.io/research/capture-loop/report/) for per-example results, fixed-policy versus native-tool comparisons, and AWS reruns.
 
 [Open Capture Loop](https://blucca.github.io/research/capture-loop/) on your phone. Try the included GLS sample, or photograph a label you can share. Follow one requested retake, then compare the original and straightened view.
 
-The limited-capacity live trial runs through **October 14, 2026, 12:00 UTC**, with **six photo attempts per browser session**. Session files expire after **24 hours**.
+The limited-capacity live trial runs through **November 10, 2026, 08:00 UTC**, with **six photo attempts per browser session**. Session files expire after **24 hours**.
 
 **On your phone, did the requested retake make your chosen field easier to read?** A comment with your phone/browser and the instruction you received would help target the next repair.
 
