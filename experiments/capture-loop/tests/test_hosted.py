@@ -64,6 +64,72 @@ class Browser:
 
 
 class HostedContracts(unittest.TestCase):
+    def test_linked_detail_retains_context_and_binds_separate_review(self):
+        import cv2
+        import numpy as np
+        a, b = Browser(self), Browser(self)
+        a.session()
+        b.session()
+        study = ROOT / 'docs/field-source-scale'
+        context = (study / 'bell-input-640.png').read_bytes()
+        status, capture, _ = a.capture(context)
+        self.assertEqual(status, 200)
+        self.assertEqual(capture['analysis']['action'], 'prepare_document_review')
+        # A controlled crop of the same source raster develops the HTTP workflow.
+        quad = np.array([[[263, 810], [429, 792], [432, 819], [266, 837]]], np.float64) / 2
+        view = capture['analysis']['derived']
+        mapped = cv2.perspectiveTransform(quad, np.asarray(view['homography']))[0]
+        left, top = mapped.min(axis=0) / (np.asarray(view['sizePx']) - 1)
+        right, bottom = mapped.max(axis=0) / (np.asarray(view['sizePx']) - 1)
+        status, inspection, _ = a.request('POST', '/api/field', {
+            'captureId': capture['id'], 'field': 'Printed form code',
+            'box': [float(left), float(top), float(right-left), float(bottom-top)],
+        })
+        self.assertEqual(status, 200)
+        route = f"/api/detail?captureId={capture['id']}&fieldInspectionId={inspection['id']}"
+        self.assertEqual(a.request('POST', route, GLS)[0], 400)
+        self.assertEqual(b.request('POST', route + '&sameDocument=true', GLS)[0], 409)
+        status, wrong, _ = a.request('POST', route + '&sameDocument=true', GLS)
+        self.assertEqual(status, 200)
+        self.assertEqual(wrong['analysis']['action'], 'request_field_detail')
+        self.assertEqual(a.request('POST', route + '&sameDocument=true', GLS)[0], 409)
+        raster = cv2.imread(str(study / 'bell-input-1280.png'))[590:930, 150:750]
+        success, encoded = cv2.imencode('.png', raster)
+        self.assertTrue(success)
+        status, detail, _ = a.request('POST', route + '&sameDocument=true&replacesDetail=' + wrong['id'], encoded.tobytes())
+        self.assertEqual(status, 200, detail)
+        self.assertEqual(detail['analysis']['action'], 'prepare_detail_review', detail['analysis'])
+        self.assertTrue(detail['sameDocumentDeclared'])
+        restored, _ = a.session()
+        self.assertEqual(len(restored['captures']), 1)
+        self.assertEqual(restored['captures'][0]['id'], capture['id'])
+        self.assertEqual(len(restored['captures'][0]['fieldInspections'][0]['detailCaptures']), 2)
+        self.assertEqual(restored['captureAllowance']['used'], 3)
+        self.assertIsNone(restored['review'])
+        field = detail['analysis']['field']
+        status, pixels, _ = a.request('GET', field['view']['url'])
+        self.assertEqual(status, 200)
+        crop = cv2.imdecode(np.frombuffer(pixels, np.uint8), cv2.IMREAD_COLOR)
+        x, y, w, h = field['sourceBoxPx']
+        self.assertTrue(np.array_equal(crop, raster[y:y+h, x:x+w]))
+        for url in (detail['source']['url'], wrong['source']['url'], field['view']['url']):
+            self.assertEqual(b.request('GET', url)[0], 404)
+        review = {'captureId': capture['id'], 'fieldInspectionId': inspection['id'],
+                  'detailCaptureId': detail['id'], 'field': inspection['field'],
+                  'value': 'E-1242-5 (9-91)', 'reviewer': 'scripted paired-field check', 'confirmed': True}
+        self.assertEqual(a.request('POST', '/api/review', review)[0], 400)
+        self.assertEqual(a.request('POST', '/api/review', {**review, 'detailCaptureId': wrong['id'], 'detailReadability': 'easier'})[0], 409)
+        status, saved, _ = a.request('POST', '/api/review', {**review, 'detailReadability': 'easier'})
+        self.assertEqual(status, 200)
+        self.assertEqual(saved['sourceSha256'], capture['source']['sha256'])
+        self.assertEqual(saved['detailSourceSha256'], detail['source']['sha256'])
+        self.assertEqual(saved['detailFieldSourceQuadPx'], field['sourceQuadPx'])
+        self.assertEqual(a.request('GET', '/api/export')[1]['review']['detailReadability'], 'easier')
+        self.assertEqual(a.request('POST', '/api/reset', {})[0], 200)
+        self.assertEqual(a.request('GET', detail['source']['url'])[0], 404)
+        self.assertEqual(a.request('GET', field['view']['url'])[0], 404)
+        self.assertEqual(a.session()[0]['captureAllowance']['used'], 3)
+
     def test_original_pixel_field_and_review_binding(self):
         import cv2
         import numpy as np

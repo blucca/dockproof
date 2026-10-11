@@ -8,6 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import { reserveBudget } from '../../src/budget.mjs';
 import { assertFieldReviewEligible } from './agent-contract.mjs';
+import { DETAIL_SYSTEM, DETAIL_TOOLS, assertDetailReviewEligible } from './detail-contract.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SYSTEM = `You operate a document-capture workstation. A new photograph needs an actionable next step.
@@ -44,6 +45,7 @@ async function main() {
   const { values } = parseArgs({ options: {
     source: { type: 'string' }, output: { type: 'string' },
     'capture-id': { type: 'string' }, previous: { type: 'string' },
+    'detail-context': { type: 'string' },
   } });
   if (!values.source || !values.output) throw new Error('Supply --source IMAGE and --output DIRECTORY.');
   const source = path.resolve(values.source), output = path.resolve(values.output);
@@ -54,15 +56,19 @@ async function main() {
   const model = process.env.NEBIUS_MODEL || 'nvidia/nemotron-3-super-120b-a12b';
   const base = (process.env.NEBIUS_BASE_URL || 'https://api.tokenfactory.us-central1.nebius.com/v1').replace(/\/$/, '');
   const previous = values.previous ? JSON.parse(fs.readFileSync(values.previous, 'utf8')) : null;
+  const detailContext = values['detail-context'] ? JSON.parse(fs.readFileSync(values['detail-context'], 'utf8')) : null;
+  const tools = detailContext ? DETAIL_TOOLS : TOOLS;
   fs.mkdirSync(output, { recursive: true });
   const traceFile = path.join(output, `${captureId}-agent.json`);
   const messages = [
-    { role: 'system', content: SYSTEM },
-    { role: 'user', content: JSON.stringify({ currentCaptureId: captureId, previousRequest: previous, task: 'Inspect this new photo and execute its next step.' }) },
+    { role: 'system', content: detailContext ? DETAIL_SYSTEM : SYSTEM },
+    { role: 'user', content: JSON.stringify({ currentCaptureId: captureId, previousRequest: previous,
+      ...(detailContext ? { targetField: detailContext.field, contextCaptureId: detailContext.contextCaptureId } : {}),
+      task: detailContext ? 'Inspect this linked field detail and execute its next step.' : 'Inspect this new photo and execute its next step.' }) },
   ];
   const trace = { schemaVersion: 1, controller: 'live_native_model_tools', model,
-    measurementBackend: process.env.CAPTURE_MEASURE_FUNCTION ? 'AWS_Lambda' : 'local_OpenCV',
-    startedAt: new Date().toISOString(), captureId, tools: TOOLS, messages, calls: [], status: 'running' };
+    measurementBackend: detailContext ? 'local_OpenCV5_registration' : process.env.CAPTURE_MEASURE_FUNCTION ? 'AWS_Lambda' : 'local_OpenCV',
+    startedAt: new Date().toISOString(), captureId, tools, messages, calls: [], status: 'running' };
   let observation, action;
   const persist = () => fs.writeFileSync(traceFile, `${JSON.stringify(trace, null, 2)}\n`);
   const text = (value, limit) => {
@@ -72,15 +78,31 @@ async function main() {
   function execute(name, args) {
     if (args.captureId !== captureId) throw new Error('Use the current capture ID.');
     if (action) throw new Error('A next-step action is already saved.');
-    if (name === 'inspect_capture') {
+    if (detailContext && name === 'inspect_field_detail') {
+      observation ||= JSON.parse(execFileSync(process.env.CAPTURE_PYTHON || 'python3', [
+        '-B', path.join(ROOT, 'detail.py'), '--source', source,
+        '--context', detailContext.contextSource, '--inspection', detailContext.inspectionFile,
+        '--output', output,
+      ], { encoding: 'utf8', timeout: 90000, maxBuffer: 512 * 1024 }));
+      return { captureId, ...observation };
+    }
+    if (!detailContext && name === 'inspect_capture') {
       observation ||= JSON.parse(execFileSync(process.env.CAPTURE_PYTHON || 'python3', [
         '-B', path.join(ROOT, process.env.CAPTURE_MEASURE_FUNCTION ? 'aws/invoke.py' : 'measure.py'),
         '--source', source, '--output', output,
       ], { encoding: 'utf8', timeout: 90000, maxBuffer: 512 * 1024 }));
       return { captureId, ...observation };
     }
-    if (!observation) throw new Error('Call inspect_capture before selecting a next step.');
+    if (!observation) throw new Error(`Call ${detailContext ? 'inspect_field_detail' : 'inspect_capture'} before selecting a next step.`);
     const instruction = text(args.instruction, 1200), rationale = text(args.rationale, 1600);
+    if (detailContext) {
+      if (name === 'prepare_detail_review') assertDetailReviewEligible(observation);
+      else if (name !== 'request_detail_recapture') throw new Error('Choose a listed detail-photo tool.');
+      action = { action: name === 'prepare_detail_review' ? 'prepare_detail_review' : 'request_field_detail',
+        tool: name, instruction, rationale,
+        status: name === 'prepare_detail_review' ? 'awaiting_reviewer' : 'awaiting_new_detail', review: null };
+      return { saved: true, captureId, ...action };
+    }
     if (name === 'request_recapture') {
       const actions = { focus: 'request_sharper_capture', framing: 'request_full_edges', document_view: 'request_document_view' };
       if (!Object.hasOwn(actions, args.recovery)) throw new Error('Choose focus, framing or document_view recovery.');
@@ -100,7 +122,7 @@ async function main() {
   persist();
   try {
     for (let round = 0; round < 4 && !action; round++) {
-      const request = { model, messages, tools: TOOLS, tool_choice: 'required', parallel_tool_calls: false,
+      const request = { model, messages, tools, tool_choice: 'required', parallel_tool_calls: false,
         max_tokens: 2200, temperature: 0.2, top_p: 0.95, reasoning_effort: 'low' };
       const reservation = reserveBudget({ model, request });
       const started = performance.now();

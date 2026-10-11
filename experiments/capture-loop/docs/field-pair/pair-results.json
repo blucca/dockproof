@@ -1,0 +1,1339 @@
+{
+  "kind": "selected_paired_field_development_replay",
+  "opencv": "5.0.0",
+  "samplingUnits": [
+    "One Bell Labs photograph at controlled scales/crops",
+    "One unrelated GLS photograph for rejection",
+    "One SmartDoc video: natural frames 22 and 72"
+  ],
+  "independentParticipantReadings": 0,
+  "scope": "Fixed selected cases exercise mapping, target coverage and supplied-raster sampling. A reviewer confirms document identity and field readability.",
+  "cases": [
+    {
+      "case": "controlled_detail",
+      "scope": "controlled_same_photograph",
+      "contextFile": "bell-input-640.png",
+      "detailFile": "bell-detail.png",
+      "field": "Printed form code",
+      "referenceValue": "E-1242-5 (9-91)",
+      "contextAnalysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4",
+        "inputPx": [
+          640,
+          480
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            25.65,
+            56.23,
+            76.14,
+            93.91
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 5.0,
+          "minObservedFrameGapPx": 34.0,
+          "documentAreaRatio": 0.4516,
+          "laplacianVariance": 154.113,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            94.0,
+            111.0
+          ],
+          [
+            528.0,
+            108.0
+          ],
+          [
+            553.0,
+            394.0
+          ],
+          [
+            106.0,
+            443.0
+          ]
+        ],
+        "geometry": "four_interior_corners",
+        "elapsedMs": 165.52,
+        "derived": {
+          "file": "bell-input-640-rectified.jpg",
+          "sha256": "1847eec542203f2291933c9ecabbc7d68924daa4b0b2107178cc88fff0006125",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              1.9649370953284726,
+              -0.07102182272271584,
+              -176.82066463865493
+            ],
+            [
+              0.01573502897940136,
+              2.2763341923534264,
+              -254.15218807529405
+            ],
+            [
+              -0.0003028409329622543,
+              0.0001273113616597277,
+              1.0
+            ]
+          ],
+          "sizePx": [
+            1000,
+            739
+          ]
+        },
+        "controller": "fixed_visual_rules",
+        "action": "prepare_document_review",
+        "request": "Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown."
+      },
+      "inspection": {
+        "box": [
+          0.05224436357806984,
+          0.894653258714778,
+          0.16944058509428248,
+          0.04246645361704937
+        ],
+        "sourceQuadPx": [
+          [
+            131.467,
+            404.169
+          ],
+          [
+            215.337,
+            395.918
+          ],
+          [
+            216.022,
+            409.957
+          ],
+          [
+            132.033,
+            418.599
+          ]
+        ],
+        "sourceBoxPx": [
+          131,
+          395,
+          87,
+          25
+        ],
+        "nativeSizePx": [
+          87,
+          25
+        ],
+        "metrics": {
+          "laplacianVariance": 14838.099,
+          "percentileContrast": 130.0,
+          "brightPixelFraction": 0.0,
+          "samplePixels": 1111
+        },
+        "view": {
+          "file": "controlled_detail-context-field.png",
+          "sha256": "492fba2874501ba126f06eb101364bb10f7d91553482f1f5288a5b107917cb89",
+          "sizePx": [
+            87,
+            25
+          ],
+          "operations": [
+            "axis_aligned_source_pixel_crop",
+            "lossless_PNG_encode"
+          ]
+        },
+        "scope": "original_pixel_field_observation",
+        "method": "inverse_page_homography_to_retained_original",
+        "opencv": "5.0.0",
+        "field": "Printed form code",
+        "sourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4"
+      },
+      "detailAnalysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "c0acbd4e5bd894d6a64ea6d24b43db057400f13754cf1d283b8248f5a17a6647",
+        "contextSourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4",
+        "inputPx": [
+          600,
+          340
+        ],
+        "scope": "planar_visual_correspondence",
+        "registration": {
+          "method": "SIFT_mutual_Lowe_ratio_RANSAC_homography",
+          "thresholds": {
+            "maxInputPixels": 24000000,
+            "minInputSidePx": 160,
+            "maxWorkSidePx": 1600,
+            "maxWorkPixels": 1600000,
+            "maxFeaturesPerImage": 2400,
+            "loweRatio": 0.75,
+            "ransacReprojectionWorkPx": 3.0,
+            "ransacMaxIterations": 3000,
+            "ransacConfidence": 0.995,
+            "minInliers": 12,
+            "minInlierLocations": 12,
+            "minInlierRatio": 0.4,
+            "maxMedianReprojectionWorkPx": 1.5,
+            "maxP95ReprojectionWorkPx": 3.0,
+            "minDetailInlierHullFraction": 0.02,
+            "minInlierAxisRatio": 0.035,
+            "minLocalInliers": 6,
+            "localSupportPaddingFieldDiagonals": 0.5,
+            "minLocalSupportPaddingWorkPx": 20,
+            "minTargetInlierHullCoverage": 0.5,
+            "maxFieldPixels": 3000000,
+            "minFieldSidePx": 6,
+            "minFieldInteriorPixels": 16,
+            "minLinearScaleRatio": 1.2
+          },
+          "metrics": {
+            "contextWorkPx": [
+              640,
+              480
+            ],
+            "detailWorkPx": [
+              600,
+              340
+            ],
+            "contextKeypoints": 2400,
+            "detailKeypoints": 671,
+            "ratioMatches": 142,
+            "mutualMatches": 113,
+            "inliers": 106,
+            "inlierRatio": 0.93805,
+            "inlierLocations": 91,
+            "medianReprojectionWorkPx": 0.1621,
+            "p95ReprojectionWorkPx": 0.6355,
+            "medianInverseReprojectionWorkPx": 0.081,
+            "p95InverseReprojectionWorkPx": 0.3178,
+            "detailInlierHullFraction": 0.63336,
+            "inlierAxisRatio": 0.36269,
+            "targetFrameCoverage": 1.0,
+            "localInliers": 56,
+            "targetInlierHullCoverage": 1.0,
+            "localSupportPaddingWorkPx": 43.772
+          },
+          "contextToDetailHomography": [
+            [
+              2.00691083757568,
+              0.0018847607471127467,
+              -150.94763558121753
+            ],
+            [
+              0.00014540574314681934,
+              2.008206299367116,
+              -592.2665602883166
+            ],
+            [
+              -2.6602184265656494e-07,
+              8.988110853422391e-06,
+              1.0
+            ]
+          ]
+        },
+        "comparison": {
+          "contextNativeSizePx": [
+            87,
+            25
+          ],
+          "detailNativeSizePx": [
+            171,
+            47
+          ],
+          "fieldAreaRatio": 3.9974,
+          "linearScaleRatio": 1.99935,
+          "scope": "supplied_raster_pixel_footprint"
+        },
+        "field": {
+          "sourceQuadPx": [
+            [
+              113.249,
+              218.621
+            ],
+            [
+              280.977,
+              202.142
+            ],
+            [
+              282.338,
+              230.208
+            ],
+            [
+              114.393,
+              247.463
+            ]
+          ],
+          "sourceBoxPx": [
+            113,
+            202,
+            171,
+            47
+          ],
+          "nativeSizePx": [
+            171,
+            47
+          ],
+          "metrics": {
+            "laplacianVariance": 5723.089,
+            "percentileContrast": 157.0,
+            "brightPixelFraction": 0.0,
+            "samplePixels": 4491
+          },
+          "view": {
+            "file": "controlled_detail-detail-field.png",
+            "sha256": "8ad5e32d3959c409a9ef3d143840240f39b9a0489fd0540f5bd35b9e8a1725f1",
+            "sizePx": [
+              171,
+              47
+            ],
+            "operations": [
+              "axis_aligned_source_pixel_crop",
+              "lossless_PNG_encode"
+            ]
+          }
+        },
+        "status": "matched",
+        "reason": "target_mapped_with_larger_pixel_footprint",
+        "request": "Compare the mapped source-pixel field with the full-label context, confirm the same item, and enter the printed value you can read.",
+        "elapsedMs": 166.72
+      }
+    },
+    {
+      "case": "same_raster",
+      "scope": "controlled_same_photograph",
+      "contextFile": "bell-input-640.png",
+      "detailFile": "bell-input-640.png",
+      "field": "Printed form code",
+      "referenceValue": "E-1242-5 (9-91)",
+      "contextAnalysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4",
+        "inputPx": [
+          640,
+          480
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            25.65,
+            56.23,
+            76.14,
+            93.91
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 5.0,
+          "minObservedFrameGapPx": 34.0,
+          "documentAreaRatio": 0.4516,
+          "laplacianVariance": 154.113,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            94.0,
+            111.0
+          ],
+          [
+            528.0,
+            108.0
+          ],
+          [
+            553.0,
+            394.0
+          ],
+          [
+            106.0,
+            443.0
+          ]
+        ],
+        "geometry": "four_interior_corners",
+        "elapsedMs": 27.08,
+        "derived": {
+          "file": "bell-input-640-rectified.jpg",
+          "sha256": "1847eec542203f2291933c9ecabbc7d68924daa4b0b2107178cc88fff0006125",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              1.9649370953284726,
+              -0.07102182272271584,
+              -176.82066463865493
+            ],
+            [
+              0.01573502897940136,
+              2.2763341923534264,
+              -254.15218807529405
+            ],
+            [
+              -0.0003028409329622543,
+              0.0001273113616597277,
+              1.0
+            ]
+          ],
+          "sizePx": [
+            1000,
+            739
+          ]
+        },
+        "controller": "fixed_visual_rules",
+        "action": "prepare_document_review",
+        "request": "Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown."
+      },
+      "inspection": {
+        "box": [
+          0.05224436357806984,
+          0.894653258714778,
+          0.16944058509428248,
+          0.04246645361704937
+        ],
+        "sourceQuadPx": [
+          [
+            131.467,
+            404.169
+          ],
+          [
+            215.337,
+            395.918
+          ],
+          [
+            216.022,
+            409.957
+          ],
+          [
+            132.033,
+            418.599
+          ]
+        ],
+        "sourceBoxPx": [
+          131,
+          395,
+          87,
+          25
+        ],
+        "nativeSizePx": [
+          87,
+          25
+        ],
+        "metrics": {
+          "laplacianVariance": 14838.099,
+          "percentileContrast": 130.0,
+          "brightPixelFraction": 0.0,
+          "samplePixels": 1111
+        },
+        "view": {
+          "file": "same_raster-context-field.png",
+          "sha256": "492fba2874501ba126f06eb101364bb10f7d91553482f1f5288a5b107917cb89",
+          "sizePx": [
+            87,
+            25
+          ],
+          "operations": [
+            "axis_aligned_source_pixel_crop",
+            "lossless_PNG_encode"
+          ]
+        },
+        "scope": "original_pixel_field_observation",
+        "method": "inverse_page_homography_to_retained_original",
+        "opencv": "5.0.0",
+        "field": "Printed form code",
+        "sourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4"
+      },
+      "detailAnalysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4",
+        "contextSourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4",
+        "inputPx": [
+          640,
+          480
+        ],
+        "scope": "planar_visual_correspondence",
+        "registration": {
+          "method": "SIFT_mutual_Lowe_ratio_RANSAC_homography",
+          "thresholds": {
+            "maxInputPixels": 24000000,
+            "minInputSidePx": 160,
+            "maxWorkSidePx": 1600,
+            "maxWorkPixels": 1600000,
+            "maxFeaturesPerImage": 2400,
+            "loweRatio": 0.75,
+            "ransacReprojectionWorkPx": 3.0,
+            "ransacMaxIterations": 3000,
+            "ransacConfidence": 0.995,
+            "minInliers": 12,
+            "minInlierLocations": 12,
+            "minInlierRatio": 0.4,
+            "maxMedianReprojectionWorkPx": 1.5,
+            "maxP95ReprojectionWorkPx": 3.0,
+            "minDetailInlierHullFraction": 0.02,
+            "minInlierAxisRatio": 0.035,
+            "minLocalInliers": 6,
+            "localSupportPaddingFieldDiagonals": 0.5,
+            "minLocalSupportPaddingWorkPx": 20,
+            "minTargetInlierHullCoverage": 0.5,
+            "maxFieldPixels": 3000000,
+            "minFieldSidePx": 6,
+            "minFieldInteriorPixels": 16,
+            "minLinearScaleRatio": 1.2
+          },
+          "metrics": {
+            "contextWorkPx": [
+              640,
+              480
+            ],
+            "detailWorkPx": [
+              640,
+              480
+            ],
+            "contextKeypoints": 2400,
+            "detailKeypoints": 2400,
+            "ratioMatches": 2400,
+            "mutualMatches": 2400,
+            "inliers": 2400,
+            "inlierRatio": 1.0,
+            "inlierLocations": 1813,
+            "medianReprojectionWorkPx": 0.0,
+            "p95ReprojectionWorkPx": 0.0,
+            "medianInverseReprojectionWorkPx": 0.0,
+            "p95InverseReprojectionWorkPx": 0.0,
+            "detailInlierHullFraction": 0.96473,
+            "inlierAxisRatio": 0.64087,
+            "targetFrameCoverage": 1.0,
+            "localInliers": 77,
+            "targetInlierHullCoverage": 1.0,
+            "localSupportPaddingWorkPx": 43.772
+          },
+          "contextToDetailHomography": [
+            [
+              1.0,
+              -1.5492272473427788e-17,
+              2.453539334286921e-15
+            ],
+            [
+              9.887502363057234e-18,
+              1.0,
+              -7.984273187004697e-15
+            ],
+            [
+              6.15872697460565e-20,
+              3.9363637053227083e-20,
+              1.0
+            ]
+          ]
+        },
+        "comparison": {
+          "contextNativeSizePx": [
+            87,
+            25
+          ],
+          "detailNativeSizePx": [
+            87,
+            25
+          ],
+          "fieldAreaRatio": 1.0,
+          "linearScaleRatio": 1.0,
+          "scope": "supplied_raster_pixel_footprint"
+        },
+        "field": {
+          "sourceQuadPx": [
+            [
+              131.467,
+              404.169
+            ],
+            [
+              215.337,
+              395.918
+            ],
+            [
+              216.022,
+              409.957
+            ],
+            [
+              132.033,
+              418.599
+            ]
+          ],
+          "sourceBoxPx": [
+            131,
+            395,
+            87,
+            25
+          ],
+          "nativeSizePx": [
+            87,
+            25
+          ],
+          "metrics": {
+            "laplacianVariance": 14838.099,
+            "percentileContrast": 130.0,
+            "brightPixelFraction": 0.0,
+            "samplePixels": 1111
+          },
+          "view": {
+            "file": "same_raster-detail-field.png",
+            "sha256": "492fba2874501ba126f06eb101364bb10f7d91553482f1f5288a5b107917cb89",
+            "sizePx": [
+              87,
+              25
+            ],
+            "operations": [
+              "axis_aligned_source_pixel_crop",
+              "lossless_PNG_encode"
+            ]
+          }
+        },
+        "status": "needs_more_detail",
+        "reason": "small_source_pixel_gain",
+        "request": "Move closer to enlarge the selected field in a fresh photo, retain two nearby printed lines, and tap the field to focus.",
+        "elapsedMs": 307.86
+      }
+    },
+    {
+      "case": "missing_target",
+      "scope": "controlled_same_photograph",
+      "contextFile": "bell-input-640.png",
+      "detailFile": "bell-missing-target.png",
+      "field": "Printed form code",
+      "referenceValue": "E-1242-5 (9-91)",
+      "contextAnalysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4",
+        "inputPx": [
+          640,
+          480
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            25.65,
+            56.23,
+            76.14,
+            93.91
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 5.0,
+          "minObservedFrameGapPx": 34.0,
+          "documentAreaRatio": 0.4516,
+          "laplacianVariance": 154.113,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            94.0,
+            111.0
+          ],
+          [
+            528.0,
+            108.0
+          ],
+          [
+            553.0,
+            394.0
+          ],
+          [
+            106.0,
+            443.0
+          ]
+        ],
+        "geometry": "four_interior_corners",
+        "elapsedMs": 26.04,
+        "derived": {
+          "file": "bell-input-640-rectified.jpg",
+          "sha256": "1847eec542203f2291933c9ecabbc7d68924daa4b0b2107178cc88fff0006125",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              1.9649370953284726,
+              -0.07102182272271584,
+              -176.82066463865493
+            ],
+            [
+              0.01573502897940136,
+              2.2763341923534264,
+              -254.15218807529405
+            ],
+            [
+              -0.0003028409329622543,
+              0.0001273113616597277,
+              1.0
+            ]
+          ],
+          "sizePx": [
+            1000,
+            739
+          ]
+        },
+        "controller": "fixed_visual_rules",
+        "action": "prepare_document_review",
+        "request": "Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown."
+      },
+      "inspection": {
+        "box": [
+          0.05224436357806984,
+          0.894653258714778,
+          0.16944058509428248,
+          0.04246645361704937
+        ],
+        "sourceQuadPx": [
+          [
+            131.467,
+            404.169
+          ],
+          [
+            215.337,
+            395.918
+          ],
+          [
+            216.022,
+            409.957
+          ],
+          [
+            132.033,
+            418.599
+          ]
+        ],
+        "sourceBoxPx": [
+          131,
+          395,
+          87,
+          25
+        ],
+        "nativeSizePx": [
+          87,
+          25
+        ],
+        "metrics": {
+          "laplacianVariance": 14838.099,
+          "percentileContrast": 130.0,
+          "brightPixelFraction": 0.0,
+          "samplePixels": 1111
+        },
+        "view": {
+          "file": "missing_target-context-field.png",
+          "sha256": "492fba2874501ba126f06eb101364bb10f7d91553482f1f5288a5b107917cb89",
+          "sizePx": [
+            87,
+            25
+          ],
+          "operations": [
+            "axis_aligned_source_pixel_crop",
+            "lossless_PNG_encode"
+          ]
+        },
+        "scope": "original_pixel_field_observation",
+        "method": "inverse_page_homography_to_retained_original",
+        "opencv": "5.0.0",
+        "field": "Printed form code",
+        "sourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4"
+      },
+      "detailAnalysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "086ba3c8f26c78a0c40bc68ce7d61f423443d70b0ac0c346d1f84d024823bed1",
+        "contextSourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4",
+        "inputPx": [
+          800,
+          450
+        ],
+        "scope": "planar_visual_correspondence",
+        "registration": {
+          "method": "SIFT_mutual_Lowe_ratio_RANSAC_homography",
+          "thresholds": {
+            "maxInputPixels": 24000000,
+            "minInputSidePx": 160,
+            "maxWorkSidePx": 1600,
+            "maxWorkPixels": 1600000,
+            "maxFeaturesPerImage": 2400,
+            "loweRatio": 0.75,
+            "ransacReprojectionWorkPx": 3.0,
+            "ransacMaxIterations": 3000,
+            "ransacConfidence": 0.995,
+            "minInliers": 12,
+            "minInlierLocations": 12,
+            "minInlierRatio": 0.4,
+            "maxMedianReprojectionWorkPx": 1.5,
+            "maxP95ReprojectionWorkPx": 3.0,
+            "minDetailInlierHullFraction": 0.02,
+            "minInlierAxisRatio": 0.035,
+            "minLocalInliers": 6,
+            "localSupportPaddingFieldDiagonals": 0.5,
+            "minLocalSupportPaddingWorkPx": 20,
+            "minTargetInlierHullCoverage": 0.5,
+            "maxFieldPixels": 3000000,
+            "minFieldSidePx": 6,
+            "minFieldInteriorPixels": 16,
+            "minLinearScaleRatio": 1.2
+          },
+          "metrics": {
+            "contextWorkPx": [
+              640,
+              480
+            ],
+            "detailWorkPx": [
+              800,
+              450
+            ],
+            "contextKeypoints": 2400,
+            "detailKeypoints": 376,
+            "ratioMatches": 147,
+            "mutualMatches": 81,
+            "inliers": 73,
+            "inlierRatio": 0.90123,
+            "inlierLocations": 57,
+            "medianReprojectionWorkPx": 0.1414,
+            "p95ReprojectionWorkPx": 0.4257,
+            "medianInverseReprojectionWorkPx": 0.0706,
+            "p95InverseReprojectionWorkPx": 0.213,
+            "detailInlierHullFraction": 0.16645,
+            "inlierAxisRatio": 0.66695,
+            "targetFrameCoverage": 0.0
+          },
+          "contextToDetailHomography": [
+            [
+              1.9955042682478905,
+              -0.0010192285808110133,
+              -198.99720208660895
+            ],
+            [
+              -0.00019706611944624738,
+              1.9943418724083328,
+              -199.0337504610783
+            ],
+            [
+              -8.762261038081989e-07,
+              -9.62402936934427e-06,
+              1.0
+            ]
+          ]
+        },
+        "comparison": {
+          "contextNativeSizePx": [
+            87,
+            25
+          ],
+          "detailNativeSizePx": null,
+          "fieldAreaRatio": 4.0245,
+          "linearScaleRatio": 2.00611,
+          "scope": "supplied_raster_pixel_footprint"
+        },
+        "status": "target_out_of_frame",
+        "reason": "target_partially_or_fully_outside_detail",
+        "request": "Aim at the selected field in the full-label photo; include the complete field and two nearby lines of printed text in the detail photo.",
+        "elapsedMs": 161.33
+      }
+    },
+    {
+      "case": "unrelated_photo",
+      "scope": "independent_source_rejection_control",
+      "contextFile": "bell-input-640.png",
+      "detailFile": "small-parcel.jpg",
+      "field": "Printed form code",
+      "referenceValue": "E-1242-5 (9-91)",
+      "contextAnalysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4",
+        "inputPx": [
+          640,
+          480
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            25.65,
+            56.23,
+            76.14,
+            93.91
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 5.0,
+          "minObservedFrameGapPx": 34.0,
+          "documentAreaRatio": 0.4516,
+          "laplacianVariance": 154.113,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            94.0,
+            111.0
+          ],
+          [
+            528.0,
+            108.0
+          ],
+          [
+            553.0,
+            394.0
+          ],
+          [
+            106.0,
+            443.0
+          ]
+        ],
+        "geometry": "four_interior_corners",
+        "elapsedMs": 25.57,
+        "derived": {
+          "file": "bell-input-640-rectified.jpg",
+          "sha256": "1847eec542203f2291933c9ecabbc7d68924daa4b0b2107178cc88fff0006125",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              1.9649370953284726,
+              -0.07102182272271584,
+              -176.82066463865493
+            ],
+            [
+              0.01573502897940136,
+              2.2763341923534264,
+              -254.15218807529405
+            ],
+            [
+              -0.0003028409329622543,
+              0.0001273113616597277,
+              1.0
+            ]
+          ],
+          "sizePx": [
+            1000,
+            739
+          ]
+        },
+        "controller": "fixed_visual_rules",
+        "action": "prepare_document_review",
+        "request": "Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown."
+      },
+      "inspection": {
+        "box": [
+          0.05224436357806984,
+          0.894653258714778,
+          0.16944058509428248,
+          0.04246645361704937
+        ],
+        "sourceQuadPx": [
+          [
+            131.467,
+            404.169
+          ],
+          [
+            215.337,
+            395.918
+          ],
+          [
+            216.022,
+            409.957
+          ],
+          [
+            132.033,
+            418.599
+          ]
+        ],
+        "sourceBoxPx": [
+          131,
+          395,
+          87,
+          25
+        ],
+        "nativeSizePx": [
+          87,
+          25
+        ],
+        "metrics": {
+          "laplacianVariance": 14838.099,
+          "percentileContrast": 130.0,
+          "brightPixelFraction": 0.0,
+          "samplePixels": 1111
+        },
+        "view": {
+          "file": "unrelated_photo-context-field.png",
+          "sha256": "492fba2874501ba126f06eb101364bb10f7d91553482f1f5288a5b107917cb89",
+          "sizePx": [
+            87,
+            25
+          ],
+          "operations": [
+            "axis_aligned_source_pixel_crop",
+            "lossless_PNG_encode"
+          ]
+        },
+        "scope": "original_pixel_field_observation",
+        "method": "inverse_page_homography_to_retained_original",
+        "opencv": "5.0.0",
+        "field": "Printed form code",
+        "sourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4"
+      },
+      "detailAnalysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "2b2866a6ed76b66c42085dae16f30fa7dfa69e48f0cfbee5155c33087ce8de09",
+        "contextSourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4",
+        "inputPx": [
+          1280,
+          984
+        ],
+        "scope": "planar_visual_correspondence",
+        "registration": {
+          "method": "SIFT_mutual_Lowe_ratio_RANSAC_homography",
+          "thresholds": {
+            "maxInputPixels": 24000000,
+            "minInputSidePx": 160,
+            "maxWorkSidePx": 1600,
+            "maxWorkPixels": 1600000,
+            "maxFeaturesPerImage": 2400,
+            "loweRatio": 0.75,
+            "ransacReprojectionWorkPx": 3.0,
+            "ransacMaxIterations": 3000,
+            "ransacConfidence": 0.995,
+            "minInliers": 12,
+            "minInlierLocations": 12,
+            "minInlierRatio": 0.4,
+            "maxMedianReprojectionWorkPx": 1.5,
+            "maxP95ReprojectionWorkPx": 3.0,
+            "minDetailInlierHullFraction": 0.02,
+            "minInlierAxisRatio": 0.035,
+            "minLocalInliers": 6,
+            "localSupportPaddingFieldDiagonals": 0.5,
+            "minLocalSupportPaddingWorkPx": 20,
+            "minTargetInlierHullCoverage": 0.5,
+            "maxFieldPixels": 3000000,
+            "minFieldSidePx": 6,
+            "minFieldInteriorPixels": 16,
+            "minLinearScaleRatio": 1.2
+          },
+          "metrics": {
+            "contextWorkPx": [
+              640,
+              480
+            ],
+            "detailWorkPx": [
+              1280,
+              984
+            ],
+            "contextKeypoints": 2400,
+            "detailKeypoints": 904,
+            "ratioMatches": 41,
+            "mutualMatches": 7
+          },
+          "contextToDetailHomography": null
+        },
+        "comparison": {
+          "contextNativeSizePx": [
+            87,
+            25
+          ],
+          "detailNativeSizePx": null,
+          "fieldAreaRatio": null,
+          "linearScaleRatio": null,
+          "scope": "supplied_raster_pixel_footprint"
+        },
+        "status": "needs_overlap",
+        "reason": "few_distinct_matches",
+        "request": "Keep the same label flat, include the target field plus two nearby lines of printed text, and tap the text to focus before taking the detail photo.",
+        "elapsedMs": 297.86
+      }
+    },
+    {
+      "case": "natural_new_view",
+      "scope": "two_natural_frames_of_one_physical_sheet",
+      "contextFile": "datasheet001-frame-0022.png",
+      "detailFile": "datasheet001-frame-0072.png",
+      "field": "Power Dissipation",
+      "referenceValue": "300 mW",
+      "contextAnalysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db",
+        "inputPx": [
+          1920,
+          1080
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            46.91,
+            52.99,
+            48.28,
+            47.72
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 8.4,
+          "minObservedFrameGapPx": 193.2,
+          "documentAreaRatio": 0.1409,
+          "laplacianVariance": 105.891,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            726.0,
+            198.0
+          ],
+          [
+            1172.4000244140625,
+            196.8000030517578
+          ],
+          [
+            1244.4000244140625,
+            780.0
+          ],
+          [
+            702.0,
+            792.0
+          ]
+        ],
+        "geometry": "four_interior_corners",
+        "elapsedMs": 76.72,
+        "derived": {
+          "file": "datasheet001-frame-0022-rectified.jpg",
+          "sha256": "9e84fbaa8cc06f4f3d694f6ae9d5a7d578aaf944772b5def0205df964a2b9bb4",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              2.319888313282867,
+              0.09373286114274172,
+              -1702.7980219496244
+            ],
+            [
+              0.0063495264125562455,
+              2.3620299616053297,
+              -472.29168857337123
+            ],
+            [
+              -3.3415069460759306e-05,
+              0.00038464466388018933,
+              1.0
+            ]
+          ],
+          "sizePx": [
+            1000,
+            1096
+          ]
+        },
+        "controller": "fixed_visual_rules",
+        "action": "prepare_document_review",
+        "request": "Compare the printed value in the original with the straightened view. Enter the field you have checked and confirm that the same document is shown."
+      },
+      "inspection": {
+        "box": [
+          0.11071,
+          0.51789,
+          0.78164,
+          0.04335
+        ],
+        "sourceQuadPx": [
+          [
+            769.95,
+            475.722
+          ],
+          [
+            1154.056,
+            471.19
+          ],
+          [
+            1156.758,
+            496.673
+          ],
+          [
+            769.381,
+            501.573
+          ]
+        ],
+        "sourceBoxPx": [
+          769,
+          471,
+          389,
+          32
+        ],
+        "nativeSizePx": [
+          389,
+          32
+        ],
+        "metrics": {
+          "laplacianVariance": 3799.941,
+          "percentileContrast": 116.0,
+          "brightPixelFraction": 0.0,
+          "samplePixels": 9617
+        },
+        "view": {
+          "file": "natural_new_view-context-field.png",
+          "sha256": "291cf84f213d34ca3dff38532573bdc2b51acfc58a217697ab0fbe607d26a2bf",
+          "sizePx": [
+            389,
+            32
+          ],
+          "operations": [
+            "axis_aligned_source_pixel_crop",
+            "lossless_PNG_encode"
+          ]
+        },
+        "scope": "original_pixel_field_observation",
+        "method": "inverse_page_homography_to_retained_original",
+        "opencv": "5.0.0",
+        "field": "Power Dissipation",
+        "sourceSha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db"
+      },
+      "detailAnalysis": {
+        "opencv": "5.0.0",
+        "sourceSha256": "be7b20d819bc6be65978adedb6f3a4a932c7a2807fda5acaa599b29327df056f",
+        "contextSourceSha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db",
+        "inputPx": [
+          1920,
+          1080
+        ],
+        "scope": "planar_visual_correspondence",
+        "registration": {
+          "method": "SIFT_mutual_Lowe_ratio_RANSAC_homography",
+          "thresholds": {
+            "maxInputPixels": 24000000,
+            "minInputSidePx": 160,
+            "maxWorkSidePx": 1600,
+            "maxWorkPixels": 1600000,
+            "maxFeaturesPerImage": 2400,
+            "loweRatio": 0.75,
+            "ransacReprojectionWorkPx": 3.0,
+            "ransacMaxIterations": 3000,
+            "ransacConfidence": 0.995,
+            "minInliers": 12,
+            "minInlierLocations": 12,
+            "minInlierRatio": 0.4,
+            "maxMedianReprojectionWorkPx": 1.5,
+            "maxP95ReprojectionWorkPx": 3.0,
+            "minDetailInlierHullFraction": 0.02,
+            "minInlierAxisRatio": 0.035,
+            "minLocalInliers": 6,
+            "localSupportPaddingFieldDiagonals": 0.5,
+            "minLocalSupportPaddingWorkPx": 20,
+            "minTargetInlierHullCoverage": 0.5,
+            "maxFieldPixels": 3000000,
+            "minFieldSidePx": 6,
+            "minFieldInteriorPixels": 16,
+            "minLinearScaleRatio": 1.2
+          },
+          "metrics": {
+            "contextWorkPx": [
+              1600,
+              900
+            ],
+            "detailWorkPx": [
+              1600,
+              900
+            ],
+            "contextKeypoints": 1252,
+            "detailKeypoints": 1110,
+            "ratioMatches": 551,
+            "mutualMatches": 502,
+            "inliers": 488,
+            "inlierRatio": 0.97211,
+            "inlierLocations": 394,
+            "medianReprojectionWorkPx": 0.2604,
+            "p95ReprojectionWorkPx": 1.0862,
+            "medianInverseReprojectionWorkPx": 0.2738,
+            "p95InverseReprojectionWorkPx": 1.1142,
+            "detailInlierHullFraction": 0.07656,
+            "inlierAxisRatio": 0.80391,
+            "targetFrameCoverage": 1.0,
+            "localInliers": 330,
+            "targetInlierHullCoverage": 0.92562,
+            "localSupportPaddingWorkPx": 161.903
+          },
+          "contextToDetailHomography": [
+            [
+              0.8788033840780618,
+              -0.1303144928233213,
+              -1.3570044391111633
+            ],
+            [
+              -0.002249300425066579,
+              0.8771990650903019,
+              22.76912472493401
+            ],
+            [
+              -4.1922880487353013e-05,
+              -1.2236322156961946e-05,
+              1.0
+            ]
+          ]
+        },
+        "comparison": {
+          "contextNativeSizePx": [
+            389,
+            32
+          ],
+          "detailNativeSizePx": [
+            374,
+            29
+          ],
+          "fieldAreaRatio": 0.88882,
+          "linearScaleRatio": 0.94277,
+          "scope": "supplied_raster_pixel_footprint"
+        },
+        "field": {
+          "sourceQuadPx": [
+            [
+              637.576,
+              455.702
+            ],
+            [
+              1005.895,
+              458.317
+            ],
+            [
+              1005.346,
+              482.161
+            ],
+            [
+              633.746,
+              479.424
+            ]
+          ],
+          "sourceBoxPx": [
+            633,
+            455,
+            374,
+            29
+          ],
+          "nativeSizePx": [
+            374,
+            29
+          ],
+          "metrics": {
+            "laplacianVariance": 5039.88,
+            "percentileContrast": 114.0,
+            "brightPixelFraction": 0.00048,
+            "samplePixels": 8289
+          },
+          "view": {
+            "file": "natural_new_view-detail-field.png",
+            "sha256": "e8964790d5a04fb47be328f87c8388a359781957062df9beed1f714a4aeec444",
+            "sizePx": [
+              374,
+              29
+            ],
+            "operations": [
+              "axis_aligned_source_pixel_crop",
+              "lossless_PNG_encode"
+            ]
+          }
+        },
+        "status": "needs_more_detail",
+        "reason": "small_source_pixel_gain",
+        "request": "Move closer to enlarge the selected field in a fresh photo, retain two nearby printed lines, and tap the field to focus.",
+        "elapsedMs": 474.03
+      }
+    }
+  ]
+}

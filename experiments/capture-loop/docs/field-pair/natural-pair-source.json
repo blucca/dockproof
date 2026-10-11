@@ -1,0 +1,162 @@
+{
+  "title": "Same physical datasheet, two natural handheld frames",
+  "selected_pair": [
+    22,
+    72
+  ],
+  "applicability": "Selected same-video natural-view control for planar field matching and source-pixel sampling. Both frames retain the full page; frame 72 shows a smaller page area and a changed perspective. A close-detail recapture is the next capture action for a minimum 1.2x linear sampling gain.",
+  "sampling_unit": "One physical A4 sheet filmed in one video; two distinct recorded frames. Selected development example.",
+  "source": {
+    "dataset": "ICDAR 2015 SmartDoc Challenge 1 original sample dataset",
+    "source_record": "https://zenodo.org/records/1230218",
+    "doi": "10.5281/zenodo.1230218",
+    "source_archive": "sampleDataset.tar.gz",
+    "archive_member": "sampleDataset/input_sample/background00/datasheet001.avi",
+    "source_video_sha256": "a45f09604883d201c4e9691c67e67b3a86ffbf60470f661acf9ceac525aad6b0",
+    "source_video_bytes": 6745554,
+    "license": "CC-BY-4.0",
+    "license_url": "https://creativecommons.org/licenses/by/4.0/",
+    "author_attribution": "Jean-Christophe Burie, Joseph Chazalon, Mickaël Coustaty, Sébastien Eskenazi, Muhammad Muzzamil Luqman, Maroua Mehri, Nibal Nayef, Jean-Marc OGIER, Sophea Prum and Marçal Rusinol. ICDAR2015 Competition on Smartphone Document Capture and OCR (SmartDoc). ICDAR, 2015."
+  },
+  "source_archive_url": "https://zenodo.org/records/1230218/files/sampleDataset.tar.gz?download=1",
+  "capture": {
+    "device": "Google Nexus 7 tablet",
+    "page": "A4 normal paper; document model printed using a color laser-jet",
+    "source_description_url": "https://github.com/jchazalon/smartdoc15-ch1-dataset",
+    "source_description_line": 19,
+    "author_video_framerate_description": "variable frame-rate",
+    "reported_stream_fps": 22,
+    "stream_frame_count": 214
+  },
+  "frames": [
+    {
+      "file": "datasheet001-frame-0022.png",
+      "zero_based_frame_index": 22,
+      "nominal_timestamp_seconds": 1.0,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 635060,
+      "sha256": "867974f6d254a04bf45c76b5c07d58b302d5a6d2f8758452e295c7dfbbf329db",
+      "decode": "Sequential cv2.VideoCapture.read() from frame 0; native resolution; PNG compression level 6",
+      "document_quad_px": [
+        [
+          726.0,
+          198.0
+        ],
+        [
+          1172.4000244140625,
+          196.8000030517578
+        ],
+        [
+          1244.4000244140625,
+          780.0
+        ],
+        [
+          702.0,
+          792.0
+        ]
+      ],
+      "document_area_ratio": 0.1409,
+      "page_normalized_focus": 105.891
+    },
+    {
+      "file": "datasheet001-frame-0072.png",
+      "zero_based_frame_index": 72,
+      "nominal_timestamp_seconds": 3.272727272727273,
+      "width": 1920,
+      "height": 1080,
+      "bytes": 378128,
+      "sha256": "be7b20d819bc6be65978adedb6f3a4a932c7a2807fda5acaa599b29327df056f",
+      "decode": "Sequential cv2.VideoCapture.read() from frame 0; native resolution; PNG compression level 6",
+      "document_quad_px": [
+        [
+          632.4000244140625,
+          201.60000610351562
+        ],
+        [
+          1057.199951171875,
+          204.0
+        ],
+        [
+          1057.199951171875,
+          750.0
+        ],
+        [
+          536.4000244140625,
+          746.4000244140625
+        ]
+      ],
+      "document_area_ratio": 0.125,
+      "page_normalized_focus": 112.034
+    }
+  ],
+  "manual_fields": [
+    {
+      "id": "part_series",
+      "label": "Printed part series",
+      "text": "AZ23C2V7 THRU AZ23C51",
+      "boxes": {
+        "22": [
+          870,
+          234,
+          1075,
+          256
+        ],
+        "72": [
+          762,
+          233,
+          954,
+          256
+        ]
+      },
+      "rectified_ratio_boxes": {
+        "22": [
+          0.31747,
+          0.07392,
+          0.45383,
+          0.04563
+        ],
+        "72": [
+          0.3137,
+          0.06559,
+          0.44796,
+          0.05229
+        ]
+      }
+    },
+    {
+      "id": "power_dissipation",
+      "label": "Power Dissipation (Note 1)",
+      "text": "300 mW",
+      "boxes": {
+        "22": [
+          770,
+          476,
+          1155,
+          497
+        ],
+        "72": [
+          635,
+          460,
+          1005,
+          476
+        ]
+      },
+      "rectified_ratio_boxes": {
+        "22": [
+          0.11071,
+          0.51789,
+          0.78164,
+          0.04335
+        ],
+        "72": [
+          0.10223,
+          0.51991,
+          0.78655,
+          0.03338
+        ]
+      }
+    }
+  ],
+  "coordinate_convention": "source boxes are [left, top, right_exclusive, bottom_exclusive] in the 1920x1080 native decoded image; each rectangle was selected manually with a small margin. rectified_ratio_boxes are [left, top, width, height] in capture.py perspectiveView coordinates."
+}

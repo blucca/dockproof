@@ -13,7 +13,7 @@
     <section class="intro" aria-labelledby="page-title">
       <p class="eyebrow">A readable photo is where it starts.</p>
       <h1 id="page-title">TAKE A<br>CLEARER<br><span>LOOK.</span></h1>
-      <p class="intro-copy">Four edges. Sharp detail. A field you can check.<br>Get the next capture instruction, then compare your original and confirm the value.</p>
+      <p class="intro-copy">Keep the whole label. Bring the small field closer.<br>Follow the capture request, compare linked originals, then confirm the value.</p>
       <div class="capture-diagram" aria-hidden="true">
         <div class="target-corner tl"></div><div class="target-corner tr"></div><div class="target-corner bl"></div><div class="target-corner br"></div>
         <div class="label-sketch"><span>DOCKPROOF / INTAKE</span><div class="sketch-rules"></div><div class="barcode"></div><b>CAPTURE → REVIEW</b></div>
@@ -23,7 +23,7 @@
     </section>
     <section class="panel intake" aria-labelledby="upload-title">
       <div class="section-head"><div><p class="eyebrow">01 / Photograph</p><h2 id="upload-title">Your next<br> clear shot.</h2></div><span class="pill" id="count">Connecting…</span></div>
-      <p>Keep the field and all four document edges in view. Each new photo continues the capture history.</p>
+      <p>Start with all four document edges in view. Select a small field below, then add a closer detail while keeping the full-label context.</p>
       <p id="session-note" class="session-note small" hidden></p>
       <div class="actions">
         <button class="primary" id="upload" type="button">Take / upload a photo</button>
@@ -34,6 +34,7 @@
       <p class="small" id="file-hint">JPEG or PNG · The camera opens on supported phones.</p>
       <p id="status" class="status" role="status" aria-live="polite">Loading the saved session…</p>
       <p id="error" class="error" role="alert" hidden></p>
+      <section id="paired-sample" class="paired-sample" hidden><p class="eyebrow">New / Full label + linked field detail</p><h3>A small code.<br>A closer look.</h3><p class="small">Try a controlled pair from one label photograph. Keep the full label, then match a higher-sampling crop to the printed form code.</p><button id="paired-start" type="button" data-capture>Start the two-view sample</button><div id="paired-credit"></div></section>
       <section class="parcel-samples" aria-labelledby="parcel-title"><p class="eyebrow">Two real parcels / Two capture tasks</p><h3 id="parcel-title">Try a label. Follow the request.</h3><p class="small">Choose either independent photo. Each click adds a new capture to this session.</p><p id="parcel-status" class="small" role="status">Loading parcel samples…</p><div id="parcel-list" class="sample-grid"></div></section>
       <details class="samples"><summary>Try the blur → clear camera sequence</summary><p id="sample-description" class="small">Loading sample details…</p><div id="sample-list" class="sample-grid"></div><a id="attribution" class="small" target="_blank" rel="noopener noreferrer" hidden>Frame source &amp; license ↗</a></details>
       <details class="data-details"><summary>Where your photos go</summary><p class="method" id="method">OpenCV 5 measurements · loading controller</p><p class="small" id="data-note">Loading this station’s storage and measurement settings…</p><button id="delete-session" type="button" hidden>Delete my saved photos and review</button></details>
@@ -96,9 +97,31 @@
             </div>
           </div>
         </details>
+        <section id="detail-capture" class="detail-capture" aria-labelledby="detail-target" hidden>
+          <p class="eyebrow">Full label + linked detail</p>
+          <h3 id="detail-target">Get a closer look</h3>
+          <p class="small">Keep the <a id="detail-context-link" target="_blank" rel="noopener noreferrer">full-label original ↗</a> as context. Move closer to your selected field and include some surrounding words or distinctive marks. The detail can leave the outer page edges out of frame.</p>
+          <label class="check"><input id="detail-same-document" type="checkbox"><span>This detail shows the same physical document as my saved full-label photo.</span></label>
+          <button id="detail-upload" type="button">Take / upload this field’s detail</button>
+          <button id="detail-sample" type="button" hidden>Load the paired sample detail</button>
+          <input id="detail-photo" type="file" accept="image/jpeg,image/png" capture="environment" hidden>
+          <p id="detail-sample-note" class="small" hidden>This sample uses a higher-sampling crop of the same source photograph. Check the same-document box, then load the paired detail. The two images form a controlled workflow example.</p>
+          <p class="small">Each detail uses one photo attempt. Both originals stay together in your private session.</p>
+          <section id="detail-result" class="detail-result" hidden>
+            <h4 id="detail-result-title" tabindex="-1">Field detail</h4>
+            <p id="detail-request" class="request"></p><p id="detail-agent" class="small" hidden></p>
+            <div id="detail-originals" class="views detail-originals"></div>
+            <p class="eyebrow">Original pixels / 1× display · scroll each crop</p>
+            <div id="detail-crops" class="detail-crops"></div>
+            <p id="detail-sampling" class="small"></p>
+            <details class="measurements"><summary>Inspect the visual correspondence</summary><dl id="detail-metrics"></dl><p class="small">OpenCV matches planar image features and checks target coverage. Your same-document declaration and field reading are recorded separately.</p></details>
+            <label class="detail-source-label">Image used for this confirmation<select id="detail-review-source"><option value="context">Full-label field</option><option value="detail">Linked detail field</option></select></label>
+            <label id="detail-readability-row" hidden>Compared with the context crop, this field is…<select id="detail-readability"><option value="">Choose after comparing</option><option value="easier">Easier to read</option><option value="same">About the same</option><option value="harder">Harder to read</option></select></label>
+          </section>
+        </section>
         <form id="review-form">
           <div class="form-grid"><label>Document field<input name="field" required maxlength="120" placeholder="e.g. Date or shipment number"></label><label>Exact visible value<input name="value" required maxlength="400" placeholder="Copy the value from the document"></label><label>Your name / reviewer ID<input name="reviewer" required maxlength="100" autocomplete="name" placeholder="Who checked this field?"></label></div>
-          <label class="check"><input name="confirmed" type="checkbox" required><span>I checked the intended document, compared this field in the retained original and the perspective view, and confirmed the value entered above.</span></label>
+          <label class="check"><input name="confirmed" type="checkbox" required><span id="review-confirmation-label">I checked the intended document, compared this field in the retained original and the perspective view, and confirmed the value entered above.</span></label>
           <button class="primary" type="submit">Save field confirmation</button>
         </form>
       </section>

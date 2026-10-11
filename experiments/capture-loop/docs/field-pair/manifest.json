@@ -1,0 +1,45 @@
+{
+  "id": "bell-form-detail",
+  "kind": "controlled_same_photo_pair",
+  "title": "A small code. A closer look.",
+  "description": "One Bell Labs label photograph at two controlled raster scales. Keep the full label, then match a higher-sampling crop to its printed form code.",
+  "context": {
+    "file": "../field-source-scale/bell-input-640.png",
+    "url": "/samples/paired/bell-context-640.png",
+    "name": "bell-context-640.png",
+    "sha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4"
+  },
+  "detail": {
+    "file": "bell-detail.png",
+    "url": "/samples/paired/bell-detail.png",
+    "name": "bell-detail.png"
+  },
+  "field": "Printed form code",
+  "box": [
+    0.05224436357806984,
+    0.894653258714778,
+    0.16944058509428248,
+    0.04246645361704937
+  ],
+  "source": {
+    "title": "File:AT&T Bell Laboratories package mailing labels.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:AT&T_Bell_Laboratories_package_mailing_labels.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8b/AT%26T_Bell_Laboratories_package_mailing_labels.jpg",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/AT%26T_Bell_Laboratories_package_mailing_labels.jpg/1280px-AT%26T_Bell_Laboratories_package_mailing_labels.jpg",
+    "author": "Jonathan Schilling",
+    "date": "2020-01-17",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalPx": [
+      4032,
+      3024
+    ],
+    "transformation": "Wikimedia official 1280px thumbnail",
+    "retrieved": "2026-10-10"
+  },
+  "transformations": {
+    "context": "1280px official thumbnail -> INTER_AREA 640px -> lossless PNG",
+    "detail": "1280px official thumbnail -> retained original-pixel crop x=150, y=590, width=600, height=340 -> lossless PNG"
+  },
+  "scope": "Controlled same-photograph workflow example. Independent phone retakes are collected through the external trial."
+}

@@ -1,0 +1,112 @@
+{
+  "scope": "scripted_local_browser_with_controlled_same_photograph_pair",
+  "sourceUnit": "one natural Bell Labs photograph, two controlled raster views",
+  "execution": "local_OpenCV5_with_rule_based_requests",
+  "contextRetained": true,
+  "action": "prepare_detail_review",
+  "registration": {
+    "method": "SIFT_mutual_Lowe_ratio_RANSAC_homography",
+    "thresholds": {
+      "maxInputPixels": 24000000,
+      "minInputSidePx": 160,
+      "maxWorkSidePx": 1600,
+      "maxWorkPixels": 1600000,
+      "maxFeaturesPerImage": 2400,
+      "loweRatio": 0.75,
+      "ransacReprojectionWorkPx": 3.0,
+      "ransacMaxIterations": 3000,
+      "ransacConfidence": 0.995,
+      "minInliers": 12,
+      "minInlierLocations": 12,
+      "minInlierRatio": 0.4,
+      "maxMedianReprojectionWorkPx": 1.5,
+      "maxP95ReprojectionWorkPx": 3.0,
+      "minDetailInlierHullFraction": 0.02,
+      "minInlierAxisRatio": 0.035,
+      "minLocalInliers": 6,
+      "localSupportPaddingFieldDiagonals": 0.5,
+      "minLocalSupportPaddingWorkPx": 20,
+      "minTargetInlierHullCoverage": 0.5,
+      "maxFieldPixels": 3000000,
+      "minFieldSidePx": 6,
+      "minFieldInteriorPixels": 16,
+      "minLinearScaleRatio": 1.2
+    },
+    "metrics": {
+      "contextWorkPx": [
+        640,
+        480
+      ],
+      "detailWorkPx": [
+        600,
+        340
+      ],
+      "contextKeypoints": 2400,
+      "detailKeypoints": 671,
+      "ratioMatches": 142,
+      "mutualMatches": 113,
+      "inliers": 106,
+      "inlierRatio": 0.93805,
+      "inlierLocations": 91,
+      "medianReprojectionWorkPx": 0.1621,
+      "p95ReprojectionWorkPx": 0.6355,
+      "medianInverseReprojectionWorkPx": 0.081,
+      "p95InverseReprojectionWorkPx": 0.3178,
+      "detailInlierHullFraction": 0.63336,
+      "inlierAxisRatio": 0.36269,
+      "targetFrameCoverage": 1.0,
+      "localInliers": 56,
+      "targetInlierHullCoverage": 1.0,
+      "localSupportPaddingWorkPx": 43.772
+    },
+    "contextToDetailHomography": [
+      [
+        2.00691083757568,
+        0.0018847607471127467,
+        -150.94763558121753
+      ],
+      [
+        0.00014540574314681934,
+        2.008206299367116,
+        -592.2665602883166
+      ],
+      [
+        -2.6602184265656494e-07,
+        8.988110853422391e-06,
+        1.0
+      ]
+    ]
+  },
+  "comparison": {
+    "contextNativeSizePx": [
+      87,
+      25
+    ],
+    "detailNativeSizePx": [
+      171,
+      47
+    ],
+    "fieldAreaRatio": 3.9974,
+    "linearScaleRatio": 1.99935,
+    "scope": "supplied_raster_pixel_footprint"
+  },
+  "contextNativeSizePx": [
+    87,
+    25
+  ],
+  "detailNativeSizePx": [
+    171,
+    47
+  ],
+  "sampleRequiresSameDocumentCheck": true,
+  "newDetailClearsValueAndConfirmation": true,
+  "readabilityAssessmentRequired": true,
+  "reviewBoundToBothOriginals": true,
+  "reloadRestoresDetail": true,
+  "reviewSourceChoiceUpdatesConfirmation": true,
+  "mobileViewportPx": 390,
+  "mobileOverflowPx": 0,
+  "pageErrors": [],
+  "newCloudOrModelCalls": 0,
+  "independentParticipantReadings": 0
+}

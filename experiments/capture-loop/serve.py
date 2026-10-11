@@ -47,6 +47,12 @@ def sample_catalog():
                 catalog['parcelSamples'].append({**sample, 'id': Path(sample['file']).stem,
                                                   'url': url, 'kind': 'natural_parcel_photo'})
                 files[url] = ROOT / 'domain' / 'images' / sample['file']
+    paired_manifest = ROOT / 'docs' / 'field-pair' / 'manifest.json'
+    if paired_manifest.exists():
+        sample = json.loads(paired_manifest.read_text())
+        catalog['pairedSample'] = sample
+        for kind in ('context', 'detail'):
+            files[sample[kind]['url']] = paired_manifest.parent / sample[kind]['file']
     return catalog, files
 
 
@@ -323,7 +329,7 @@ class CaptureService:
             self.active_key = key
             return state
 
-    def process_photo(self, key, original, artifacts, capture_id, prior):
+    def process_photo(self, key, original, artifacts, capture_id, prior, detail_context=None):
         directory = self.directory(key)
         env = {**os.environ, 'CAPTURE_PYTHON': sys.executable}
         if env.get('PYTHONPATH'):
@@ -333,6 +339,10 @@ class CaptureService:
             command = [os.environ.get('CAPTURE_NODE', 'node'), '--use-env-proxy',
                        str(ROOT / 'agent.mjs'), '--source', str(original),
                        '--output', str(artifacts), '--capture-id', capture_id]
+            if detail_context:
+                detail_file = directory / 'detail-context.json'
+                atomic_json(detail_file, detail_context)
+                command += ['--detail-context', str(detail_file)]
             if prior:
                 context_file = directory / 'agent-context.json'
                 atomic_json(context_file, {'captureId': prior['id'], 'action': prior['analysis']['action'],
@@ -340,6 +350,10 @@ class CaptureService:
                 command += ['--previous', str(context_file)]
             if self.args.hosted:
                 env['CAPTURE_PROVIDER_LOG_DIR'] = str(directory / 'provider-logs')
+        elif detail_context:
+            command = [sys.executable, '-B', str(ROOT / 'detail_capture.py'),
+                       '--source', str(original), '--context', detail_context['contextSource'],
+                       '--inspection', detail_context['inspectionFile'], '--output', str(artifacts)]
         else:
             command = [sys.executable, '-B', '-c',
                        'import json,sys; from capture import inspect; '
@@ -440,6 +454,7 @@ class CaptureService:
             review = {**fields, 'captureId': current['id'], 'sourceSha256': current['source']['sha256'],
                       'derivedSha256': current['analysis']['derived']['sha256'],
                       'confirmed': True, 'reviewedAt': iso(now())}
+            inspection = None
             if values.get('fieldInspectionId') is not None:
                 inspection = next((item for item in current.get('fieldInspections', [])
                                    if item['id'] == values['fieldInspectionId']), None)
@@ -448,6 +463,23 @@ class CaptureService:
                 review['fieldInspectionId'] = inspection['id']
                 review['fieldSourceQuadPx'] = inspection['sourceQuadPx']
                 review['fieldViewSha256'] = inspection['view']['sha256']
+            if values.get('detailCaptureId') is not None:
+                details = inspection.get('detailCaptures', []) if inspection else []
+                detail = details[-1] if details else None
+                if (detail is None or detail['id'] != values['detailCaptureId']
+                        or detail['analysis']['action'] != 'prepare_detail_review'
+                        or detail['analysis'].get('status') != 'matched'):
+                    raise RequestError('Review the latest matched detail for this saved field.', 409, 'stale_detail')
+                readability = values.get('detailReadability')
+                if readability not in ('easier', 'same', 'harder'):
+                    raise RequestError('Compare the two field crops and choose easier, the same, or harder to read.')
+                detail_field = detail['analysis']['field']
+                review.update(detailCaptureId=detail['id'],
+                              detailSourceSha256=detail['source']['sha256'],
+                              detailFieldSourceQuadPx=detail_field['sourceQuadPx'],
+                              detailFieldViewSha256=detail_field['view']['sha256'],
+                              detailReadability=readability,
+                              sameDocumentDeclared=detail['sameDocumentDeclared'])
             state['review'] = review
             state['reviews'].append(review)
             atomic_json(self.directory(key) / 'session.json', state)
@@ -492,6 +524,77 @@ class CaptureService:
                 crop.unlink(missing_ok=True)
                 raise
 
+    def detail(self, key, body, params):
+        """Append a detail under its immutable context field; context remains current."""
+        extension = 'jpg' if body.startswith(b'\xff\xd8\xff') else 'png' if body.startswith(b'\x89PNG\r\n\x1a\n') else None
+        if extension is None:
+            raise RequestError('Choose a JPEG or PNG detail photograph.')
+        if params.get('sameDocument', [''])[0] != 'true':
+            raise RequestError('Confirm that the new detail shows the same physical document as the saved context.')
+        with self.lock:
+            state = self.read_state(key)
+            current = state['captures'][-1] if state['captures'] else None
+            if current is None or params.get('captureId', [None])[0] != current['id']:
+                raise RequestError('Add a detail to the latest full-document context.', 409, 'stale_capture')
+            inspection = next((item for item in current.get('fieldInspections', [])
+                               if item['id'] == params.get('fieldInspectionId', [None])[0]), None)
+            if inspection is None:
+                raise RequestError('Save the target field selection before adding its detail.')
+            details = inspection.get('detailCaptures', [])
+            previous = details[-1] if details else None
+            if params.get('replacesDetail', [None])[0] != (previous['id'] if previous else None):
+                raise RequestError('A newer detail is saved. Reload this field before continuing.', 409, 'stale_detail')
+            self.reserve_capture(key, current['id'])
+        detail_id = uuid.uuid4().hex
+        directory = self.directory(key)
+        artifacts = directory / 'files'
+        original = artifacts / (detail_id + '.' + extension)
+        try:
+            with self.lock:
+                self.read_state(key)
+                original.write_bytes(body)
+                os.chmod(original, 0o600)
+                inspection_file = directory / 'detail-inspection.json'
+                # The measurement worker receives the selected geometry and source binding.
+                atomic_json(inspection_file, {k: v for k, v in inspection.items() if k != 'detailCaptures'})
+            result = self.process_photo(key, original, artifacts, detail_id, previous, {
+                'contextSource': str(artifacts / current['source']['file']),
+                'inspectionFile': str(inspection_file), 'contextCaptureId': current['id'],
+                'fieldInspectionId': inspection['id'], 'field': inspection['field'],
+            })
+            analysis = result['analysis']
+            detail_field = analysis.get('field')
+            if detail_field:
+                filename = detail_field['view']['file']
+                if filename != detail_id + '-field.png' or not (artifacts / filename).is_file():
+                    raise ValueError('Invalid detail field file.')
+                detail_field['view']['url'] = '/files/' + filename
+                os.chmod(artifacts / filename, 0o600)
+            record = {'id': detail_id, 'capturedAt': iso(now()), 'contextCaptureId': current['id'],
+                      'fieldInspectionId': inspection['id'], 'previousDetailId': previous['id'] if previous else None,
+                      'sameDocumentDeclared': True,
+                      'source': {'file': original.name, 'name': params.get('name', ['detail.' + extension])[0][:160],
+                                 'sha256': analysis['sourceSha256'], 'width': analysis['inputPx'][0],
+                                 'height': analysis['inputPx'][1], 'url': '/files/' + original.name},
+                      'analysis': analysis}
+            if result.get('trace'):
+                record['agentTrace'] = self.visitor_trace(result['trace']) if self.args.hosted else result['trace']
+            with self.lock:
+                state = self.read_state(key)
+                target = next(item for item in state['captures'][-1]['fieldInspections'] if item['id'] == inspection['id'])
+                target.setdefault('detailCaptures', []).append(record)
+                state['review'] = None
+                atomic_json(directory / 'session.json', state)
+            return record
+        except Exception:
+            for path in artifacts.glob(detail_id + '*'):
+                path.unlink(missing_ok=True)
+            raise
+        finally:
+            with self.lock:
+                self.active_key = None
+                self.worker = None
+
     def reset(self, key):
         with self.lock:
             state = self.read_state(key)
@@ -502,7 +605,8 @@ class CaptureService:
                 path = directory / name
                 if path.exists():
                     shutil.rmtree(path)
-            (directory / 'agent-context.json').unlink(missing_ok=True)
+            for name in ('agent-context.json', 'detail-context.json', 'detail-inspection.json'):
+                (directory / name).unlink(missing_ok=True)
             (directory / 'files').mkdir(mode=0o700)
             state.update(captures=[], review=None, reviews=[], resetAt=iso(now()))
             atomic_json(directory / 'session.json', state)
@@ -587,6 +691,12 @@ def handler_for(service):
                         allowed.update(c['analysis']['derived']['file'] for c in state['captures'] if 'derived' in c['analysis'])
                         allowed.update(item['view']['file'] for c in state['captures']
                                        for item in c.get('fieldInspections', []))
+                        for capture in state['captures']:
+                            for inspection in capture.get('fieldInspections', []):
+                                for detail in inspection.get('detailCaptures', []):
+                                    allowed.add(detail['source']['file'])
+                                    if detail['analysis'].get('field'):
+                                        allowed.add(detail['analysis']['field']['view']['file'])
                         target = service.directory(key) / 'files' / filename if filename in allowed else None
                         body = target.read_bytes() if target is not None and target.is_file() else None
                 else:
@@ -626,9 +736,9 @@ def handler_for(service):
             try:
                 self.boundary()
                 route = urlparse(self.path)
-                if route.path not in ('/api/capture', '/api/review', '/api/reset', '/api/field'):
+                if route.path not in ('/api/capture', '/api/review', '/api/reset', '/api/field', '/api/detail'):
                     raise RequestError('This API route is unavailable.', 404)
-                if route.path in ('/api/capture', '/api/field'):
+                if route.path in ('/api/capture', '/api/field', '/api/detail'):
                     owns_gate = service.capture_gate.acquire(blocking=False)
                     if not owns_gate:
                         raise RequestError('A photo is processing. Please try again shortly.', 429, 'busy')
@@ -636,8 +746,9 @@ def handler_for(service):
                 body = self.read_body(allow_empty=route.path == '/api/reset')
                 if route.path == '/api/reset':
                     return self.respond(service.reset(key))
-                if route.path == '/api/capture':
-                    record = service.capture(key, body, parse_qs(route.query))
+                if route.path in ('/api/capture', '/api/detail'):
+                    method = service.detail if route.path == '/api/detail' else service.capture
+                    record = method(key, body, parse_qs(route.query))
                     service.capture_gate.release()
                     owns_gate = False
                     return self.respond(record)

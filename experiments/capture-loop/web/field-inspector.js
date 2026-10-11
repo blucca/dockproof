@@ -49,7 +49,7 @@ export function createFieldInspector({ api, run, localUrl, getCapture, onSelect,
   function selectInspection(inspection, fillReview = true) {
     selected = inspection || null; linkedId = inspection?.id || null;
     $('field-result').hidden = !inspection;
-    if (!inspection) { availability(); return; }
+    if (!inspection) { if (fillReview) onSelect(null); availability(); return; }
     form.elements.field.value = inspection.field;
     setBox(inspection.box);
     $('field-history').value = inspection.id;
@@ -97,6 +97,7 @@ export function createFieldInspector({ api, run, localUrl, getCapture, onSelect,
       $('field-selection-note').textContent = 'Drag across the field, or enter its box as percentages below.';
       root.open = false;
       photo.removeAttribute('src');
+      onSelect(null);
     }
     if (derived?.url) {
       const nextUrl = localUrl(derived.url);
@@ -124,7 +125,7 @@ export function createFieldInspector({ api, run, localUrl, getCapture, onSelect,
     if (busy || !loaded || !imageReady || event.button !== 0 || inspections().length >= 6) return;
     event.preventDefault();
     drag = { start: point(event), pointerId: event.pointerId, previous: box };
-    stage.setPointerCapture(event.pointerId); linkedId = null;
+    stage.setPointerCapture(event.pointerId); linkedId = null; onSelect(null);
     setBox(null);
   });
   stage.addEventListener('pointermove', move);
@@ -145,12 +146,12 @@ export function createFieldInspector({ api, run, localUrl, getCapture, onSelect,
     $('field-selection-note').textContent = 'The selection image failed to load. Reload the saved session to restore it.';
   });
   coords.forEach(input => input.addEventListener('input', () => {
-    linkedId = null; const value = fromInputs(); setBox(validBox(value) ? value : null, false);
+    linkedId = null; onSelect(null); const value = fromInputs(); setBox(validBox(value) ? value : null, false);
     $('field-selection-note').textContent = validBox(value)
       ? 'Field box selected from percentage coordinates.'
       : 'Enter left, top, width and height within the page. Left + width and top + height each fit within 100%.';
   }));
-  form.elements.field.addEventListener('input', () => { linkedId = null; });
+  form.elements.field.addEventListener('input', () => { linkedId = null; onSelect(null); });
   $('field-history').addEventListener('change', event => {
     const inspection = inspections().find(item => item.id === event.target.value);
     if (inspection) selectInspection(inspection);
@@ -177,6 +178,7 @@ export function createFieldInspector({ api, run, localUrl, getCapture, onSelect,
   });
   return {
     render,
+    selectedInspection() { return selected?.id === linkedId ? selected : null; },
     setBusy(value, sessionLoaded) { busy = value; loaded = sessionLoaded; availability(); },
     reviewInspectionId(field, id) { return selected?.captureId === id && selected.field === field && linkedId === selected.id ? selected.id : null; }
   };

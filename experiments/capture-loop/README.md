@@ -1,8 +1,10 @@
 # Capture Loop · OpenCV 5 + a tool-using capture agent
 
-**Get a readable original before reviewing a document field.** A photograph starts an evidence trail. Image measurements select a concrete capture request; a fresh photo continues the trail; the reviewer compares the retained original and a perspective-corrected view before recording a field.
+**Keep the whole label. Get a closer field.** Image measurements select a concrete capture request. A full-label original carries context; a linked detail photo brings more source samples to the exact field. The reviewer compares the originals and confirms the value.
 
-**[Open the live capture station →](https://blucca.github.io/research/capture-loop/)** · Free field trial through **October 14, 2026, 12:00 UTC**. Each browser gets its own session and six capture attempts. Try the two supplied parcel photos, or upload a photo cleared for the trial. Session files expire after 24 hours and can be deleted from the page.
+**[Open the live capture station →](https://blucca.github.io/research/capture-loop/)** · Free field trial through **October 14, 2026, 12:00 UTC**. Each browser gets its own session and six photo attempts, shared by full-label and detail photos. Start the controlled two-view sample, try the independent parcel photos, or upload a photo cleared for the trial. Session files expire after 24 hours and can be deleted from the page.
+
+**New: [full-label context + linked detail](docs/field-pair/).** Select a field, add a detail with shared surrounding print, and let OpenCV 5 map the field between originals. The native agent requests another detail or opens a fresh field review. The clickable controlled example grows the target from **87 × 25 to 171 × 47 source pixels**; natural same-video frames separately exercise registration with a further-detail request.
 
 **[Watch the 101-second real-browser walkthrough →](https://blucca.github.io/research/capture-loop/demo/)** · [YouTube with English captions](https://youtu.be/6ydEKLplXM8) · [Architecture diagram](docs/architecture.svg) · [Transcript and recording notes](docs/demo-transcript.md).
 
@@ -99,6 +101,16 @@ The [source-scale development study](docs/field-source-scale/) follows one licen
 python -B experiments/capture-loop/tests/test_hosted.py HostedContracts.test_original_pixel_field_and_review_binding
 ```
 
+## Keep full-label context with a linked detail
+
+After saving a field inspection, check that the detail belongs to the same physical document and use **Take / upload this field’s detail**. Keep the entire target and some surrounding print. The outer page corners can leave the detail frame: they remain in the full-label context.
+
+The new **Start the two-view sample** button prepares a controlled Bell Labs pair with a fixed field selection. A second click loads the higher-sampling detail. The station displays both originals and source-pixel crops, requests an `easier` / `same` / `harder` readability assessment, and binds the new confirmation to both original identifiers. Each detail uses one photo attempt. A further detail clears the current confirmation and keeps earlier records in history.
+
+[`detail.py`](detail.py) provides SIFT/RANSAC registration, target coverage and raster sampling. [`detail-contract.mjs`](detail-contract.mjs) gates the model’s `prepare_detail_review` tool. The field’s `detailCaptures` list retains successful measurements and actionable retake requests. `POST /api/detail` adds a detail to the latest context; `POST /api/review` accepts its `detailCaptureId` and `detailReadability`. [API, selected cases, exact thresholds, sources and replay](docs/field-pair/).
+
+[Recorded native-tool workflow](evidence/detail-native-session.json) · [Browser acceptance](evidence/detail-browser-acceptance.json) · [Two-view desktop](evidence/detail-desktop.png) · [390 px view](evidence/detail-mobile.png).
+
 ## Host an isolated field trial
 
 The same workstation supports a same-origin HTTPS trial. Hosted mode assigns an opaque, HTTP-only session cookie; captures, images, reviews and exports belong to that browser's workspace. The default local mode retains its single-case workflow.
@@ -173,6 +185,6 @@ The report’s current image reruns are [`evidence/report-selected.json`](eviden
 
 ## Source and license
 
-Code and the original synthetic shipping label: repository MIT license. Natural SmartDoc camera frames: **CC BY 4.0**, with [full author attribution, source and transformation notes](fixtures/ATTRIBUTION.md). The earlier SmartDoc screenshots include that attributed dataset. Parcel photos and their perspective views use the source-specific CC BY-SA licenses in [domain attribution](domain/ATTRIBUTION.md). The `parcel-gls-*.png`, `hosted-*.png` and `field-*.png` screenshots are CC BY-SA 3.0 and include the GLS and cropped-label photographs by Klaus Mueller. OpenCV: Apache-2.0; the Python wheel includes its third-party license files.
+Code and the original synthetic shipping label: repository MIT license. Natural SmartDoc camera frames: **CC BY 4.0**, with [full author attribution, source and transformation notes](fixtures/ATTRIBUTION.md). The earlier SmartDoc screenshots include that attributed dataset. Parcel photos and their perspective views use the source-specific CC BY-SA licenses in [domain attribution](domain/ATTRIBUTION.md). The `parcel-gls-*.png`, `hosted-*.png` and `field-*.png` screenshots are CC BY-SA 3.0 and include the GLS and cropped-label photographs by Klaus Mueller. The `detail-*.png` screenshots include the Bell Labs photograph by Jonathan Schilling and retain CC BY-SA 4.0; the paired natural-frame study retains SmartDoc’s CC BY 4.0. [Paired-study attribution](docs/field-pair/#image-credits). OpenCV: Apache-2.0; the Python wheel includes its third-party license files.
 
 The next evaluation scope is fresh shipping-label photography from external users, covering their phones, lighting, print sizes and backgrounds. Current image observations cover the selected SmartDoc recording and the four Commons examples. Live agent/AWS execution, scripted field confirmations and external use are recorded separately.

@@ -1,0 +1,63 @@
+{
+  "scope": "scripted_native_tools_with_one_AWS_context_and_two_local_detail_registrations",
+  "sourceUnits": {
+    "BellLabs": "one source photograph and controlled raster pair",
+    "GLS": "unrelated-photo rejection control"
+  },
+  "elapsedSeconds": 18.85,
+  "context": {
+    "action": "prepare_document_review",
+    "controller": "live_native_model_tools",
+    "agent": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "tool": "prepare_field_review",
+      "rationale": "Four interior corners detected, no frame contact (gap 34px > tolerance 5px), Laplacian variance 154 exceeds focus threshold 50, indicating adequate focus and framing for review.",
+      "status": "awaiting_reviewer",
+      "calls": 2,
+      "traceFile": "530470c0cb43480db9e390acafad1145-agent.json"
+    }
+  },
+  "wrongDetail": {
+    "status": "needs_overlap",
+    "action": "request_field_detail",
+    "agent": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "tool": "request_detail_recapture",
+      "rationale": "Few distinct matches indicate insufficient overlap between detail and context; need more surrounding print for reliable correspondence.",
+      "status": "awaiting_new_detail",
+      "calls": 2,
+      "traceFile": "24e9663311cd448385644730bc5804ea-agent.json"
+    }
+  },
+  "matchedDetail": {
+    "status": "matched",
+    "action": "prepare_detail_review",
+    "agent": {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "tool": "prepare_detail_review",
+      "rationale": "SIFT matches yielded 106 inliers (0.94 ratio), target frame coverage 1.0, linear scale ratio ~2.0 (>1.2) providing adequate source-pixel sampling.",
+      "status": "awaiting_reviewer",
+      "calls": 2,
+      "traceFile": "f9378d2eb6064d6ea7a56e2d4cdc1961-agent.json"
+    },
+    "comparison": {
+      "contextNativeSizePx": [
+        87,
+        25
+      ],
+      "detailNativeSizePx": [
+        171,
+        47
+      ],
+      "fieldAreaRatio": 3.9974,
+      "linearScaleRatio": 1.99935,
+      "scope": "supplied_raster_pixel_footprint"
+    }
+  },
+  "modelHttpCalls": 6,
+  "awsImageCalls": 1,
+  "reviewBoundToBothOriginals": true,
+  "localHostedAttempts": 3,
+  "publicTrialAttemptsUsed": 0,
+  "independentParticipantReadings": 0
+}

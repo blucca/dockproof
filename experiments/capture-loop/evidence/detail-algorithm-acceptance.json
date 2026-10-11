@@ -1,0 +1,130 @@
+{
+  "opencv": "5.0.0",
+  "testCount": 6,
+  "testResult": "passed",
+  "testSeconds": 1.628,
+  "sourceScope": "Controlled crops and scales of one Bell Labs photograph; unrelated GLS photograph supplies a visual correspondence boundary.",
+  "nativePixelEquality": "Verified by numpy.array_equal against the decoded detail original for each mapped test case.",
+  "cases": [
+    {
+      "case": "full",
+      "status": "matched",
+      "reason": "target_mapped_with_larger_pixel_footprint",
+      "inliers": 383,
+      "mutualMatches": 387,
+      "medianErrorWorkPx": 0.1458,
+      "p95ErrorWorkPx": 0.6099,
+      "localInliers": 23,
+      "targetHullCoverage": 1.0,
+      "fieldAreaRatio": 4.00058,
+      "contextNativeSizePx": [
+        86,
+        24
+      ],
+      "detailNativeSizePx": [
+        171,
+        47
+      ],
+      "elapsedMs": 489.35
+    },
+    {
+      "case": "local",
+      "status": "matched",
+      "reason": "target_mapped_with_larger_pixel_footprint",
+      "inliers": 106,
+      "mutualMatches": 113,
+      "medianErrorWorkPx": 0.1621,
+      "p95ErrorWorkPx": 0.6355,
+      "localInliers": 56,
+      "targetHullCoverage": 1.0,
+      "fieldAreaRatio": 3.9974,
+      "contextNativeSizePx": [
+        87,
+        25
+      ],
+      "detailNativeSizePx": [
+        171,
+        47
+      ],
+      "elapsedMs": 163.89
+    },
+    {
+      "case": "same",
+      "status": "needs_more_detail",
+      "reason": "small_source_pixel_gain",
+      "inliers": 2400,
+      "mutualMatches": 2400,
+      "medianErrorWorkPx": 0.0,
+      "p95ErrorWorkPx": 0.0,
+      "localInliers": 76,
+      "targetHullCoverage": 1.0,
+      "fieldAreaRatio": 1.0,
+      "contextNativeSizePx": [
+        86,
+        24
+      ],
+      "detailNativeSizePx": [
+        86,
+        24
+      ],
+      "elapsedMs": 303.36
+    },
+    {
+      "case": "missing",
+      "status": "target_out_of_frame",
+      "reason": "target_partially_or_fully_outside_detail",
+      "inliers": 249,
+      "mutualMatches": 258,
+      "medianErrorWorkPx": 0.1381,
+      "p95ErrorWorkPx": 0.6131,
+      "localInliers": null,
+      "targetHullCoverage": null,
+      "fieldAreaRatio": 4.00118,
+      "contextNativeSizePx": [
+        86,
+        24
+      ],
+      "detailNativeSizePx": null,
+      "elapsedMs": 233.4
+    },
+    {
+      "case": "unrelated",
+      "status": "needs_overlap",
+      "reason": "few_distinct_matches",
+      "inliers": null,
+      "mutualMatches": 7,
+      "medianErrorWorkPx": null,
+      "p95ErrorWorkPx": null,
+      "localInliers": null,
+      "targetHullCoverage": null,
+      "fieldAreaRatio": null,
+      "contextNativeSizePx": [
+        86,
+        24
+      ],
+      "detailNativeSizePx": null,
+      "elapsedMs": 299.32
+    },
+    {
+      "case": "cli",
+      "status": "matched",
+      "reason": "target_mapped_with_larger_pixel_footprint",
+      "inliers": 106,
+      "mutualMatches": 113,
+      "medianErrorWorkPx": 0.1621,
+      "p95ErrorWorkPx": 0.6355,
+      "localInliers": 55,
+      "targetHullCoverage": 1.0,
+      "fieldAreaRatio": 3.99739,
+      "contextNativeSizePx": [
+        86,
+        24
+      ],
+      "detailNativeSizePx": [
+        171,
+        47
+      ],
+      "elapsedMs": 183.38
+    }
+  ]
+}

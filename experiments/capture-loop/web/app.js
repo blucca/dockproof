@@ -1,4 +1,5 @@
 import { createFieldInspector } from './field-inspector.js';
+import { createDetailCapture } from './detail-capture.js';
 
 const $ = id => document.getElementById(id);
 const titles = {
@@ -21,6 +22,7 @@ const parcelGuides = {
   }
 };
 const parcelSamples = new Map();
+let pairedSample = null;
 const last = () => state.captures.at(-1);
 const node = (tag, text, className) => {
   const el = document.createElement(tag);
@@ -48,6 +50,7 @@ function setBusy(value) {
   }
   $('review-form').setAttribute('aria-busy', String(value));
   fieldInspector.setBusy(value, loaded);
+  detailCapture.setBusy(value, loaded);
 }
 async function run(message, work) {
   if (busy) return;
@@ -91,6 +94,7 @@ function renderReceipt() {
   if (!receipt) return;
   $('receipt-value').textContent = `${receipt.field}: ${receipt.value}`;
   $('receipt-meta').textContent = `Checked by ${receipt.reviewer} · ${new Date(receipt.reviewedAt).toLocaleString()} · Capture ${receipt.captureId}`;
+  if (receipt.detailCaptureId) $('receipt-meta').textContent += ` · Linked detail ${receipt.detailCaptureId} · Reviewer found it ${receipt.detailReadability} to read`;
 }
 function render() {
   const current = last(), captures = state.captures;
@@ -100,10 +104,10 @@ function render() {
   $('file-hint').textContent = `JPEG or PNG · Up to ${(state.maxImageBytes || 8 * 1024 * 1024).toLocaleString()} bytes · The camera opens on supported phones.`;
   $('method').textContent = agentMode ? `${cloudMode ? 'AWS · ' : ''}OpenCV 5 measurements → live model tools → your next step` : 'OpenCV 5 measurements · rule-based capture requests';
   $('data-note').textContent = hosted
-    ? `This browser has its own server-side session, accessed with an essential session cookie. Originals, perspective views, field crops and review records are automatically deleted after ${state.sessionHours || 24} hours; the button below deletes them now. ${cloudMode ? 'Photos are sent to a private AWS Lambda for OpenCV measurements. Page measurements and previous capture requests are sent to Nebius for model decisions. Selected field crops are measured on this server from the retained original.' : 'OpenCV measurements run on this station.'} Use the supplied samples or photos cleared for this trial. Save images and export your record before the session expires.`
+    ? `This browser has its own server-side session, accessed with an essential session cookie. Full-label originals, detail originals, perspective views, field crops and review records are automatically deleted after ${state.sessionHours || 24} hours; the button below deletes them now. ${cloudMode ? 'Full-label photos are sent to a private AWS Lambda for OpenCV measurements. Field crops and detail-photo registration run on this server. Page or detail measurements, the selected field name and previous capture requests are sent to Nebius for model decisions.' : 'OpenCV measurements run on this station.'} Use the supplied samples or photos cleared for this trial. Save images and export your record before the session expires.`
     : cloudMode
-    ? 'Originals and review records are retained here. Photos are sent to the configured private AWS Lambda function for measurement; page measurements and previous capture requests are sent to the model provider. Selected field crops are measured on this server from the retained original. This server shares one research session.'
-    : 'Photos and review records stay on this server. Everyone using it shares one research session.' + (agentMode ? ' Numerical image measurements and previous requests are sent to the configured model provider.' : '');
+    ? 'Originals and review records are retained here. Full-label photos are sent to the configured private AWS Lambda. Field crops and detail registration run on this server; page or detail measurements, the target field name and previous requests are sent to the model provider. This server shares one research session.'
+    : 'Photos and review records stay on this server. Everyone using it shares one research session.' + (agentMode ? ' Numerical image measurements, the selected field name and previous requests are sent to the configured model provider.' : '');
   $('session-note').hidden = !hosted;
   $('delete-session').hidden = !hosted;
   if (hosted) {
@@ -119,7 +123,8 @@ function render() {
     }[state.captureStatus];
     $('session-note').textContent = `Your own session · ${allowance?.remaining ?? '—'} of ${allowance?.limit ?? 6} capture attempts remaining. Photos auto-delete ${until}. Live trial through ${trialUntil}. ${availability || 'Try the two parcel samples below, or upload a photo cleared for this trial.'}`;
   }
-  $('count').textContent = `${captures.length} photo${captures.length === 1 ? '' : 's'}`;
+  const detailCount = captures.reduce((total, capture) => total + (capture.fieldInspections || []).reduce((sum, item) => sum + (item.detailCaptures || []).length, 0), 0);
+  $('count').textContent = `${captures.length + detailCount} photo${captures.length + detailCount === 1 ? '' : 's'}`;
   $('upload').textContent = current ? 'Take / upload another photo' : 'Take / upload a photo';
   $('empty').hidden = captures.length > 0;
   $('current').hidden = !current;
@@ -130,6 +135,10 @@ function render() {
     detail.append(node('p', capture.source.name));
     detail.append(node('p', `${capture.source.width} × ${capture.source.height} px · Original retained`));
     if (capture.previousCaptureId) detail.append(node('p', `Follows capture ${capture.previousCaptureId}`));
+    for (const inspection of capture.fieldInspections || []) for (const closeup of inspection.detailCaptures || []) {
+      const link = node('a', `Detail for ${inspection.field} ↗`); link.href = localUrl(closeup.source.url); link.target = '_blank'; link.rel = 'noopener noreferrer';
+      detail.append(link, node('p', `${closeup.analysis.status} · ${closeup.source.width} × ${closeup.source.height} px · Same-document declaration saved`));
+    }
     li.append(imageLink(capture.source.url, `Original photo ${index + 1}`), detail); $('history').append(li);
   });
   renderReceipt();
@@ -173,9 +182,22 @@ const fieldInspector = createFieldInspector({
   api, run, localUrl, getCapture: last, status: $('status'),
   onSelect: inspection => {
     const form = $('review-form').elements;
-    form.field.value = inspection.field;
+    if (inspection) form.field.value = inspection.field;
     form.value.value = '';
     form.confirmed.checked = false;
+    detailCapture.render(inspection);
+  }
+});
+const detailCapture = createDetailCapture({
+  api, run, localUrl, getState: () => state, status: $('status'),
+  getPairedSample: () => pairedSample,
+  refresh: async () => { state = await api('/api/session'); render(); },
+  onReviewTarget: detail => {
+    $('review-form').elements.value.value = '';
+    $('review-form').elements.confirmed.checked = false;
+    $('review-confirmation-label').textContent = detail
+      ? 'I checked the same intended document in both retained originals, compared the target crops, and confirmed the value and readability assessment entered above.'
+      : 'I checked the intended document, compared this field in the retained original and the perspective view, and confirmed the value entered above.';
   }
 });
 $('upload').addEventListener('click', () => $('photo').click());
@@ -197,6 +219,7 @@ $('review-form').addEventListener('submit', event => {
   if (fieldInspectionId) payload.fieldInspectionId = fieldInspectionId;
   run('Saving your field confirmation…', async () => {
     if (!payload.field || !payload.value || !payload.reviewer || !payload.confirmed) throw new Error('Enter the field, value and reviewer, then check the comparison box.');
+    Object.assign(payload, detailCapture.reviewPayload(payload.field, payload.captureId, fieldInspectionId));
     state.review = await api('/api/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     renderReceipt(); $('review-form').elements.confirmed.checked = false;
     $('status').textContent = 'Field confirmation saved with its retained original.';
@@ -206,6 +229,24 @@ $('review-form').addEventListener('submit', event => {
 async function loadSamples() {
   try {
     const data = await api('/api/samples');
+    if (data.pairedSample) {
+      pairedSample = data.pairedSample;
+      $('paired-sample').hidden = false;
+      $('paired-credit').replaceChildren(sourceLinks(pairedSample.source));
+      $('paired-start').addEventListener('click', () => run('Loading the full-label context and selecting its printed code…', async () => {
+        const response = await fetch(localUrl(pairedSample.context.url));
+        if (!response.ok) throw new Error('The paired context failed to load. Reload the station to retry.');
+        await upload(await response.blob(), pairedSample.context.name);
+        if (last()?.analysis.action !== 'prepare_document_review') return;
+        await api('/api/field', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ captureId: last().id, field: pairedSample.field, box: pairedSample.box }) });
+        state = await api('/api/session'); render();
+        $('field-inspector').open = true;
+        $('status').textContent = 'Full-label context saved and target selected. Check the same-document box below, then load its paired detail.';
+        $('detail-capture').scrollIntoView({ block: 'start' });
+      }));
+      if (loaded) detailCapture.render(fieldInspector.selectedInspection());
+    }
     const sampleButton = (sample, label) => {
       const button = node('button', label); button.type = 'button'; button.disabled = busy || !loaded;
       button.dataset.capture = 'true';
