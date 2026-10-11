@@ -1,0 +1,36 @@
+{
+  "scope": "scripted_local_browser_rules_and_local_OpenCV5_field_inspection",
+  "captureAction": "prepare_document_review",
+  "fieldBox": [
+    0.36,
+    0.87,
+    0.3,
+    0.13
+  ],
+  "sourceBoxPx": [
+    516,
+    613,
+    151,
+    49
+  ],
+  "nativeSizePx": [
+    151,
+    49
+  ],
+  "metrics": {
+    "laplacianVariance": 4246.438,
+    "percentileContrast": 80.0,
+    "brightPixelFraction": 0.0,
+    "samplePixels": 6705
+  },
+  "desktopPointerSelection": true,
+  "mobilePercentageKeyboardInputs": true,
+  "pixelZoom4x": true,
+  "targetSelectionClearsPreviousValueAndConfirmation": true,
+  "reviewBoundToInspection": true,
+  "reloadRestoredInspection": true,
+  "mobileViewportPx": 390,
+  "mobileOverflowPx": 0,
+  "pageErrors": [],
+  "newCloudOrModelCalls": 0
+}

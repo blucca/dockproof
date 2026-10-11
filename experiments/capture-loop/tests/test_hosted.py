@@ -7,6 +7,7 @@ import http.client
 import importlib.util
 import json
 import os
+import sys
 from pathlib import Path
 import tempfile
 import threading
@@ -15,6 +16,7 @@ import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 spec = importlib.util.spec_from_file_location('capture_serve', ROOT / 'serve.py')
 serve = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(serve)
@@ -62,6 +64,48 @@ class Browser:
 
 
 class HostedContracts(unittest.TestCase):
+    def test_original_pixel_field_and_review_binding(self):
+        import cv2
+        import numpy as np
+        a, b = Browser(self), Browser(self)
+        a.session()
+        b.session()
+        status, capture, _ = a.capture(GLS)
+        self.assertEqual(status, 200)
+        request = {'captureId': capture['id'], 'field': 'Date', 'box': [.36, .87, .30, .13]}
+        self.assertEqual(b.request('POST', '/api/field', request)[0], 409)
+        for box in ([0, 0, 0, .2], [0, 0, 2, .2], [True, 0, .2, .2]):
+            self.assertEqual(a.request('POST', '/api/field', {**request, 'box': box})[0], 400)
+        status, inspection, _ = a.request('POST', '/api/field', request)
+        self.assertEqual(status, 200)
+        self.assertEqual(inspection['captureId'], capture['id'])
+        self.assertEqual(inspection['scope'], 'original_pixel_field_observation')
+        crop_url = inspection['view']['url']
+        status, crop_body, _ = a.request('GET', crop_url)
+        self.assertEqual(status, 200)
+        self.assertEqual(b.request('GET', crop_url)[0], 404)
+        original = cv2.imdecode(np.frombuffer(GLS, dtype=np.uint8), cv2.IMREAD_COLOR)
+        crop = cv2.imdecode(np.frombuffer(crop_body, dtype=np.uint8), cv2.IMREAD_COLOR)
+        x, y, w, h = inspection['sourceBoxPx']
+        self.assertTrue(np.array_equal(crop, original[y:y+h, x:x+w]))
+        self.assertEqual(inspection['nativeSizePx'], [w, h])
+        self.assertTrue(all(np.isfinite(n) for n in inspection['metrics'].values()))
+        review = {'captureId': capture['id'], 'field': 'Date', 'value': '12.08.2010',
+                  'reviewer': 'scripted field check', 'confirmed': True,
+                  'fieldInspectionId': inspection['id']}
+        self.assertEqual(a.request('POST', '/api/review', {**review, 'field': 'Other field'})[0], 400)
+        status, saved, _ = a.request('POST', '/api/review', review)
+        self.assertEqual(status, 200)
+        self.assertEqual(saved['fieldInspectionId'], inspection['id'])
+        self.assertEqual(saved['fieldSourceQuadPx'], inspection['sourceQuadPx'])
+        restored, _ = a.session()
+        self.assertEqual(restored['captures'][0]['fieldInspections'][0]['id'], inspection['id'])
+        for _ in range(5):
+            self.assertEqual(a.request('POST', '/api/field', request)[0], 200)
+        self.assertEqual(a.request('POST', '/api/field', request)[0], 429)
+        self.assertEqual(a.request('POST', '/api/reset', {})[0], 200)
+        self.assertEqual(a.request('GET', crop_url)[0], 404)
+
     def setUp(self):
         root = Path(os.environ.get('CAPTURE_TEST_ROOT', Path.cwd() / 'temp' / 'hosted-tests'))
         root.mkdir(parents=True, exist_ok=True)

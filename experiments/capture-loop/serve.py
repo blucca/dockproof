@@ -440,10 +440,57 @@ class CaptureService:
             review = {**fields, 'captureId': current['id'], 'sourceSha256': current['source']['sha256'],
                       'derivedSha256': current['analysis']['derived']['sha256'],
                       'confirmed': True, 'reviewedAt': iso(now())}
+            if values.get('fieldInspectionId') is not None:
+                inspection = next((item for item in current.get('fieldInspections', [])
+                                   if item['id'] == values['fieldInspectionId']), None)
+                if inspection is None or inspection['field'] != fields['field']:
+                    raise RequestError('Use the selected field name and its inspection from this capture.')
+                review['fieldInspectionId'] = inspection['id']
+                review['fieldSourceQuadPx'] = inspection['sourceQuadPx']
+                review['fieldViewSha256'] = inspection['view']['sha256']
             state['review'] = review
             state['reviews'].append(review)
             atomic_json(self.directory(key) / 'session.json', state)
             return review
+
+    def field(self, key, values):
+        if not isinstance(values, dict):
+            raise RequestError('Send a target field and its page-view selection as a JSON object.')
+        field_name = values.get('field')
+        if not isinstance(field_name, str) or not field_name.strip() or len(field_name) > 120:
+            raise RequestError('Name the target field using 1–120 characters.')
+        with self.lock:
+            state = self.read_state(key)
+            current = state['captures'][-1] if state['captures'] else None
+            if current is None or values.get('captureId') != current['id']:
+                raise RequestError('Select a field from the latest capture.', 409, 'stale_capture')
+            if current['analysis']['action'] != 'prepare_document_review':
+                raise RequestError('Complete the capture request to open the field inspector.')
+            inspections = current.setdefault('fieldInspections', [])
+            if len(inspections) >= 6:
+                raise RequestError('This capture has six field inspections. Review a saved inspection.', 429)
+            # Source slices stay inside the existing private session and expiry contract.
+            from field import inspect_field
+            inspection_id = uuid.uuid4().hex
+            artifacts = self.directory(key) / 'files'
+            crop = artifacts / (current['id'] + '-field-' + inspection_id + '.png')
+            try:
+                measured = inspect_field(artifacts / current['source']['file'], current['analysis'],
+                                         values.get('box'), crop)
+                os.chmod(crop, 0o600)
+                inspection = {**measured, 'id': inspection_id, 'captureId': current['id'],
+                              'field': field_name.strip(), 'sourceSha256': current['source']['sha256'],
+                              'measuredAt': iso(now()), 'execution': 'local_OpenCV5_original_pixels'}
+                inspection['view']['url'] = '/files/' + crop.name
+                inspections.append(inspection)
+                atomic_json(self.directory(key) / 'session.json', state)
+                return inspection
+            except ValueError as error:
+                crop.unlink(missing_ok=True)
+                raise RequestError(str(error)) from error
+            except Exception:
+                crop.unlink(missing_ok=True)
+                raise
 
     def reset(self, key):
         with self.lock:
@@ -538,6 +585,8 @@ def handler_for(service):
                         state = service.read_state(key)
                         allowed = {c['source']['file'] for c in state['captures']}
                         allowed.update(c['analysis']['derived']['file'] for c in state['captures'] if 'derived' in c['analysis'])
+                        allowed.update(item['view']['file'] for c in state['captures']
+                                       for item in c.get('fieldInspections', []))
                         target = service.directory(key) / 'files' / filename if filename in allowed else None
                         body = target.read_bytes() if target is not None and target.is_file() else None
                 else:
@@ -577,9 +626,9 @@ def handler_for(service):
             try:
                 self.boundary()
                 route = urlparse(self.path)
-                if route.path not in ('/api/capture', '/api/review', '/api/reset'):
+                if route.path not in ('/api/capture', '/api/review', '/api/reset', '/api/field'):
                     raise RequestError('This API route is unavailable.', 404)
-                if route.path == '/api/capture':
+                if route.path in ('/api/capture', '/api/field'):
                     owns_gate = service.capture_gate.acquire(blocking=False)
                     if not owns_gate:
                         raise RequestError('A photo is processing. Please try again shortly.', 429, 'busy')
@@ -596,6 +645,8 @@ def handler_for(service):
                     values = json.loads(body)
                 except (ValueError, UnicodeDecodeError):
                     raise RequestError('Send the field-review form as valid JSON.')
+                if route.path == '/api/field':
+                    return self.respond(service.field(key, values))
                 return self.respond(service.review(key, values))
             except Exception as error:
                 self.route_error(error)

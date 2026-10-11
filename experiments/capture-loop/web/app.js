@@ -1,3 +1,5 @@
+import { createFieldInspector } from './field-inspector.js';
+
 const $ = id => document.getElementById(id);
 const titles = {
   request_document_view: 'Bring the document into view',
@@ -45,6 +47,7 @@ function setBusy(value) {
     document.querySelectorAll('#upload, #another, #photo, [data-capture]').forEach(el => { el.disabled = true; });
   }
   $('review-form').setAttribute('aria-busy', String(value));
+  fieldInspector.setBusy(value, loaded);
 }
 async function run(message, work) {
   if (busy) return;
@@ -97,9 +100,9 @@ function render() {
   $('file-hint').textContent = `JPEG or PNG · Up to ${(state.maxImageBytes || 8 * 1024 * 1024).toLocaleString()} bytes · The camera opens on supported phones.`;
   $('method').textContent = agentMode ? `${cloudMode ? 'AWS · ' : ''}OpenCV 5 measurements → live model tools → your next step` : 'OpenCV 5 measurements · rule-based capture requests';
   $('data-note').textContent = hosted
-    ? `This browser has its own server-side session, accessed with an essential session cookie. Originals, perspective views and review records are automatically deleted after ${state.sessionHours || 24} hours; the button below deletes them now. ${cloudMode ? 'Photos are sent to a private AWS Lambda for OpenCV measurements. Numerical measurements and previous requests are sent to Nebius for model decisions.' : 'OpenCV measurements run on this station.'} Use the supplied samples or photos cleared for this trial. Save images and export your record before the session expires.`
+    ? `This browser has its own server-side session, accessed with an essential session cookie. Originals, perspective views, field crops and review records are automatically deleted after ${state.sessionHours || 24} hours; the button below deletes them now. ${cloudMode ? 'Photos are sent to a private AWS Lambda for OpenCV measurements. Page measurements and previous capture requests are sent to Nebius for model decisions. Selected field crops are measured on this server from the retained original.' : 'OpenCV measurements run on this station.'} Use the supplied samples or photos cleared for this trial. Save images and export your record before the session expires.`
     : cloudMode
-    ? 'Originals and review records are retained here. Photos are sent to the configured private AWS Lambda function for measurement; numerical measurements and previous requests are sent to the model provider. This server shares one research session.'
+    ? 'Originals and review records are retained here. Photos are sent to the configured private AWS Lambda function for measurement; page measurements and previous capture requests are sent to the model provider. Selected field crops are measured on this server from the retained original. This server shares one research session.'
     : 'Photos and review records stay on this server. Everyone using it shares one research session.' + (agentMode ? ' Numerical image measurements and previous requests are sent to the configured model provider.' : '');
   $('session-note').hidden = !hosted;
   $('delete-session').hidden = !hosted;
@@ -131,7 +134,7 @@ function render() {
   });
   renderReceipt();
   renderSampleContext();
-  if (!current) return;
+  if (!current) { fieldInspector.render(null); return; }
   const { analysis, source } = current, ready = analysis.action === 'prepare_document_review';
   $('request-title').textContent = titles[analysis.action] || analysis.action;
   $('capture-id').textContent = `Photo ${captures.length}`;
@@ -150,6 +153,7 @@ function render() {
   }
   $('review-area').hidden = !ready;
   $('review-form').reset();
+  fieldInspector.render(current);
 }
 async function loadSession() {
   const session = await api('/api/session');
@@ -165,6 +169,15 @@ async function upload(blob, name) {
   $('status').textContent = 'Photo saved. Its measurements and next step are below.';
   $('request-title').focus({ preventScroll: true }); $('current').scrollIntoView({ block: 'start' });
 }
+const fieldInspector = createFieldInspector({
+  api, run, localUrl, getCapture: last, status: $('status'),
+  onSelect: inspection => {
+    const form = $('review-form').elements;
+    form.field.value = inspection.field;
+    form.value.value = '';
+    form.confirmed.checked = false;
+  }
+});
 $('upload').addEventListener('click', () => $('photo').click());
 $('another').addEventListener('click', () => $('photo').click());
 $('reload').addEventListener('click', () => run('Restoring the saved session…', loadSession));
@@ -180,6 +193,8 @@ $('review-form').addEventListener('submit', event => {
   event.preventDefault();
   const data = new FormData(event.currentTarget);
   const payload = { captureId: last().id, field: data.get('field').trim(), value: data.get('value').trim(), reviewer: data.get('reviewer').trim(), confirmed: data.get('confirmed') === 'on' };
+  const fieldInspectionId = fieldInspector.reviewInspectionId(payload.field, payload.captureId);
+  if (fieldInspectionId) payload.fieldInspectionId = fieldInspectionId;
   run('Saving your field confirmation…', async () => {
     if (!payload.field || !payload.value || !payload.reviewer || !payload.confirmed) throw new Error('Enter the field, value and reviewer, then check the comparison box.');
     state.review = await api('/api/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });

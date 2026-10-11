@@ -85,6 +85,20 @@ The two parcel cards link directly to each Commons source page and its **CC BY-S
 
 Your own files use **Take / upload a photo**. The supported subject is one flat page or label with a visible boundary against a contrasting surface. The four-edge, focus and source-comparison steps form this experiment's review contract.
 
+## Inspect the actual target field
+
+At field review, open **Inspect a target field**, name the field and drag a box on the perspective image. Percentage inputs provide a keyboard path. OpenCV maps that box back through the page homography and saves a **lossless PNG slice of the retained original pixels**, including the original orientation. The crop viewer offers 1×, 2× and 4× display magnification.
+
+Each capture supports six saved field inspections. Its JSON records the selected page box, source quadrilateral, source bounding box, native pixel dimensions and local focus/contrast diagnostics. Selecting an inspection starts a fresh value confirmation; the saved review links its field-inspection ID and crop to the original capture. Field slices share the browser session's access, export and deletion lifetime. Page measurements run on the configured AWS path; selected source-pixel crops use OpenCV 5 on the workstation server.
+
+The [source-scale development study](docs/field-source-scale/) follows one licensed Bell Labs label photograph at 1280, 640 and 480 pixels. All three reach whole-page review while the selected code's estimated glyph height falls from **16 to 8 to 6 source pixels**. Native-scale Laplacian rises between the first two sizes. Field metrics are scale-dependent diagnostics; the reviewer reads and confirms the value. The two lower-resolution inputs are controlled resamples of the existing source thumbnail.
+
+[Scripted local browser check](evidence/field-browser-acceptance.json) · [Desktop field inspector](evidence/field-desktop.png) · [390 px view](evidence/field-mobile.png). The focused HTTP test checks exact decoded source-pixel preservation, session access, crop coordinates, saved-review binding and cleanup:
+
+```sh
+python -B experiments/capture-loop/tests/test_hosted.py HostedContracts.test_original_pixel_field_and_review_binding
+```
+
 ## Host an isolated field trial
 
 The same workstation supports a same-origin HTTPS trial. Hosted mode assigns an opaque, HTTP-only session cookie; captures, images, reviews and exports belong to that browser's workspace. The default local mode retains its single-case workflow.
@@ -159,6 +173,6 @@ The report’s current image reruns are [`evidence/report-selected.json`](eviden
 
 ## Source and license
 
-Code and the original synthetic shipping label: repository MIT license. Natural SmartDoc camera frames: **CC BY 4.0**, with [full author attribution, source and transformation notes](fixtures/ATTRIBUTION.md). The earlier SmartDoc screenshots include that attributed dataset. Parcel photos and their perspective views use the source-specific CC BY-SA licenses in [domain attribution](domain/ATTRIBUTION.md). The `parcel-gls-*.png` and `hosted-*.png` screenshots are CC BY-SA 3.0 and include the GLS and cropped-label photographs by Klaus Mueller. OpenCV: Apache-2.0; the Python wheel includes its third-party license files.
+Code and the original synthetic shipping label: repository MIT license. Natural SmartDoc camera frames: **CC BY 4.0**, with [full author attribution, source and transformation notes](fixtures/ATTRIBUTION.md). The earlier SmartDoc screenshots include that attributed dataset. Parcel photos and their perspective views use the source-specific CC BY-SA licenses in [domain attribution](domain/ATTRIBUTION.md). The `parcel-gls-*.png`, `hosted-*.png` and `field-*.png` screenshots are CC BY-SA 3.0 and include the GLS and cropped-label photographs by Klaus Mueller. OpenCV: Apache-2.0; the Python wheel includes its third-party license files.
 
 The next evaluation scope is fresh shipping-label photography from external users, covering their phones, lighting, print sizes and backgrounds. Current image observations cover the selected SmartDoc recording and the four Commons examples. Live agent/AWS execution, scripted field confirmations and external use are recorded separately.

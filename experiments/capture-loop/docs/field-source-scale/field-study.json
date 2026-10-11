@@ -1,0 +1,463 @@
+{
+  "kind": "selected_field_source_pixel_development_probe",
+  "opencv": "5.0.0",
+  "scope": "One natural source photograph; three selected raster sizes. Measurements and visible crop comparison.",
+  "source": {
+    "title": "File:AT&T Bell Laboratories package mailing labels.jpg",
+    "page": "https://commons.wikimedia.org/wiki/File:AT&T_Bell_Laboratories_package_mailing_labels.jpg",
+    "originalUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8b/AT%26T_Bell_Laboratories_package_mailing_labels.jpg",
+    "downloadUrl": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/AT%26T_Bell_Laboratories_package_mailing_labels.jpg/1280px-AT%26T_Bell_Laboratories_package_mailing_labels.jpg",
+    "author": "Jonathan Schilling",
+    "date": "2020-01-17",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "originalPx": [
+      4032,
+      3024
+    ],
+    "transformation": "Wikimedia official 1280px thumbnail",
+    "retrieved": "2026-10-10"
+  },
+  "sourceInputPx": [
+    1280,
+    960
+  ],
+  "fieldSelection": "Hand-selected quadrilateral around the printed bottom-left code, in 1280px-thumbnail coordinates.",
+  "glyphMethod": "Native-footprint deskew via linear perspective interpolation; grayscale Otsu; connected components with area >=2, width <13% crop width and height 30\u201397% crop height; median candidate height.",
+  "focusInterpretation": "Whole-page threshold 50 applies to capture.py page-normalized measurement. Field native-scale Laplacian is a scale-dependent diagnostic.",
+  "records": [
+    {
+      "sourceInput": "bell-input-1280.png",
+      "inputWidthPx": 1280,
+      "transformation": "identity-sized decoded source, PNG encoding",
+      "pageObservation": {
+        "opencv": "5.0.0",
+        "sourceSha256": "3572a75640c36f7908e8805089b13052b51fdcd64186b3dbdfd1cb9b7e14eb28",
+        "inputPx": [
+          1280,
+          960
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            126.26,
+            112.03,
+            119.17,
+            120.81
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 8.0,
+          "minObservedFrameGapPx": 93.0,
+          "documentAreaRatio": 0.3776,
+          "laplacianVariance": 717.825,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            217.0,
+            265.0
+          ],
+          [
+            970.0,
+            207.0
+          ],
+          [
+            1070.0,
+            772.0
+          ],
+          [
+            242.0,
+            866.0
+          ]
+        ],
+        "perspectiveView": {
+          "file": "bell-input-1280-rectified.jpg",
+          "sha256": "89147e3ce958377edb26d24cf655d09b288ac713b129bc1bdd0a101e723ddcea",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              1.3113055862960592,
+              -0.054546821393346934,
+              -270.0984045570079
+            ],
+            [
+              0.10588977649109634,
+              1.3747414085826777,
+              -387.28455477297746
+            ],
+            [
+              -4.844817822749796e-05,
+              0.00018629528209145786,
+              1.0
+            ]
+          ],
+          "sizePx": [
+            1000,
+            722
+          ]
+        },
+        "geometry": "four_interior_corners",
+        "elapsedMs": 194.7
+      },
+      "pageRuleAction": "prepare_document_review",
+      "field": {
+        "name": "Printed form code",
+        "referenceValue": "E-1242-5 (9-91)",
+        "sourceQuadPx": [
+          [
+            263.0,
+            810.0
+          ],
+          [
+            429.0,
+            792.0
+          ],
+          [
+            432.0,
+            819.0
+          ],
+          [
+            266.0,
+            837.0
+          ]
+        ],
+        "sourceBoxPx": [
+          263,
+          792,
+          170,
+          46
+        ],
+        "sourceBoxImage": "bell-field-source-box-1280.png",
+        "nativeScaleDeskewedImage": "bell-field-native-1280.png",
+        "nativeScaleDeskewedSizePx": [
+          167,
+          27
+        ],
+        "deskewHomography": [
+          [
+            0.9880952380952454,
+            -0.10978835978836066,
+            -170.9404761904774
+          ],
+          [
+            0.10317460317460385,
+            0.9514991181657937,
+            -797.8492063492137
+          ],
+          [
+            -3.733571405465267e-18,
+            1.1115786082938178e-17,
+            1.0
+          ]
+        ],
+        "candidateGlyphHeightsPx": [
+          21,
+          20,
+          16,
+          15,
+          16,
+          16,
+          16,
+          16,
+          16,
+          16,
+          15
+        ],
+        "medianCandidateGlyphHeightPx": 16.0,
+        "nativeScaleLaplacianVariance": 3400.115
+      }
+    },
+    {
+      "sourceInput": "bell-input-640.png",
+      "inputWidthPx": 640,
+      "transformation": "1280px official JPEG thumbnail -> cv2.resize INTER_AREA -> PNG encoding",
+      "pageObservation": {
+        "opencv": "5.0.0",
+        "sourceSha256": "e44c82cec761e6c59435db6478562daa91a6d8e0dce0e001cb7a37de469238a4",
+        "inputPx": [
+          640,
+          480
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            25.65,
+            56.23,
+            76.14,
+            93.91
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 5.0,
+          "minObservedFrameGapPx": 34.0,
+          "documentAreaRatio": 0.4516,
+          "laplacianVariance": 154.113,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            94.0,
+            111.0
+          ],
+          [
+            528.0,
+            108.0
+          ],
+          [
+            553.0,
+            394.0
+          ],
+          [
+            106.0,
+            443.0
+          ]
+        ],
+        "perspectiveView": {
+          "file": "bell-input-640-rectified.jpg",
+          "sha256": "1847eec542203f2291933c9ecabbc7d68924daa4b0b2107178cc88fff0006125",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              1.9649370953284726,
+              -0.07102182272271584,
+              -176.82066463865493
+            ],
+            [
+              0.01573502897940136,
+              2.2763341923534264,
+              -254.15218807529405
+            ],
+            [
+              -0.0003028409329622543,
+              0.0001273113616597277,
+              1.0
+            ]
+          ],
+          "sizePx": [
+            1000,
+            739
+          ]
+        },
+        "geometry": "four_interior_corners",
+        "elapsedMs": 25.63
+      },
+      "pageRuleAction": "prepare_document_review",
+      "field": {
+        "name": "Printed form code",
+        "referenceValue": "E-1242-5 (9-91)",
+        "sourceQuadPx": [
+          [
+            131.5,
+            405.0
+          ],
+          [
+            214.5,
+            396.0
+          ],
+          [
+            216.0,
+            409.5
+          ],
+          [
+            133.0,
+            418.5
+          ]
+        ],
+        "sourceBoxPx": [
+          131,
+          396,
+          86,
+          24
+        ],
+        "sourceBoxImage": "bell-field-source-box-640.png",
+        "nativeScaleDeskewedImage": "bell-field-native-640.png",
+        "nativeScaleDeskewedSizePx": [
+          83,
+          14
+        ],
+        "deskewHomography": [
+          [
+            0.9761904761904846,
+            -0.10846560846560932,
+            -84.44047619047694
+          ],
+          [
+            0.1031746031746039,
+            0.9514991181657946,
+            -398.9246031746072
+          ],
+          [
+            -7.18128714221943e-18,
+            2.4867796666212175e-17,
+            1.0
+          ]
+        ],
+        "candidateGlyphHeightsPx": [
+          8,
+          8,
+          8,
+          8,
+          8,
+          9,
+          8,
+          7,
+          10,
+          7
+        ],
+        "medianCandidateGlyphHeightPx": 8.0,
+        "nativeScaleLaplacianVariance": 5917.773
+      }
+    },
+    {
+      "sourceInput": "bell-input-480.png",
+      "inputWidthPx": 480,
+      "transformation": "1280px official JPEG thumbnail -> cv2.resize INTER_AREA -> PNG encoding",
+      "pageObservation": {
+        "opencv": "5.0.0",
+        "sourceSha256": "6dbd09b8b789a5d9b0b190376c47cd10f78295deba99409faad99f5caf4eede6",
+        "inputPx": [
+          480,
+          360
+        ],
+        "method": "edge_and_brightness_planar_document_v2",
+        "metrics": {
+          "boundaryMethod": "closed_edge_quad",
+          "edgeContrastLab": [
+            71.84,
+            53.02,
+            75.85,
+            85.01
+          ],
+          "polygonCorners": 4,
+          "touchesFrame": false,
+          "frameContactTolerancePx": 5.0,
+          "minObservedFrameGapPx": 25.0,
+          "documentAreaRatio": 0.4498,
+          "laplacianVariance": 59.973,
+          "focusThreshold": 50.0
+        },
+        "documentQuadPx": [
+          [
+            71.0,
+            83.0
+          ],
+          [
+            370.0,
+            63.0
+          ],
+          [
+            415.0,
+            296.0
+          ],
+          [
+            79.0,
+            332.0
+          ]
+        ],
+        "perspectiveView": {
+          "file": "bell-input-480-rectified.jpg",
+          "sha256": "3a66aac51d67b7a416a955b4ee6441b5ca88feb48f4e4683f2dca0ccbcbf01a3",
+          "operations": [
+            "perspective_rectification",
+            "JPEG_encode_quality_95"
+          ],
+          "homography": [
+            [
+              3.290389555616468,
+              -0.10571532708807937,
+              -224.8432863004586
+            ],
+            [
+              0.23164326877425265,
+              3.4630668681750816,
+              -303.8812221415037
+            ],
+            [
+              -0.00012989609109539954,
+              0.0005553851601232655,
+              1.0
+            ]
+          ],
+          "sizePx": [
+            1000,
+            737
+          ]
+        },
+        "geometry": "four_interior_corners",
+        "elapsedMs": 16.91
+      },
+      "pageRuleAction": "prepare_document_review",
+      "field": {
+        "name": "Printed form code",
+        "referenceValue": "E-1242-5 (9-91)",
+        "sourceQuadPx": [
+          [
+            98.625,
+            303.75
+          ],
+          [
+            160.875,
+            297.0
+          ],
+          [
+            162.0,
+            307.125
+          ],
+          [
+            99.75,
+            313.875
+          ]
+        ],
+        "sourceBoxPx": [
+          98,
+          297,
+          65,
+          18
+        ],
+        "sourceBoxImage": "bell-field-source-box-480.png",
+        "nativeScaleDeskewedImage": "bell-field-native-480.png",
+        "nativeScaleDeskewedSizePx": [
+          63,
+          10
+        ],
+        "deskewHomography": [
+          [
+            0.984126984126998,
+            -0.10934744268077755,
+            -63.84523809523898
+          ],
+          [
+            0.09523809523809683,
+            0.8783068783068883,
+            -276.1785714285746
+          ],
+          [
+            5.568485057231339e-17,
+            1.6450555775043073e-17,
+            1.0
+          ]
+        ],
+        "candidateGlyphHeightsPx": [
+          6,
+          6,
+          6,
+          6,
+          6,
+          5,
+          7
+        ],
+        "medianCandidateGlyphHeightPx": 6.0,
+        "nativeScaleLaplacianVariance": 4088.729
+      }
+    }
+  ]
+}

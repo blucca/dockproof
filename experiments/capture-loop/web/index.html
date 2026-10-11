@@ -49,6 +49,53 @@
       <section id="review-area" class="review" aria-labelledby="review-title" hidden>
         <p class="eyebrow">03 / Field review</p><h2 id="review-title">Read it. Confirm it.</h2>
         <p>Open either image at full size. Name one document field and enter the value you can read in the original.</p>
+        <details id="field-inspector" class="field-inspector" hidden>
+          <summary>Inspect a target field</summary>
+          <p class="small">Select the field on the perspective view. Inspect its original pixels, then enter the value you can read.</p>
+          <p id="field-allowance" class="small"></p>
+          <div class="field-workspace">
+            <div class="field-select-column">
+              <div id="field-select-stage" class="field-select-stage" aria-describedby="field-selection-note">
+                <img id="field-select-image" alt="Perspective view: select a target field" draggable="false">
+                <div id="field-selection" class="field-selection" aria-hidden="true" hidden></div>
+              </div>
+              <p id="field-selection-note" class="small" role="status">Drag across the field, or enter its box as percentages below.</p>
+              <form id="field-inspect-form">
+                <label>Field to inspect<input name="field" maxlength="120" required placeholder="e.g. Date or reference number"></label>
+                <details class="field-coordinates"><summary>Set the box with percentage coordinates</summary>
+                  <p class="small">Measured from the top-left of the perspective image. Left + width and top + height each fit within 100%.</p>
+                  <div class="field-coordinate-grid">
+                    <label>Left (%)<input name="left" type="number" min="0" max="99.99" step="0.01" inputmode="decimal" placeholder="0"></label>
+                    <label>Top (%)<input name="top" type="number" min="0" max="99.99" step="0.01" inputmode="decimal" placeholder="0"></label>
+                    <label>Width (%)<input name="width" type="number" min="0.01" max="100" step="0.01" inputmode="decimal" placeholder="20"></label>
+                    <label>Height (%)<input name="height" type="number" min="0.01" max="100" step="0.01" inputmode="decimal" placeholder="10"></label>
+                  </div>
+                </details>
+                <button id="field-inspect-submit" type="submit">Inspect original pixels</button>
+              </form>
+            </div>
+            <div class="field-result-column">
+              <label id="field-history-label" hidden>Saved field inspections<select id="field-history"><option value="">Choose a saved field</option></select></label>
+              <section id="field-result" class="field-result" aria-labelledby="field-result-title" hidden>
+                <h3 id="field-result-title">Original-pixel field</h3>
+                <p id="field-native-size" class="field-native-size"></p>
+                <div class="field-zoom" role="group" aria-label="Original crop pixel magnification">
+                  <button type="button" data-field-zoom="1" aria-pressed="true">1×</button>
+                  <button type="button" data-field-zoom="2" aria-pressed="false">2×</button>
+                  <button type="button" data-field-zoom="4" aria-pressed="false">4×</button>
+                  <a id="field-crop-link" target="_blank" rel="noopener noreferrer">Open crop ↗</a>
+                </div>
+                <div class="field-crop-viewport" tabindex="0" role="region" aria-label="Original-pixel field crop; scroll to inspect"><img id="field-crop" alt="Original-pixel field crop"></div>
+                <p id="field-zoom-note" class="small"></p>
+                <p class="small">Original-pixel crop; page focus and field readability are reviewed separately.</p>
+                <details class="field-diagnostic-details"><summary>Field measurement details</summary>
+                  <p id="field-crop-position" class="small"></p><dl id="field-diagnostics"></dl>
+                  <p class="small">These describe the selected crop. Read the original field and confirm its value below.</p>
+                </details>
+              </section>
+            </div>
+          </div>
+        </details>
         <form id="review-form">
           <div class="form-grid"><label>Document field<input name="field" required maxlength="120" placeholder="e.g. Date or shipment number"></label><label>Exact visible value<input name="value" required maxlength="400" placeholder="Copy the value from the document"></label><label>Your name / reviewer ID<input name="reviewer" required maxlength="100" autocomplete="name" placeholder="Who checked this field?"></label></div>
           <label class="check"><input name="confirmed" type="checkbox" required><span>I checked the intended document, compared this field in the retained original and the perspective view, and confirmed the value entered above.</span></label>
