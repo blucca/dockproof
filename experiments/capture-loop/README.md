@@ -4,7 +4,7 @@
 
 **[Open the live capture station →](https://blucca.github.io/research/capture-loop/)** · Free field trial through **October 14, 2026, 12:00 UTC**. Each browser gets its own session and six capture attempts. Try the two supplied parcel photos, or upload a photo cleared for the trial. Session files expire after 24 hours and can be deleted from the page.
 
-**[Watch the 101-second real-browser walkthrough →](https://blucca.github.io/research/capture-loop/demo/)** · [Architecture diagram](docs/architecture.svg) · [Transcript and recording notes](docs/demo-transcript.md).
+**[Watch the 101-second real-browser walkthrough →](https://blucca.github.io/research/capture-loop/demo/)** · [YouTube with English captions](https://youtu.be/6ydEKLplXM8) · [Architecture diagram](docs/architecture.svg) · [Transcript and recording notes](docs/demo-transcript.md).
 
 **[Read the technical report →](https://blucca.github.io/research/capture-loop/report/)** · [Download the eight-page PDF](https://blucca.github.io/research/capture-loop/report/capture-loop-report.pdf). Problem, OpenCV implementation, selected-case results, fixed/native controller comparison, AWS delivery, reproduction, and field-study plan. [Report source](docs/technical-report.html).
 
