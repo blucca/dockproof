@@ -30,7 +30,7 @@ test('basic searches reserve free credits before HTTP and preserve their source 
       {title:'Pinned tariff',url:TARIFF_URL,content:'Individual damaged piece'},
       {title:'Other tariff',url:'https://www.xpo.com/cdn/CNWY_199-AK.4.pdf',content:'Review effective date'},
       {title:'Spoofed host',url:'https://www.xpo.com.evil.example/rules',content:'Discard'},
-      {title:'Script',url:'javascript:alert(1)',content:'Discard'},
+      {title:'Banking rule',url:'https://www.ecfr.gov/current/title-12/chapter-X/part-1005',content:'Discard unrelated title'},
       {title:'CFR',url:'https://www.ecfr.gov/current/title-49/part-1005',content:'Claim evidence'},
     ]});
   };

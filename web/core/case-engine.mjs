@@ -20,6 +20,7 @@ export function officialSourceUrl(value) {
     const url = new URL(value);
     if (url.protocol !== 'https:' || url.username || url.password || (url.port && url.port !== '443')
       || !['xpo.com', 'www.xpo.com', 'ecfr.gov', 'www.ecfr.gov'].includes(url.hostname)) return null;
+    if (url.hostname.endsWith('ecfr.gov') && (!url.pathname.includes('/title-49/') || !/\/part-1005(?:\/|$)/.test(url.pathname))) return null;
     url.hash = '';
     return url.href;
   } catch { return null; }
@@ -45,7 +46,7 @@ const SOURCES = [
   {
     id: 'cfr_claim',
     title: '49 CFR § 1005.2(b) · minimum written claim fields',
-    url: 'https://www.ecfr.gov/current/title-49/subtitle-B/chapter-X/subchapter-B/part-1005/section-1005.2#p-1005.2(b)',
+    url: 'https://www.ecfr.gov/current/title-49/subtitle-B/chapter-X/subchapter-A/part-1005/section-1005.2#p-1005.2(b)',
     locator: '49 CFR § 1005.2(b)',
     description: 'A written communication identifies the shipment, asserts liability for loss or damage, and claims a specified or determinable amount of money.',
     verifiedAt: '2026-10-09',
@@ -53,7 +54,7 @@ const SOURCES = [
   {
     id: 'cfr_invoice',
     title: '49 CFR § 1005.4(b) · invoice and discounts',
-    url: 'https://www.ecfr.gov/current/title-49/subtitle-B/chapter-X/subchapter-B/part-1005/section-1005.4#p-1005.4(b)',
+    url: 'https://www.ecfr.gov/current/title-49/subtitle-B/chapter-X/subchapter-A/part-1005/section-1005.4#p-1005.4(b)',
     locator: '49 CFR § 1005.4(b)',
     description: 'The supporting invoice shows all trade or other discounts, allowances, or deductions of any nature.',
     verifiedAt: '2026-10-09',
