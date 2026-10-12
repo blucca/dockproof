@@ -44,7 +44,7 @@ function citationButton(ref, label) {
   return `<button class="cite" data-cite="${html(ref.documentId)}" data-line="${ref.globalLine || ref.line || 1}" data-page="${ref.page || 1}">${html(label || `p${ref.page || 1} · line ${ref.line || 1} ↗`)}</button>`;
 }
 
-export function createIntakeUI({ getState, commit, notify, openDocument }) {
+export function createIntakeUI({ getState, commit, notify, openDocument, onStatusChange = () => {} }) {
   const originals = new Map();
   let busy = false;
   let modelReady = false;
@@ -214,6 +214,7 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
       const response = await fetch(`${api}/status`, {headers:accessHeaders(),cache:'no-store'});
       if (!response.ok) throw new Error('server');
       const status = await response.json();
+      onStatusChange(status);
       modelReady = Boolean(status.extractionReady);
       $('#evaluation-access').hidden = !status.access?.required || status.access?.authorized;
       $('#model-status').textContent = modelReady
@@ -221,7 +222,11 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
         : status.access?.required
           ? (accessCode && !status.access.authorized ? 'Access code rejected. Enter the code from the testing instructions.' : status.budget?.message || 'Enter your evaluation access code.')
           : `${status.budget?.message || 'Configure a private credit budget.'} Set NEBIUS_API_KEY and NEBIUS_BUDGET_FILE in the server environment. Source-linked manual selection is ready.`;
-    } catch { modelReady = false; $('#model-status').textContent = 'Live connection interrupted. Reopen the evaluation entry to reconnect. Source-linked manual selection is ready here.'; }
+    } catch {
+      modelReady = false;
+      $('#model-status').textContent = 'Live connection interrupted. Reopen the evaluation entry to reconnect. Source-linked manual selection is ready here.';
+      onStatusChange({ rulesReady:false, rules:{ message:'Live connection interrupted. Reopen live evaluation to reconnect.' } });
+    }
     setBusy(busy);
   }
 
@@ -468,5 +473,5 @@ export function createIntakeUI({ getState, commit, notify, openDocument }) {
     connect();
   });
   connect();
-  return { render, addFiles, loadExample, openOriginal, displayOriginalImage, preparePacket, forgetOriginals:ids => ids.forEach(id => originals.delete(id)), get busy() { return busy; } };
+  return { api, accessHeaders, setBusy, render, addFiles, loadExample, openOriginal, displayOriginalImage, preparePacket, forgetOriginals:ids => ids.forEach(id => originals.delete(id)), get busy() { return busy; } };
 }

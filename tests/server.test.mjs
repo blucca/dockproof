@@ -28,7 +28,22 @@ test('hosted extraction requires evaluation access; provider credentials stay se
     assert.equal(run.status,200);assert.deepEqual(await run.json(),{mode:'live',documents:1});assert.equal(calls,1);
     const html=await fetch(base+'/').then(r=>r.text());assert.match(html,/name="dockproof-api" content="\/api"/);
     assert.equal(html.includes(env.DOCKPROOF_ACCESS_TOKEN),false);assert.equal(html.includes(env.NEBIUS_API_KEY),false);
-    assert.deepEqual(await fetch(base+'/api/health').then(r=>r.json()),{ok:true,product:'DockProof',version:'0.5.0'});
+    assert.deepEqual(await fetch(base+'/api/health').then(r=>r.json()),{ok:true,product:'DockProof',version:'0.6.0'});
+  });
+});
+
+test('official-source searches share the authenticated same-origin request boundary',async()=>{
+  let calls=0;
+  await withServer({env,budgetStatus,ruleStatus:()=>({ready:true,code:'rule_search_ready',message:'Ready.'}),
+    ruleSearch:async input=>{calls++;return {topic:input.topic,results:[]};}},async base=>{
+    const plain=await fetch(base+'/api/status').then(r=>r.json());assert.equal(plain.rulesReady,false);
+    const denied=await fetch(base+'/api/rules',{method:'POST',body:'{"topic":"liability"}'});
+    assert.equal(denied.status,401);assert.equal(calls,0);
+    const headers={Authorization:`Bearer ${env.DOCKPROOF_ACCESS_TOKEN}`,'Content-Type':'application/json',Origin:base};
+    assert.equal((await fetch(base+'/api/status',{headers}).then(r=>r.json())).rulesReady,true);
+    assert.equal((await fetch(base+'/api/rules',{method:'POST',headers:{...headers,Origin:'https://other.example'},body:'{}'})).status,403);
+    const result=await fetch(base+'/api/rules',{method:'POST',headers,body:'{"topic":"liability"}'});
+    assert.equal(result.status,200);assert.deepEqual(await result.json(),{topic:'liability',results:[]});assert.equal(calls,1);
   });
 });
 

@@ -32,6 +32,14 @@ Open [Live evaluation](https://blucca.github.io/dockproof/judge/) and enter the 
 
 The access code opens this evaluation service. Nebius credentials stay server-side. Original files and saved workspaces stay in the browser; the explicit extraction action sends extracted document text to the server and Nebius. Keep the stable evaluation-entry bookmark when returning to the service.
 
+## Check the official rule sources
+
+In the live build, open **Rules & scope**, choose **Liability & weight limits**, **Filing requirements**, or **Discounts & invoice value**, and select **Search official sources**.
+
+Tavily retrieves XPO/eCFR source excerpts using the topic and selected service/class. For carrier topics, the server also reads XPO’s tariff library directly and compares its listed edition with the calculation policy. Each result keeps its own edition label. A fresh search is saved with the case and opens its final review again; the reviewed ZIP adds `05-rule-research.json` and a readable research appendix.
+
+**Observed in the live integration:** the search returned five other CNWY editions, including an older $150,000 shipment-cap excerpt. XPO’s live tariff library listed **199-AK.3**, the calculation’s $100,000-cap edition. The source check exposes that discrepancy while the reviewed policy continues to drive the amount. [Implementation and reproduction](docs/rule-research.md).
+
 ## Try the PDF document path
 
 The **PDF example** reads six original synthetic records in your browser, including a two-page bill of lading / delivery receipt and a PDF invoice. Its **32 candidate facts** come from a recorded, successful **NVIDIA Nemotron Super** run on those same files; the page labels their recorded origin.
@@ -68,7 +76,7 @@ Try the full scanning path with the [synthetic scan + photo set](https://blucca.
 - Original PDF / photo / text bytes stay in **IndexedDB**; extracted text, selections, and review state stay in browser-local storage. Reload restores both. Downloads check original-file SHA-256 against the imported record.
 - Limits: **12 records**, **10 MB per file**, **25 MB combined**, **40 pages per PDF**, **24 MP per photo**, and **80,000 extracted text characters per case**. OCR uses one CPU worker, a 4 MP rendered-page ceiling, and a two-minute page timeout; the worker is released after the document.
 - OCR assets are self-hosted and load on demand (about 6 MB). Original images and OCR stay in the browser; model extraction sends the derived text through the connected Node server.
-- The public page supports importing, manual review, calculation, and export. The full evaluation build adds live NVIDIA extraction. A local installation uses your own configured Nebius account.
+- The public page supports importing, manual review, calculation, and export. The full evaluation build adds live NVIDIA extraction and Tavily official-source research. A local installation uses your own configured Nebius account.
 
 ## Run locally
 
@@ -109,13 +117,26 @@ curl http://127.0.0.1:4318/api/extract \
   --data '{"documents":[{"id":"weight","name":"Warehouse weight sheet","text":"Crate B4 actual gross weight: 150 lb."}]}'
 ```
 
+### Enable Tavily official-source research
+
+Use a Tavily **Researcher** account and copy [`tavily-budget.example.json`](tavily-budget.example.json) to a private file. Set a positive `approvedCredits` allowance, preserve cumulative `reservedCredits`, keep `freeReserveCredits` available, and set an approval expiry with its timezone. The example begins disabled.
+
+```sh
+export TAVILY_API_KEY_FILE='/absolute/path/to/private/tavily-key'
+export TAVILY_BUDGET_FILE='/absolute/path/to/private/tavily-budget.json'
+export TAVILY_BUDGET_RUNTIME_DIR='/absolute/path/to/temp/tavily-runtime'
+npm start
+```
+
+`TAVILY_API_KEY` is also supported. Each search checks the account’s free allowance, reserves one Basic credit durably, and then sends the request. Automatic depth selection stays off. Failed searches retain their reservation. The server restricts queries to three rule topics and filters result URLs to XPO/eCFR; shipment identifiers, names, amounts and document text stay out of the search payload. Source research uses the same evaluation access as model extraction.
+
 ### Host an evaluation build
 
 The same server works behind an HTTPS reverse proxy. Set `DOCKPROOF_ACCESS_TOKEN` to a private random access code and `DOCKPROOF_ORIGIN` to the HTTPS origin. Give the code to your evaluators separately. Keep `NEBIUS_API_KEY`, the private budget and access code outside the public repository.
 
 The Node-served page detects its same-origin API, offers the evaluation-code form and sends the code only in the Authorization header. An optional `#access=…` entry fragment is moved into tab-local session storage and removed from the address bar. The static Pages build keeps its recorded examples and links to the stable live entry.
 
-`GET /api/health` exposes product availability. `GET /api/status` exposes live-extraction readiness for the supplied access code. `POST /api/extract` uses that code, same-origin requests, one active extraction and the persistent credit budget. `web/judge/endpoint.json` points the stable entry at the current HTTPS deployment.
+`GET /api/health` exposes product availability. `GET /api/status` exposes live-extraction readiness for the supplied access code. `POST /api/extract` and `POST /api/rules` use that code, same-origin requests and one active live request. Each provider uses its own persistent allowance. `web/judge/endpoint.json` points the stable entry at the current HTTPS deployment.
 
 ## Rule scope
 

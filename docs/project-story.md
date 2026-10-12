@@ -20,6 +20,8 @@ The demonstrated case follows:
 
 DockProof produces a **22-file ZIP**: a claim letter, valuation, source/OCR text, rule references, review record and **all eight original files**, with SHA-256 fingerprints. The shipper can use the carrier's filing process. Carrier receipt and payment are recorded as subsequent evidence-backed events.
 
+**Rules & scope** adds a live **Tavily** source check. The reviewer chooses a rule topic; the application retrieves official XPO/eCFR excerpts, checks the carrier’s tariff library directly, and labels each returned edition. Saved research travels in the reviewed packet. A new search opens the evidence review again.
+
 ## How we built it
 
 The browser uses self-hosted **PDF.js** for selectable text and **Tesseract.js** for English OCR. Each page keeps its extraction method, page/line locations and original-file hash. IndexedDB preserves original bytes; browser-local workspaces preserve selections and review state.
@@ -36,11 +38,13 @@ Source location and field meaning required separate controls. Early extraction r
 
 A warehouse inspection date also appeared as carrier claim receipt. We added explicit receipt-evidence validation and individual receipt review. One OCR label read `lb.` as `Ib.`; keeping the original image next to the derived text gave the reviewer the evidence needed to choose the value.
 
+The live rule search exposed another practical failure: five retrieved tariff PDFs belonged to other editions, and an older excerpt used a $150,000 shipment cap. XPO’s current library listed 199-AK.3, whose selected policy uses $100,000. DockProof keeps the search findings, library check and calculation edition visible together. The amount remains tied to the shipper-reviewed policy. [See the source-research walkthrough](https://github.com/blucca/dockproof/blob/main/docs/rule-research.md).
+
 ## Accomplishments that we're proud of
 
 The **2:44 demonstration** follows a complete, real browser workflow: eight original synthetic files, local OCR, a live NVIDIA request, source review, calculation, approval and export. Its model request returned **32 source-matched candidates in 11.173 seconds**, covering all **27 required fields**. Every exported original matched its imported fingerprint.
 
-The public scan example offers a quick start with live browser OCR and clearly labeled recorded NVIDIA candidates. The dedicated judge build provides live model extraction. The application, original sample records and source code are public.
+The public scan example offers a quick start with live browser OCR and clearly labeled recorded NVIDIA candidates. The dedicated judge build provides live model extraction and Tavily source research. The application, original sample records and source code are public.
 
 ## What we learned
 

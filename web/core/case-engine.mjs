@@ -14,7 +14,16 @@ export const SUPPORTED_CLASSES = Object.freeze([
   '110', '125', '150', '175', '200', '250', '300', '400', '500',
 ]);
 
-const TARIFF_URL = 'https://www.xpo.com/cdn/download_files/s1/p2831/CNWY_199-AK.3_Eff._08.17.2026.pdf';
+export const TARIFF_URL = 'https://www.xpo.com/cdn/download_files/s1/p2831/CNWY_199-AK.3_Eff._08.17.2026.pdf';
+export function officialSourceUrl(value) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || url.username || url.password || (url.port && url.port !== '443')
+      || !['xpo.com', 'www.xpo.com', 'ecfr.gov', 'www.ecfr.gov'].includes(url.hostname)) return null;
+    url.hash = '';
+    return url.href;
+  } catch { return null; }
+}
 const SHIPMENT_MAX_CENTS = 10000000;
 const SOURCES = [
   {
@@ -574,6 +583,7 @@ export function createPacket(state, { today = todayUTC() } = {}) {
   const amount = money(result.draftDemandCents);
   const service = facts.serviceType === 'spot_quote' ? 'Spot quote, $1.00/lb' : 'Standard tariff, actual class ' + facts.freightClass + ', ' + money(result.rateCentsPerLb) + '/lb';
   const receivedDocs = state.documents.filter(doc => doc.received === true);
+  const ruleResearch = clone(Array.isArray(state.ruleResearch) ? state.ruleResearch.slice(0, 3) : []);
   const files = [];
   const addFile = (name, type, content) => files.push({ name, type, content });
   const evidenceFiles = receivedDocs.map((doc, i) => ({
@@ -657,10 +667,14 @@ export function createPacket(state, { today = todayUTC() } = {}) {
   addFile('03-valuation-audit.json', 'application/json', JSON.stringify({
     policyVersion: POLICY_VERSION, sourceMode: state.sourceMode ?? 'curated_fixture', synthetic,
     shipment, facts, documents: evidenceFiles, decisions: state.decisions,
-    evaluation: result, events: state.events, intakeRuns: clone(state.intake?.runs ?? []),
+    evaluation: result, events: state.events, intakeRuns: clone(state.intake?.runs ?? []), ruleResearch,
   }, null, 2) + '\n');
   addFile('04-official-sources.txt', 'text/plain',
     [marker, '', ...SOURCES.flatMap(source => [source.title, source.locator, source.url, source.description, 'Verified: ' + source.verifiedAt, ''])].join('\n'));
+  if (ruleResearch.length) addFile('05-rule-research.json', 'application/json', JSON.stringify({
+    purpose: 'Official-source discovery for the shipper’s terms review. Confirm effective dates and the controlling agreement for this shipment.',
+    calculationPolicy: POLICY_VERSION, searches: ruleResearch,
+  }, null, 2) + '\n');
   receivedDocs.forEach((doc, i) => addFile(evidenceFiles[i].file, 'text/plain', doc.text + '\n'));
 
   const mathHTML = result.math.map(row => '<tr><th scope="row">' + html(row.label) + '</th><td>'
@@ -669,6 +683,17 @@ export function createPacket(state, { today = todayUTC() } = {}) {
     + (doc.textKind === 'contains_ocr_derived_text' ? ' — OCR-derived text; compare with the original.' : doc.textKind === 'visual_attachment' ? ' — visual attachment; open its original file in the originals folder.' : '') + '</li>').join('');
   const sourcesHTML = SOURCES.map(source => '<li><a href="' + html(source.url) + '" target="_blank" rel="noopener noreferrer">'
     + html(source.title) + '</a> — ' + html(source.locator) + '</li>').join('');
+  const researchHTML = ruleResearch.length ? '<h2>Official-source research</h2><p>Calculation policy: '
+    + html(POLICY_VERSION) + '. Confirm each source’s effective dates against the shipment and its controlling agreement.</p>'
+    + ruleResearch.map(search => '<section><h3>' + html(search.topic) + '</h3><p>Tavily search, retrieved '
+      + html(search.queriedAt) + '</p><p>Query: ' + html(search.query) + '</p>'
+      + (officialSourceUrl(search.library?.url) ? '<p>Carrier library check: ' + html(search.library.status)
+        + ' at ' + html(search.library.checkedAt) + '. <a href="' + html(officialSourceUrl(search.library.url))
+        + '" target="_blank" rel="noopener noreferrer">Open tariff library</a>.</p>' : '') + '<ul>'
+      + (Array.isArray(search.results) ? search.results : []).filter(source => officialSourceUrl(source.url)).map(source =>
+        '<li><a href="' + html(officialSourceUrl(source.url)) + '" target="_blank" rel="noopener noreferrer">'
+        + html(source.title) + '</a>' + (source.relationship === 'other_tariff' ? ' — Other tariff edition; review effective dates.' : '')
+        + '<p>' + html(source.excerpt) + '</p></li>').join('') + '</ul></section>').join('') : '';
   addFile('review.html', 'text/html', '<!doctype html><html lang="en"><meta charset="utf-8">'
     + '<meta name="viewport" content="width=device-width,initial-scale=1"><title>DockProof — ' + html(shipment.pro) + '</title>'
     + '<style>body{font:16px/1.6 system-ui,sans-serif;max-width:900px;margin:40px auto;padding:0 24px;color:#172331}h1{line-height:1.2}header{border-bottom:3px solid #087c6d}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;vertical-align:top;padding:9px;border-bottom:1px solid #ddd}pre{white-space:pre-wrap;font:14px/1.5 ui-monospace,monospace}.amount{font-size:38px;font-weight:750}a{color:#096e65}@media print{body{margin:0;max-width:none}a{color:inherit}table{break-inside:avoid}h2{break-after:avoid}}</style>'
@@ -678,6 +703,7 @@ export function createPacket(state, { today = todayUTC() } = {}) {
     + '<p>Written claim carrier-receipt deadline: <strong>' + html(deadline) + '</strong>. Filing status: ' + html(result.filingStatus.replaceAll('_', ' ')) + '.</p>'
     + '<h2>Valuation audit</h2><table><thead><tr><th>Step</th><th>Calculation</th><th>USD</th></tr></thead><tbody>' + mathHTML + '</tbody></table>'
     + '<h2>Original evidence</h2><ol>' + evidenceHTML + '</ol><h2>Official rule sources</h2><ul>' + sourcesHTML + '</ul>'
+    + researchHTML
     + '<h2>Claim cover letter</h2><pre>' + html(cover) + '</pre></html>\n');
 
   const summary = {

@@ -1,4 +1,4 @@
-import { evaluateCase, applyAction, createPacket, POLICY_VERSION } from './core/case-engine.mjs';
+import { evaluateCase, applyAction, createPacket, POLICY_VERSION, SUPPORTED_CLASSES, officialSourceUrl } from './core/case-engine.mjs';
 import { zipFiles } from './core/zip.mjs';
 import { createEmptyCase } from './core/fact-review.mjs';
 import { createIntakeUI } from './intake-ui.mjs';
@@ -27,6 +27,9 @@ try {
   if(slots[last])mode=last;
 } catch { $('#save-state').textContent='Browser session'; }
 let state=slots[mode] || createEmptyCase({id:'dockproof-scan-loading',title:'Loading eight synthetic originals with local OCR…',synthetic:true});let selectedId=mode==='walkthrough'?'claim_worksheet':state.documents[0]?.id;let selectedLine=mode==='walkthrough'?4:1;let selectedPage=1;let activeTab=mode==='walkthrough'?'desk':'intake';let evaluation;let toastTimer;let intake;
+const ruleTopics={liability:'Liability & weight limits',filing:'Filing requirements',discounts:'Discounts & invoice value'};
+let ruleTopic='liability';let ruleBusy=false;let ruleMessage='';let ruleError=false;
+let ruleStatus={rulesReady:false,rules:{message:'Connecting to official-source research…'}};
 
 const documentNames = {
   bill_of_lading:['Bill of lading','Shipment · class 70'],
@@ -71,6 +74,7 @@ function openDocument(id,line=1,page=1) {
 }
 async function changeCase(nextMode,{fresh=false}={}) {
   if(!Object.hasOwn(slots,nextMode))return;
+  if(ruleBusy){notify('Finish the official-source search, then switch workspaces.');return;}
   if(intake?.busy){notify('Finish the current document operation, then switch workspaces.');return;}
   save();
   try {
@@ -80,7 +84,7 @@ async function changeCase(nextMode,{fresh=false}={}) {
     }
     if(nextMode==='own' && (!slots.own||fresh)) slots.own=createEmptyCase({id:`dockproof-own-${crypto.randomUUID()}`,title:'My freight claim'});
     if(nextMode==='walkthrough' && fresh)slots.walkthrough=structuredClone(sample);
-    mode=nextMode;state=slots[mode];selectedId=mode==='walkthrough'?'claim_worksheet':state.documents[0]?.id;selectedLine=mode==='walkthrough'?4:1;selectedPage=1;
+    mode=nextMode;state=slots[mode];selectedId=mode==='walkthrough'?'claim_worksheet':state.documents[0]?.id;selectedLine=mode==='walkthrough'?4:1;selectedPage=1;ruleMessage='';ruleError=false;
     save();render();switchTab(mode==='walkthrough'?'desk':'intake');
   }catch(error){notify(error.message);}
 }
@@ -188,8 +192,68 @@ function renderPacket() {
   $('#packet').innerHTML=`<div class="packet-layout"><article class="packet-paper"><div class="paper-label">${state.synthetic?'SYNTHETIC EXAMPLE · ':''}${ready?'SHIPPER-REVIEWED DRAFT':'PREPARATION IN PROGRESS'}</div><h2>Freight damage claim</h2><div class="mini-label">${html(state.shipment.pro||'Shipment identity pending')} · Piece ${html(state.facts.affectedPieceId||'pending')}</div><div class="amount-large">${ready?money(evaluation.draftDemandCents):'Review to prepare'}</div><pre>${html(letter)}</pre></article><aside class="packet-side"><span class="status-tag ${ready?'green':'amber'}">${ready?'Ready for download':'Awaiting evidence review'}</span><h3 style="margin-top:16px">A complete record copy.</h3><p>The packet includes the reviewed claim, source text, original files, valuation, and rule references. Imported originals are matched to their SHA-256 fingerprints on download.</p><button class="button primary" id="download-packet" ${ready?'':'disabled'}>Download evidence packet (.zip)</button><button class="button secondary" id="print-packet" ${ready?'':'disabled'}>Print reviewed claim / Save PDF</button>${ready?'':`<button class="button-plain" data-tab="desk">Return to the evidence desk →</button>`}<div class="deadline">Written claim received by XPO<strong>${deadline?date(deadline.date):'Confirm delivery date'}</strong><span>Delivery + 9 calendar months</span></div><p style="font-size:10px">Filing status: <strong>${html(evaluation.filingStatus.replaceAll('_',' '))}.</strong><br>Attach the packet through the <a class="text-link" target="_blank" rel="noreferrer" href="https://www.xpo.com/help-center/claims-and-refunds/how-file-claims-and-refunds/">official filing process</a>. Record the carrier’s confirmation when received.</p><ul>${files.map((name,i)=>`<li><span>${String(i+1).padStart(2,'0')}</span>${html(name)}</li>`).join('')}</ul></aside></div>`;
 }
 
+function ruleResearchView() {
+  const saved=Array.isArray(state.ruleResearch)?state.ruleResearch:[];
+  const research=saved.find(item=>item?.topic===ruleTopic);
+  const live=Boolean(intake?.api);
+  const available=live&&ruleStatus.rulesReady;
+  const entries=(Array.isArray(research?.results)?research.results:[]).flatMap(source=>{
+    const url=officialSourceUrl(source?.url);
+    return url?[{...source,url,filename:(new URL(url).pathname.split('/').filter(Boolean).pop()||'/').replaceAll('%20',' ')}]:[];
+  });
+  const otherEditions=entries.filter(source=>source.relationship==='other_tariff').length;
+  const library=research?.library;
+  const libraryUrl=officialSourceUrl(library?.url);
+  const libraryCheck=libraryUrl?`<div class="rule-library-check ${library.status==='pinned_listed'?'':'needs-review'}"><strong>${html({pinned_listed:'The carrier library lists the calculation edition',different_listed:'The carrier library lists a different edition',unavailable:'Open the carrier library to check the edition'}[library.status]||'Review the carrier library')}</strong><p>Direct library check: ${html(library.checkedAt)}. Search results below retain their own edition labels.</p><a class="text-link" href="${html(libraryUrl)}" target="_blank" rel="noreferrer">Open carrier tariff library</a>${(Array.isArray(library.tariffs)?library.tariffs:[]).filter(officialSourceUrl).map(url=>`<a class="text-link rule-listed-tariff" href="${html(officialSourceUrl(url))}" target="_blank" rel="noreferrer">${html((new URL(url).pathname.split('/').filter(Boolean).pop()||'/').replaceAll('%20',' '))}</a>`).join('')}</div>`:'';
+  const searched=new Date(research?.queriedAt);
+  const searchedLabel=Number.isFinite(searched.getTime())?searched.toLocaleString('en-US',{dateStyle:'medium',timeStyle:'short',timeZone:'UTC'})+' UTC':'Timestamp pending';
+  const scope=research?.scope||{};
+  const scopeLabel=[typeof scope.serviceType==='string'?scope.serviceType.replaceAll('_',' '):'',typeof scope.freightClass==='string'?`class ${scope.freightClass}`:''].filter(Boolean).join(' / ')||'General XPO US interstate LTL';
+  const connection=live?(ruleStatus.rules?.message||(available?'Tavily official-source search is ready.':'Connect live evaluation to search.')):'Live evaluation runs current searches. Saved findings for this case remain readable here.';
+  return `<section class="rule-research" aria-labelledby="rule-research-title" aria-busy="${ruleBusy}">
+    <div class="rule-research-heading"><div><h2 id="rule-research-title">Check the official sources</h2><p>Search XPO and eCFR with Tavily. Save the source excerpts with this case for the shipper’s review.</p></div><span class="status-tag ${available?'green':'amber'}">${live?(available?'Live research':'Connection needed'):'Saved research'}</span></div>
+    <div class="rule-research-controls"><label for="rule-topic">Research topic<select id="rule-topic" ${ruleBusy?'disabled':''}>${Object.entries(ruleTopics).map(([key,label])=>`<option value="${key}" ${key===ruleTopic?'selected':''}>${label}${saved.some(item=>item?.topic===key)?' · saved':''}</option>`).join('')}</select></label>${live?`<button id="research-rules" class="button primary" ${!available||ruleBusy||intake?.busy?'disabled':''}>${ruleBusy?'Searching official sources…':research?'Refresh official sources':'Search official sources'}</button>`:'<a class="button primary" href="https://blucca.github.io/dockproof/judge/">Open live evaluation</a>'}</div>
+    <p class="rule-connection">${html(connection)}${live&&ruleStatus.access?.required&&!ruleStatus.access.authorized?' <button class="button-plain" data-tab="intake">Enter evaluation access code</button>':''}</p>
+    <p class="rule-policy-note">Amounts follow the reviewed calculation policy <strong>${html(POLICY_VERSION)}</strong>. Check source effective dates and this shipment’s controlling agreement. Saving fresh research opens a new evidence review.</p>
+    <div id="rule-research-status" class="rule-research-status ${ruleError?'is-error':''}" role="${ruleError?'alert':'status'}" aria-live="polite">${html(ruleMessage)}</div>
+    ${research?`<article class="rule-findings">${libraryCheck}<h3 id="rule-findings-title" tabindex="-1">Saved findings: ${html(ruleTopics[ruleTopic])}</h3><dl class="rule-query-record"><div class="rule-query"><dt>Query</dt><dd>${html(research.query)}</dd></div><div><dt>Searched</dt><dd><time datetime="${html(research.queriedAt)}">${html(searchedLabel)}</time></dd></div><div><dt>Shipment scope</dt><dd>${html(scopeLabel)}</dd></div><div><dt>Policy at search</dt><dd>${html(research.policyVersion)}</dd></div><div><dt>Research record</dt><dd>${html(research.requestId||'Saved in this case')}</dd></div></dl>
+      ${otherEditions?`<p class="rule-version-note">${otherEditions} other tariff edition${otherEditions===1?' appears':'s appear'} in this search. Review ${otherEditions===1?'its effective date':'their effective dates'} against this shipment’s controlling agreement.</p>`:''}
+      <ul class="rule-source-list">${entries.map(source=>`<li class="rule-source ${source.relationship==='other_tariff'?'other-tariff':''}"><div class="rule-source-heading"><a href="${html(source.url)}" target="_blank" rel="noreferrer">${html(source.title||'Official source')}</a><span class="rule-relationship">${html({pinned_tariff:'Pinned tariff edition',other_tariff:'Other tariff edition',official_guidance:'Official guidance'}[source.relationship]||'Official source')}</span></div><p class="rule-source-domain">${html(new URL(source.url).hostname)}<span class="rule-source-filename">${html(source.filename)}</span></p>${source.relationship==='other_tariff'?`<details class="rule-excerpt-details"><summary>Read retrieved excerpt</summary><p class="rule-source-excerpt">${html(source.excerpt)}</p></details>`:`<p class="rule-source-excerpt">${html(source.excerpt)}</p>`}</li>`).join('')}</ul>${entries.length?'':'<p class="rule-empty">0 matching official sources in this saved result. The fixed policy sources are listed below.</p>'}</article>`:'<p class="rule-empty">Select a topic to research its current official sources. Each saved search keeps its query, retrieval time, policy version and source links with this case.</p>'}
+  </section>`;
+}
+
+async function researchRules() {
+  if(ruleBusy||!intake?.api||!ruleStatus.rulesReady)return;
+  if(intake.busy){notify('Finish the current document operation, then check official sources.');return;}
+  const caseId=state.id;const caseMode=mode;const topic=ruleTopic;
+  const body={topic};
+  for(const field of ['serviceType','freightClass']) {
+    const value=state.facts[field];
+    const allowed=field==='serviceType'?['standard_tariff','spot_quote']:SUPPORTED_CLASSES;
+    if(typeof value==='string'&&allowed.includes(value.trim()))body[field]=value.trim();
+  }
+  ruleBusy=true;ruleError=false;ruleMessage='Searching current official sources…';intake.setBusy(true);renderRules();
+  try {
+    const response=await fetch(`${intake.api}/rules`,{method:'POST',headers:{'Content-Type':'application/json',...intake.accessHeaders()},body:JSON.stringify(body),signal:AbortSignal.timeout(80000)});
+    const result=await response.json().catch(()=>null);
+    if(!response.ok)throw new Error(result?.error||`Official-source search failed: HTTP ${response.status}. Try again from live evaluation.`);
+    if(result?.schema!=='dockproof-rule-research/v1'||result.topic!==topic||!Array.isArray(result.results))throw new Error('The search response needs a supported research record. Try the search again.');
+    if(state.id!==caseId||mode!==caseMode)throw new Error('The case changed during research. Run this search from the original case.');
+    const previous=Array.isArray(state.ruleResearch)?state.ruleResearch:[];
+    ruleMessage=`${ruleTopics[topic]} saved with ${result.results.length} official source${result.results.length===1?'':'s'}. Review the findings before approving this evidence snapshot.`;
+    commit({...state,ruleResearch:[...previous.filter(item=>item?.topic!==topic&&Object.hasOwn(ruleTopics,item?.topic)),result].slice(-3)});
+  } catch(error) {
+    ruleError=true;
+    ruleMessage=error.name==='TimeoutError'?'Official-source search timed out. Try again when the live connection is ready. Saved findings remain available.':`${error.message} Saved findings remain available.`;
+  } finally {
+    ruleBusy=false;intake.setBusy(false);renderRules();
+    if(activeTab==='rules')$('#rule-findings-title')?.focus({preventScroll:true});
+  }
+}
+
 function renderRules() {
-  $('#rules').innerHTML=`<div class="rules-layout"><div><div class="eyebrow">VERSIONED RULES · VERIFIED OCT 9, 2026</div><h2 style="margin-top:12px">The basis behind the amount.</h2><p>Each rule is tied to a named source, version, and supported shipment scope. The shipper’s controlling agreement supplies the terms for an actual case.</p>${evaluation.sources.map(source=>`<section class="rule-card"><h3>${html(source.title)}</h3><p>${html(source.description)}</p><a class="text-link" href="${html(source.url)}" target="_blank" rel="noreferrer">${html(source.locator)} ↗</a></section>`).join('')}</div><aside class="scope-card"><h3>Supported calculation scope</h3><ul><li>XPO US interstate LTL</li><li>New, ordinary goods under the class table</li><li>Documented actual freight class</li><li>One identified damaged shipping piece</li><li>Visible damage recorded at delivery</li><li>Direct shipper booking</li><li>Documented standard tariff or spot quote</li><li>Invoice value, trade discount, retained salvage</li></ul><p>Special commodities, used goods, broker agreements, excess-value coverage, and concealed damage enter a separate terms review.</p><h3 style="margin-top:22px">Three distinct amounts</h3><p><strong>Evidenced loss</strong> follows the invoice and salvage.<br><strong>Reference limit</strong> follows the selected carrier terms.<br><strong>Requested amount</strong> is the specific demand approved for this case.</p><p>Carrier receipt and actual payment are subsequent events, recorded from their own evidence.</p><div class="eyebrow" style="margin-top:19px">${html(POLICY_VERSION)}</div></aside></div>`;
+  for(const button of document.querySelectorAll('[data-case],#reset-case,#confirm-reset-own'))button.disabled=ruleBusy;
+  $('#rules').innerHTML=ruleResearchView()+`<div class="rules-layout"><div><div class="eyebrow">VERSIONED RULES · VERIFIED OCT 9, 2026</div><h2 style="margin-top:12px">The basis behind the amount.</h2><p>Each rule is tied to a named source, version, and supported shipment scope. The shipper’s controlling agreement supplies the terms for an actual case.</p>${evaluation.sources.map(source=>`<section class="rule-card"><h3>${html(source.title)}</h3><p>${html(source.description)}</p><a class="text-link" href="${html(source.url)}" target="_blank" rel="noreferrer">${html(source.locator)} ↗</a></section>`).join('')}</div><aside class="scope-card"><h3>Supported calculation scope</h3><ul><li>XPO US interstate LTL</li><li>New, ordinary goods under the class table</li><li>Documented actual freight class</li><li>One identified damaged shipping piece</li><li>Visible damage recorded at delivery</li><li>Direct shipper booking</li><li>Documented standard tariff or spot quote</li><li>Invoice value, trade discount, retained salvage</li></ul><p>Special commodities, used goods, broker agreements, excess-value coverage, and concealed damage enter a separate terms review.</p><h3 style="margin-top:22px">Three distinct amounts</h3><p><strong>Evidenced loss</strong> follows the invoice and salvage.<br><strong>Reference limit</strong> follows the selected carrier terms.<br><strong>Requested amount</strong> is the specific demand approved for this case.</p><p>Carrier receipt and actual payment are subsequent events, recorded from their own evidence.</p><div class="eyebrow" style="margin-top:19px">${html(POLICY_VERSION)}</div></aside></div>`;
 }
 
 function render() {
@@ -225,6 +289,8 @@ function download(content,name) {
 let currentRequest;
 document.addEventListener('click',async event=>{
   const element=event.target.closest('button,a');if(!element)return;
+  if(ruleBusy&&(element.dataset.case||['reset-case','confirm-reset-own'].includes(element.id))){notify('Finish the official-source search, then switch workspaces.');return;}
+  if(element.id==='research-rules'){await researchRules();return;}
   if(element.dataset.case) {await changeCase(element.dataset.case);return;}
   if(element.dataset.tab) {switchTab(element.dataset.tab);return;}
   if(element.dataset.document) {selectedId=element.dataset.document;selectedLine=0;selectedPage=1;renderDocuments();renderEvidence();return;}
@@ -253,6 +319,7 @@ document.addEventListener('click',async event=>{
   if(element.id==='print-packet') {switchTab('packet');window.print();}
 });
 document.addEventListener('change',event=>{
+  if(event.target.id==='rule-topic'&&Object.hasOwn(ruleTopics,event.target.value)){ruleTopic=event.target.value;ruleMessage='';ruleError=false;renderRules();$('#rule-topic').focus({preventScroll:true});}
   if(event.target.id==='review-check') $('#confirm-review').disabled=!event.target.checked||!evaluation.canConfirm||!$('#reviewer-name').value.trim();
   if(event.target.id==='service-scenario') {selectedId='rate_confirmation';selectedLine=3;act('set_service',{service:event.target.value});}
 });
@@ -260,7 +327,7 @@ document.addEventListener('input',event=>{
   if(event.target.id==='reviewer-name') $('#confirm-review').disabled=!$('#review-check').checked||!evaluation.canConfirm||!event.target.value.trim();
 });
 
-intake=createIntakeUI({getState:()=>state,commit,notify,openDocument});
+intake=createIntakeUI({getState:()=>state,commit,notify,openDocument,onStatusChange:status=>{ruleStatus=status;if(evaluation)renderRules();}});
 render();
 for(const tab of ['intake','desk','packet','rules']) {
   $(`#panel-${tab}`).hidden=tab!==activeTab;

@@ -46,6 +46,14 @@ Release v0.3 uses 32 source-matched candidates from a recorded real NVIDIA run i
 
 ## Current calculation boundary
 
+The **Rules & scope** workspace places current XPO/eCFR source research above the fixed
+calculation policy. Its Inter typography, freight-green action bar, paper-white source
+rows and amber alternate-tariff note reuse the evidence desk's visual language. Each
+saved topic shows its query, retrieval time, shipment scope, policy version and official
+links together; narrow screens stack the controls and source metadata. Live Tavily
+searches save one result set per topic for the review appendix. Static Pages displays
+saved research and links to live evaluation. Amounts continue to use the fixed policy.
+
 XPO US interstate LTL, new ordinary goods, one visibly damaged shipping piece,
 documented actual class, direct shipper booking, and confirmed standard-tariff or
 spot-quote terms. A separate terms review handles commodity exceptions, broker agreements,

@@ -10,6 +10,28 @@ const evaluate = state => evaluateCase(state, { today });
 const completeEvidence = () => applyAction(applyAction(sample(), 'receive_weight'), 'receive_rate');
 const reviewed = () => applyAction(completeEvidence(), 'confirm_review', { today, reviewer: 'Demo shipper' });
 
+test('official-source research reopens review, keeps the calculation and travels with the packet', () => {
+  let state = reviewed();
+  const before = evaluate(state).draftDemandCents;
+  state.ruleResearch = [{schema:'dockproof-rule-research/v1',provider:'Tavily',mode:'live',topic:'liability',
+    queriedAt:'2026-10-13T00:00:00Z',query:'XPO cargo liability',results:[
+      {title:'Official tariff library',url:'https://www.xpo.com/tariff-library/',excerpt:'Check effective dates.'},
+      {title:'Unsafe imported link',url:'javascript:alert(1)',excerpt:'<script>bad()</script>'},
+    ]}];
+  assert.equal(evaluate(state).reviewValid,false);
+  assert.equal(evaluate(state).draftDemandCents,before);
+  assert.throws(()=>createPacket(state,{today}),/Confirm the current shipper review/);
+  state=applyAction(state,'confirm_review',{today,reviewer:'Demo shipper'});
+  const packet=createPacket(state,{today});
+  assert.equal(packet.summary.requestedAmountCents,before);
+  const research=JSON.parse(packet.files.find(file=>file.name==='05-rule-research.json').content);
+  assert.equal(research.searches[0].provider,'Tavily');
+  const page=packet.files.find(file=>file.name==='review.html').content;
+  assert.match(page,/Official-source research/);assert.match(page,/https:\/\/www.xpo.com\/tariff-library\//);
+  assert.equal(page.includes('javascript:'),false);assert.equal(page.includes('<script>'),false);
+  assert.equal(packet.manifest.files.length,14);
+});
+
 test('initial case exposes the two evidence gaps and retains the original $5,000 worksheet', () => {
   const state = sample();
   const result = evaluate(state);

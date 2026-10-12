@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { DEFAULT_MODEL, extractFacts } from './nebius.mjs';
 import { budgetStatus } from './budget.mjs';
+import { searchOfficialRules, tavilyStatus } from './tavily.mjs';
 
 const root = fileURLToPath(new URL('../web/', import.meta.url));
 const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.json':'application/json', '.svg':'image/svg+xml', '.txt':'text/plain; charset=utf-8', '.png':'image/png', '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.pdf':'application/pdf', '.wasm':'application/wasm', '.gz':'application/gzip', '.mp4':'video/mp4', '.vtt':'text/vtt; charset=utf-8', '.zip':'application/zip' };
@@ -32,38 +33,43 @@ export function createDockproofServer(options = {}) {
   const env = options.env || process.env;
   const extract = options.extract || extractFacts;
   const status = options.budgetStatus || budgetStatus;
+  const ruleSearch = options.ruleSearch || (input => searchOfficialRules(input, { env }));
+  const ruleStatus = options.ruleStatus || (() => tavilyStatus({ env }));
   const token = env.DOCKPROOF_ACCESS_TOKEN || '';
-  let activeExtraction = false;
+  let activeRequest = false;
   return http.createServer(async (req,res) => {
   try {
     res.setHeader('Referrer-Policy', 'same-origin');
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
     const url = new URL(req.url, 'http://localhost');
     if (url.pathname === '/api/health' && req.method === 'GET') {
-      return json(res,200,{ok:true,product:'DockProof',version:'0.5.0'});
+      return json(res,200,{ok:true,product:'DockProof',version:'0.6.0'});
     }
     if (url.pathname === '/api/status' && req.method === 'GET') {
       const budget = status();
       const authorized = hasAccess(req,token);
+      const rules = ruleStatus();
       return json(res, 200, { product:'DockProof', model:env.NEBIUS_MODEL || DEFAULT_MODEL,
         extractionReady:authorized && Boolean(env.NEBIUS_API_KEY) && budget.ready,
+        rulesReady:authorized && rules.ready,
+        rules:authorized ? rules : {ready:false,code:'evaluation_access',message:'Connect live evaluation to search official rule sources.'},
         access:{required:Boolean(token),authorized,endsAt:env.DOCKPROOF_EVALUATION_END || null},
         budget:authorized ? {ready:budget.ready,code:budget.code,message:budget.message} : {ready:false,code:'evaluation_access',message:'Enter the evaluation access code from the testing instructions.'},
         storage:'browser-local' });
     }
-    if (url.pathname === '/api/extract' && req.method === 'POST') {
+    if (['/api/extract', '/api/rules'].includes(url.pathname) && req.method === 'POST') {
       if (!hasAccess(req,token)) return json(res,401,{error:'Enter the evaluation access code from the testing instructions.',code:'evaluation_access'});
       const origin = req.headers.origin;
       if (origin && origin !== env.DOCKPROOF_ORIGIN && origin !== `http://${req.headers.host}` && origin !== `https://${req.headers.host}`) {
-        return json(res,403,{error:'Use the extraction endpoint from this DockProof application.'});
+        return json(res,403,{error:'Use this endpoint from the connected DockProof application.'});
       }
-      if (activeExtraction) return json(res,429,{error:'One extraction is running. Retry when it finishes.'});
-      activeExtraction = true;
+      if (activeRequest) return json(res,429,{error:'One live request is running. Retry when it finishes.'});
+      activeRequest = true;
       try {
         const body = await readJson(req);
-        return json(res,200,await extract(body.documents));
+        return json(res,200,url.pathname === '/api/rules' ? await ruleSearch(body) : await extract(body.documents));
       }
-      finally { activeExtraction = false; }
+      finally { activeRequest = false; }
     }
     if (req.method !== 'GET' && req.method !== 'HEAD') return json(res,405,{error:'Use GET for this resource.'});
     const relative = decodeURIComponent(url.pathname.endsWith('/') ? `${url.pathname}index.html` : url.pathname).replace(/^\/+/, '');
@@ -78,7 +84,7 @@ export function createDockproofServer(options = {}) {
     res.writeHead(200, { 'Content-Type':types[path.extname(target)] || 'application/octet-stream', 'X-Content-Type-Options':'nosniff', 'Cache-Control':'no-cache' });
     res.end(req.method === 'HEAD' ? undefined : data);
   } catch (error) {
-    json(res, error.status || 500, { error:error.status ? error.message : 'The request failed. Retry the extraction or use source-linked selection.', code:error.code || 'request_failed' });
+    json(res, error.status || 500, { error:error.status ? error.message : 'The request failed. Retry the action or continue with source-linked review.', code:error.code || 'request_failed' });
   }
   });
 }
