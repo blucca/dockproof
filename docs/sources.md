@@ -5,9 +5,9 @@ Verified October 9, 2026. The selected tariff version is **CNWY 199-AK.3, effect
 | Product rule | Official source | Use in DockProof |
 |---|---|---|
 | Delivered US shipment: written claim received within 9 months | [XPO Item 7(11), p11](https://www.xpo.com/cdn/download_files/s1/p2831/CNWY_199-AK.3_Eff._08.17.2026.pdf#page=11) | Calendar-month deadline from the delivery receipt |
-| Shipment identity, assertion of liability, specific demand | [49 CFR §1005.2(b)](https://www.ecfr.gov/current/title-49/subtitle-B/chapter-X/subchapter-B/part-1005/section-1005.2#p-1005.2(b)) and XPO Item 7(11) | Three distinct elements in the claim cover letter |
+| Shipment identity, assertion of liability, specific demand | [49 CFR §1005.2(b)](https://www.ecfr.gov/current/title-49/subtitle-B/chapter-X/subchapter-A/part-1005/section-1005.2#p-1005.2(b)) and XPO Item 7(11) | Three distinct elements in the claim cover letter |
 | Original invoice/wholesale basis and applicable salvage | [XPO Item 25, p19](https://www.xpo.com/cdn/download_files/s1/p2831/CNWY_199-AK.3_Eff._08.17.2026.pdf#page=19) | Invoice-backed loss, with retained salvage deducted |
-| Trade discounts, allowances, and deductions | [49 CFR §1005.4(b)](https://www.ecfr.gov/current/title-49/subtitle-B/chapter-X/subchapter-B/part-1005/section-1005.4#p-1005.4(b)) | Separate gross, discount, allowance, and net values |
+| Trade discounts, allowances, and deductions | [49 CFR §1005.4(b)](https://www.ecfr.gov/current/title-49/subtitle-B/chapter-X/subchapter-A/part-1005/section-1005.4#p-1005.4(b)) | Separate gross, discount, allowance, and net values |
 | Individual lost or damaged piece; actual class 70 at $5/lb | [XPO Item 25, p19](https://www.xpo.com/cdn/download_files/s1/p2831/CNWY_199-AK.3_Eff._08.17.2026.pdf#page=19) | C3's 200 lb, with the shipment's 1,000 lb retained as a distinct fact |
 | Spot-quote liability basis at $1/lb; special terms | [XPO Item 25, pp19–21](https://www.xpo.com/cdn/download_files/s1/p2831/CNWY_199-AK.3_Eff._08.17.2026.pdf#page=19) | Explicit service selection; unsupported contract/commodity branches enter manual review |
 | Vendor invoice and supporting evidence; carrier portal | [XPO filing guide](https://www.xpo.com/help-center/claims-and-refunds/how-file-claims-and-refunds/) | Packet handoff to the shipper's authenticated carrier workflow |
