@@ -136,7 +136,7 @@ The same server works behind an HTTPS reverse proxy. Set `DOCKPROOF_ACCESS_TOKEN
 
 The Node-served page detects its same-origin API, offers the evaluation-code form and sends the code only in the Authorization header. An optional `#access=…` entry fragment is moved into tab-local session storage and removed from the address bar. The static Pages build keeps its recorded examples and links to the stable live entry.
 
-`GET /api/health` exposes product availability. `GET /api/status` exposes live-extraction readiness for the supplied access code. `POST /api/extract` and `POST /api/rules` use that code, same-origin requests and one active live request. Each provider uses its own persistent allowance. `web/judge/endpoint.json` points the stable entry at the current HTTPS deployment.
+`GET /api/health` exposes product availability. `GET /api/status` exposes live-extraction readiness for the supplied access code. `POST /api/extract` and `POST /api/rules` use that code, same-origin requests and one active live request. Each provider uses its own persistent allowance. The stable entry reads [public runtime-only metadata](https://github.com/blucca/trial-runtime/blob/main/dockproof.json), so deployment recovery preserves this submitted source.
 
 ## Rule scope
 

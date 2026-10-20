@@ -24,7 +24,7 @@ function openWorkspace(own = false) {
 $('#entry-form').addEventListener('submit',event => {event.preventDefault();openWorkspace();});
 $('#open-own').addEventListener('click',() => openWorkspace(true));
 try {
-  const response = await fetch(new URL('./endpoint.json',import.meta.url),{cache:'no-store'});
+  const response = await fetch(`https://raw.githubusercontent.com/blucca/trial-runtime/main/dockproof.json?v=${Math.floor(Date.now()/60_000)}`,{cache:'no-store'});
   if (!response.ok) throw new Error('endpoint');
   endpoint = await response.json();
   const origin = new URL(endpoint.origin);
